@@ -1,0 +1,26 @@
+{
+  "name": "paper-digest",
+  "version": "0.1.0",
+  "description": "Paper digest generator: HTML/PDF/link -> agent (JSON) -> template HTML",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "paper-digest": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest 2>/dev/null || node test/run.js",
+    "lint": "node --check src/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lafqu/paper-digest.git"
+  },
+  "keywords": ["arxiv", "digest", "paper"],
+  "author": "paper-digest",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}

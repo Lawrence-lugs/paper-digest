@@ -1,0 +1,8 @@
+{
+  "models": ["meta-llama/llama-3.2-3b-instruct"],
+  "temperature": 0.2,
+  "max_tokens": 2048,
+  "retries": 2,
+  "max_requests_per_run": 50,
+  "timeout_s": 30
+}
