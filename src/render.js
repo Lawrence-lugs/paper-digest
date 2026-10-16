@@ -97,14 +97,12 @@ function renderSection(s) {
       break;
     case "icymi":
       body =
-        `<ul class="b">` +
         (s.entries || []).map(
           (e) =>
-            `<li class="item">${esc(e.text)} <span class="chip ${esc(
+            `<div class="item"><span class="chip ${esc(
               e.tag || "neu"
-            )}">${chipSign(e.tag)}</span></li>`
-        ).join("") +
-        `</ul>`;
+            )}">${chipSign(e.tag)}</span>${esc(e.text)}</div>`
+        ).join("");
       break;
     case "judge":
       body =
@@ -123,7 +121,7 @@ function renderSection(s) {
     default:
       body = `<p>${esc(s.content || "")}</p>`;
   }
-  return `<section><h2 class="s" id="${esc(s.id)}">${esc(s.title)}${conf}</h2>${body}</section>`;
+  return `<h2 class="s" id="${esc(s.id)}">${esc(s.title)}${conf}</h2>${body}`;
 }
 
 /**
@@ -145,14 +143,15 @@ export function render(digest, source = {}) {
   const mapJson = JSON.stringify(map);
 
   const navLinks = (digest.sections || [])
-    .map((s) => `<a href="#${esc(s.id)}">${esc(s.title)}</a>`)
+    .map((s) => `<a class="block py-1" href="#${esc(s.id)}">${esc(s.title)}</a>`)
     .join("");
 
   const sectionsHtml = (digest.sections || []).map((s) => renderSection(s)).join("");
 
-  const srcSection = (digest.sections || []).find((s) => s.id === "src") || {};
-  const citationsHtml = (srcSection.citations || [])
-    .map((c) => `<p class="cite mt-1">${esc(c)}</p>`)
+  const citationsHtml = ((digest.sections || []).find((s) => s.id === "src") || {})
+    .citations || [];
+  const citations = citationsHtml
+    .map((c) => `<p class="cite">${esc(c)}</p>`)
     .join("");
 
   const mapJs = Object.entries(map)
@@ -169,9 +168,7 @@ export function render(digest, source = {}) {
     "{{VERDICT}}": esc(digest.verdict || ""),
     "{{OVERALL_CONF}}": esc(digest.overallConfidence || 0),
     "{{SECTIONS}}": sectionsHtml,
-    "{{SRC_CONF}}": esc(srcSection.confidence || 0),
-    "{{SRC_CONTENT}}": esc(srcSection.content || ""),
-    "{{CITATIONS}}": citationsHtml,
+    "{{CITATIONS}}": citations,
     "{{NAV_LINKS}}": navLinks,
     "{{BASE}}": esc(base),
     "{{MAP}}": mapJson,

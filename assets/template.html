@@ -1,235 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{TITLE}} — Paper Digest</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digest: {{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
 <style>
-  /* Body measure tuned so inline math stays inline, only display equations scroll. */
-  .prose-body { max-width: 72ch; }
-  .conf { font-size: 0.75em; opacity: 0.7; margin-left: 0.5em; }
-  .chip { display: inline-block; padding: 0.05em 0.4em; border-radius: 0.35em;
-          font-size: 0.75em; margin-left: 0.35em; }
-  .chip.pos { background: #e7f7ec; color: #166534; }
-  .chip.neg { background: #fdecea; color: #991b1b; }
-  .chip.neu { background: #f1f5f9; color: #334155; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #cbd5e1; padding: 0.4em 0.6em; text-align: left; font-size: 0.9em; }
-  th { background: #f8fafc; }
-  .wrap { overflow-x: auto; margin: 1em 0; }
-  figure { margin: 1em 0; text-align: center; }
-  figure img { max-width: 100%; height: auto; border: 1px solid #e2e8f0; }
-  figcaption { font-size: 0.85em; color: #475569; margin-top: 0.4em; }
-  .cite { font-size: 0.8em; color: #64748b; margin-top: 0.2em; }
-  .ui { color: #475569; }
-  .b li { margin: 0.25em 0; }
-  .s { margin-top: 1.2em; }
-  nav { position: sticky; top: 0; background: #ffffffdd; backdrop-filter: blur(4px);
-        border-bottom: 1px solid #e2e8f0; z-index: 20; }
-  nav a { display: block; padding: 0.4em 0.8em; font-size: 0.85em; color: #475569; }
-  nav a:hover { background: #f1f5f9; color: #1e293b; }
-  /* Reading marker states */
-  .rd { cursor: pointer; }
-  .rd.active { background: #3b82f6; color: #fff; border-radius: 0.2em; }
-  #rd-hint { position: fixed; bottom: 1em; right: 1em; background: #0f172a; color: #fff;
-             padding: 0.4em 0.8em; border-radius: 0.4em; font-size: 0.8em; opacity: 0;
-             transition: opacity 0.2s; z-index: 50; pointer-events: none; }
-  #rd-hint.visible { opacity: 0.9; }
+:root{--paper:#F2F5F3;--ink:#16252C;--mute:#5B6C73;--rule:#CBD6D3;--teal:#0E6B73;--gain:#2B7A4B;--risk:#A83A2C;--warn:#9A6A12;--card:#FBFCFB}
+body{background:var(--paper);color:var(--ink);font-family:Literata,Georgia,serif;line-height:1.65}
+.ui{font-family:'Instrument Sans',system-ui,sans-serif}
+h2.s{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;font-size:1.35rem;border-left:4px solid var(--teal);padding-left:.7rem;margin:2.6rem 0 .8rem}
+p,li{max-width:72ch}
+ul.b{list-style:disc;padding-left:1.2rem;margin:.4rem 0}
+.conf{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.75rem;font-weight:600;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:.05rem .5rem;margin-left:.5rem;white-space:nowrap;vertical-align:middle}
+.chip{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.72rem;font-weight:600;border-radius:4px;padding:.05rem .4rem;margin-right:.4rem;color:#fff}
+.neg{background:var(--risk)}.pos{background:var(--gain)}.neu{background:var(--warn)}
+.item{border-bottom:1px solid var(--rule);padding:.7rem 0;max-width:72ch}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--rule);padding:.45rem .5rem;text-align:left;vertical-align:top}
+th{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;color:var(--mute)}
+.wrap{overflow-x:auto}
+blockquote{border-left:3px solid var(--rule);padding-left:1rem;color:var(--mute)}
+code,.cite{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--mute)}
+figure{background:var(--card);border:1px solid var(--rule);padding:.6rem;width:100%;max-width:72ch}
+figure img{display:block;width:100%;max-width:100%;height:auto;margin:0}
+figcaption{font-size:.8rem;color:var(--mute);margin-top:.4rem}
+main p,main li,main .item,main blockquote{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+main .cite,main .conf{text-align:left;hyphens:none}
+main p{margin:.75rem 0}
+main blockquote{margin:1.25rem 0}
+main figure{margin:1.5rem 0}
+mjx-container[jax="SVG"]{display:inline-block!important;overflow:visible}
+mjx-container[jax="SVG"] svg{display:inline-block!important}
+mjx-container[jax="SVG"][display="true"]{display:flex!important;justify-content:safe center;overflow-x:auto;overflow-y:hidden;max-width:100%;margin:1rem 0}
+.rd.on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+body.rd-active .rd:hover:not(.on){background:rgba(22,37,44,.06)}
+#rd-hint{position:fixed;right:.8rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:var(--mute);background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
+@media print{.rd.on{background:none;box-shadow:none}#rd-hint{display:none}}
 </style>
 </head>
-<body class="antialiased bg-slate-50 text-slate-900">
-<nav class="px-4 py-2 hidden md:flex gap-2 overflow-x-auto">
-  {{NAV_LINKS}}
+<body class="antialiased">
+<div class="mx-auto max-w-6xl px-5 py-10 lg:flex lg:gap-12">
+<nav class="ui hidden lg:block w-44 shrink-0 text-sm sticky top-8 self-start" style="color:var(--mute)">
+{{NAV_LINKS}}
 </nav>
+<main class="min-w-0 flex-1">
+<header>
+<p class="ui text-sm" style="color:var(--mute)">{{VENUE}} &middot; {{ID}} &middot; read: {{WHAT_READ}}</p>
+<h1 class="ui text-3xl font-semibold leading-tight mt-1">{{TITLE}}</h1>
+<p class="ui text-sm mt-1" style="color:var(--mute)">{{AUTHORS}}</p>
+<p class="mt-4"><b>Verdict.</b> {{VERDICT}} <span class="conf">{{OVERALL_CONF}}%</span></p>
+</header>
 
-<article class="prose-body mx-auto p-6 md:p-10 space-y-6">
-  <header>
-    <h1 class="text-2xl font-bold tracking-tight">{{TITLE}}</h1>
-    <p class="text-slate-600 text-sm mt-1">{{AUTHORS}} — {{VENUE}} ({{ID}})</p>
-    <p class="text-slate-600 text-sm mt-2"><span class="font-semibold">Read:</span> {{WHAT_READ}}</p>
-    <div class="mt-3 p-3 rounded bg-blue-50 border border-blue-100">
-      <p class="text-sm text-slate-700">{{VERDICT}}</p>
-      <p class="text-xs text-slate-500 mt-1"><span class="font-semibold">Overall confidence:</span> {{OVERALL_CONF}}%</p>
-    </div>
-  </header>
+{{SECTIONS}}
 
-  {{SECTIONS}}
-
-  <section id="src" class="mt-8 pt-6 border-t border-slate-200">
-    <h2 class="s" id="src">Sources and limits<span class="conf">{{SRC_CONF}}%</span></h2>
-    <p class="text-sm text-slate-600">{{SRC_CONTENT}}</p>
-    {{CITATIONS}}
-  </section>
-</article>
-
+{{CITATIONS}}
+</main>
+</div>
 <script>
-// Figure + image pipeline. BASE is the arXiv HTML version actually read;
-// MAP maps figure number -> file name (src). Images are loaded from BASE + MAP[n]
-// and fall back to an "Open on arXiv" link if they fail.
 const BASE = "{{BASE}}";
 const MAP = {{MAP}};
-
-window.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll("figure[data-n]").forEach((fig) => {
-    const n = fig.getAttribute("data-n");
-    const file = MAP && MAP[n];
-    const img = fig.querySelector("img");
-    if (!img && file) {
-      const a = document.createElement("a");
-      a.href = new URL(file, BASE).href;
-      a.target = "_blank";
-      a.rel = "noopener";
-      a.textContent = "Open figure on arXiv";
-      a.className = "ui";
-      fig.appendChild(a);
-    }
-  });
-  imgFallbacks();
+document.querySelectorAll('figure[data-n]').forEach((f)=>{
+  const n=f.dataset.n,img=new Image();img.loading='lazy';img.alt='Figure '+n;
+  img.onerror=()=>{const a=document.createElement('a');a.href=BASE.replace(/\/$/,'')+'#'+f.dataset.a;a.textContent='Open Fig. '+n+' on arXiv';a.className='ui text-sm underline';a.style.color='var(--teal)';img.replaceWith(a);};
+  img.src=BASE+MAP[n];f.prepend(img);
 });
+</script>
+<script>
+/* Reading marker. R or a click on a sentence starts it; Up/Down (or k/j) move it; Esc or R stops it.
+   Arrow keys scroll the page normally unless the marker is active. Runs after MathJax has typeset. */
+(function(){
+const BLK='main p:not(.cite),main li:not(.cite),main .item,main blockquote,main figcaption,main td';
+const ALL=BLK+',main mjx-container[display="true"]';
+const ABBR=/(?:\b(?:e\.g|i\.e|et al|etc|vs|cf|Figs?|Eqs?|Secs?|Tab|Refs?|Algs?|approx|resp|No)|\b[A-Z])\.$/;
+const OBJ='\uFFFC';
+let units=[],idx=-1,on=false,ready=false,hintEl;
 
-function imgFallbacks() {
-  document.querySelectorAll("figure img").forEach((img) => {
-    img.addEventListener("error", () => {
-      const fig = img.closest("figure");
-      const n = fig ? fig.getAttribute("data-n") : null;
-      const file = n && MAP && MAP[n];
-      const url = file ? new URL(file, BASE).href : img.src;
-      const a = document.createElement("a");
-      a.href = url; a.target = "_blank"; a.rel = "noopener";
-      a.textContent = "Open figure on arXiv";
-      a.className = "ui block mt-2";
-      img.replaceWith(a);
-    });
-  });
-}
-
-/* ---------- Reading marker ---------- */
-const ABBREVS = ["e.g","i.e","etc","vs","fig","Fig","et al","al","No","no","p","pp","sec","Sec","ch","Ch","vol","Vol","pp"];
-function isAbbrEnd(text, pos) {
-  const before = text.slice(Math.max(0, pos - 6), pos + 1).trim();
-  return ABBREVS.some((a) => before.toLowerCase().endsWith(a.toLowerCase() + "."));
-}
-function splitSentences(node) {
-  if (node.nodeType === Node.TEXT_NODE) {
-    const text = node.textContent;
-    if (!text.trim()) return;
-    const parts = [];
-    let idx = 0;
-    const re = /([.!?]+)(\s|$)/g;
-    let m;
-    let last = 0;
-    while ((m = re.exec(text)) !== null) {
-      const end = m.index + m[1].length;
-      if (isAbbrEnd(text, end - 1)) continue;
-      parts.push(text.slice(last, end));
-      last = end;
-    }
-    if (last < text.length) parts.push(text.slice(last));
-    if (parts.length === 1 && parts[0] === text) return; // no split
-    const frag = document.createDocumentFragment();
-    parts.forEach((p) => {
-      const span = document.createElement("span");
-      span.className = "rd";
-      span.textContent = p;
-      span.addEventListener("click", () => moveTo(span));
-      frag.appendChild(span);
-    });
-    node.parentNode.replaceChild(frag, node);
-    return;
-  }
-  if (node.nodeType !== Node.ELEMENT_NODE) return;
-  const tag = node.tagName;
-  if (tag === "MATH" || tag === "SCRIPT" || tag === "STYLE" || tag === "TEXTAREA") return;
-  const isStop = tag === "DISPLAY" || tag === "DIV" && node.classList.contains("rd-stop");
-  const childs = Array.from(node.childNodes);
-  let splitThis = false;
-  if (["P","LI","BLOCKQUOTE","FIGCAPTION","TD","TH","ITEM"].includes(tag) ||
-      node.classList.contains("item")) {
-    splitThis = true;
-  }
-  if (splitThis && !isStop) {
-    // only split direct text-node runs; nested blocks handled recursively
-    let textOnly = true;
-    childs.forEach((c) => { if (c.nodeType === Node.ELEMENT_NODE) textOnly = false; });
-    if (textOnly) {
-      splitSentences(node.firstChild); // handled by recursion on text nodes via wrapper below
-    }
-  }
-  childs.forEach(splitSentences);
-}
-
-function wrapSentences(root) {
-  // wrap direct text children of eligible blocks into .rd spans
-  const blocks = root.querySelectorAll("p, li, blockquote, figcaption, td, th, .item");
-  blocks.forEach((blk) => {
-    const kids = Array.from(blk.childNodes);
-    kids.forEach((kid) => {
-      if (kid.nodeType === Node.TEXT_NODE && kid.textContent.trim()) {
-        splitSentences(kid);
-      } else if (kid.nodeType === Node.ELEMENT_NODE) {
-        // recurse into nested eligible blocks but don't double-wrap
-        wrapSentences(kid);
+function tokens(block){
+  const items=[];let run=[];
+  const flush=()=>{if(run.length)items.push({run});run=[];};
+  const walk=n=>{
+    for(let c=n.firstChild;c;c=c.nextSibling){
+      if(c.nodeType===3){run.push({t:c});}
+      else if(c.nodeType===1){
+        const tag=c.tagName;
+        if(tag==='MJX-CONTAINER'){
+          if(c.getAttribute('display')==='true'){flush();items.push({disp:c});}
+          else run.push({a:c});
+        }else if(tag==='SCRIPT'||tag==='STYLE'||tag==='MJX-ASSISTIVE-MML'||tag==='IMG'){}
+        else walk(c);
       }
-    });
-  });
+    }
+  };
+  walk(block);flush();return items;
 }
 
-let current = null;
-function moveTo(span) {
-  if (current) current.classList.remove("active");
-  current = span;
-  if (!current) return;
-  current.classList.add("active");
-  current.scrollIntoView({ behavior: "smooth", block: "center" });
-  showHint();
-}
-function showHint() {
-  const h = document.getElementById("rd-hint");
-  if (!h) return;
-  h.classList.add("visible");
-}
-function clearMarker() {
-  if (current) current.classList.remove("active");
-  current = null;
-  const h = document.getElementById("rd-hint");
-  if (h) h.classList.remove("visible");
+function sentences(run){
+  let s='';const map=[];
+  for(const p of run){
+    if(p.t){const v=p.t.nodeValue;for(let i=0;i<v.length;i++)map.push({n:p.t,o:i,L:v.length});s+=v;}
+    else{map.push({a:p.a});s+=OBJ;}
+  }
+  const cuts=[0];
+  const re=/[.!?]+["'’”)\]]*(?=\s+[A-Z0-9"'‘(\[\uFFFC])/g;
+  let m;
+  while((m=re.exec(s))){const end=m.index+m[0].length;if(!ABBR.test(s.slice(Math.max(0,end-10),end)))cuts.push(end);}
+  cuts.push(s.length);
+  const out=[];
+  for(let i=0;i<cuts.length-1;i++){
+    let a=cuts[i],b=cuts[i+1];
+    while(a<b&&/\s/.test(s[a]))a++;
+    while(b>a&&/\s/.test(s[b-1]))b--;
+    if(b>a)out.push([a,b]);
+  }
+  return {out,map};
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  const root = document.body;
-  // hint element
-  const h = document.createElement("div");
-  h.id = "rd-hint";
-  h.textContent = "Reading marker active — ↓/↑ or j/k move, click a sentence, Esc or R to stop";
-  root.appendChild(h);
-  // allow MathJax to finish, then wrap sentences
-  window.MathJax ? MathJax.typesetPromise().then(() => wrapSentences(root)) : wrapSentences(root);
-});
-let armed = false;
-window.addEventListener("keydown", (e) => {
-  if (e.key === "r" || e.key === "R") {
-    if (current) { clearMarker(); return; }
-    const spans = document.querySelectorAll(".rd");
-    if (spans.length) { moveTo(spans[0]); }
-    return;
+function rangeFor(block,map,a,b){
+  const r=document.createRange(),f=map[a],l=map[b-1];
+  if(f.a)r.setStartBefore(f.a);
+  else if(f.o===0){let n=f.n;while(n.parentNode!==block&&n===n.parentNode.firstChild)n=n.parentNode;r.setStartBefore(n);}
+  else r.setStart(f.n,f.o);
+  if(l.a)r.setEndAfter(l.a);
+  else if(l.o===l.L-1){let n=l.n;while(n.parentNode!==block&&n===n.parentNode.lastChild)n=n.parentNode;r.setEndAfter(n);}
+  else r.setEnd(l.n,l.o+1);
+  return r;
+}
+
+function build(block){
+  const out=[];
+  for(const it of tokens(block)){
+    if(it.disp){it.disp.classList.add('rd');out.push(it.disp);continue;}
+    const {out:ss,map}=sentences(it.run),spans=[];
+    for(let i=ss.length-1;i>=0;i--){
+      const r=rangeFor(block,map,ss[i][0],ss[i][1]);
+      const sp=document.createElement('span');sp.className='rd';
+      sp.appendChild(r.extractContents());r.insertNode(sp);spans.push(sp);
+    }
+    out.push(...spans.reverse());
   }
-  if (!current) return;
-  if (e.key === "Escape" || e.key === "Esc") { clearMarker(); return; }
-  const spans = Array.from(document.querySelectorAll(".rd"));
-  const i = spans.indexOf(current);
-  if (i === -1) return;
-  let next = i;
-  if (e.key === "ArrowDown" || e.key === "j") next = i + 1;
-  if (e.key === "ArrowUp" || e.key === "k") next = i - 1;
-  if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "j" || e.key === "k") {
-    e.preventDefault();
-    if (next >= 0 && next < spans.length) moveTo(spans[next]);
-  }
+  return out;
+}
+
+function hint(){
+  if(!hintEl){hintEl=document.createElement('div');hintEl.id='rd-hint';document.body.appendChild(hintEl);}
+  hintEl.textContent=on?'\u2191 \u2193 move \u00b7 Esc exit':'R: reading marker';
+}
+function inView(i){const r=units[i].getBoundingClientRect();return r.bottom>0&&r.top<innerHeight;}
+function firstVisible(){for(let i=0;i<units.length;i++)if(units[i].getBoundingClientRect().top>=48)return i;return units.length-1;}
+function ensure(u,fast){
+  const r=u.getBoundingClientRect(),h=innerHeight;
+  if(r.top<h*.18||r.bottom>h*.78)scrollBy({top:r.top-h*.38,behavior:fast?'auto':'smooth'});
+}
+function set(i,scroll,fast){
+  if(units[idx])units[idx].classList.remove('on');
+  idx=Math.max(0,Math.min(units.length-1,i));
+  units[idx].classList.add('on');
+  if(scroll)ensure(units[idx],fast);
+}
+function activate(i){
+  on=true;document.body.classList.add('rd-active');
+  set(i!==undefined?i:(idx>=0&&inView(idx)?idx:firstVisible()),i===undefined);hint();
+}
+function deactivate(){
+  on=false;document.body.classList.remove('rd-active');
+  if(units[idx])units[idx].classList.remove('on');hint();
+}
+
+document.addEventListener('keydown',e=>{
+  if(!units.length||e.ctrlKey||e.metaKey||e.altKey)return;
+  const t=e.target;if(t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable))return;
+  if(e.key==='r'||e.key==='R'){e.preventDefault();on?deactivate():activate();return;}
+  if(!on)return;
+  if(e.key==='ArrowDown'||e.key==='j'){e.preventDefault();set(idx+1,true,e.repeat);}
+  else if(e.key==='ArrowUp'||e.key==='k'){e.preventDefault();set(idx-1,true,e.repeat);}
+  else if(e.key==='Escape')deactivate();
 });
+document.addEventListener('click',e=>{
+  const sel=getSelection();if(sel&&!sel.isCollapsed)return;
+  if(!units.length||e.target.closest('a,button,nav'))return;
+  const u=e.target.closest('.rd');if(!u)return;
+  const i=units.indexOf(u);if(i<0)return;
+  if(on){set(i,false);}else activate(i);
+});
+
+function init(){
+  if(ready)return;ready=true;
+  for(const el of Array.from(document.querySelectorAll(ALL))){
+    if(el.tagName==='MJX-CONTAINER'){if(!el.parentElement.closest(BLK)){el.classList.add('rd');units.push(el);}continue;}
+    if(el.querySelector(BLK))continue;
+    units.push(...build(el));
+  }
+  hint();
+}
+addEventListener('load',()=>{
+  const p=window.MathJax&&window.MathJax.startup&&window.MathJax.startup.promise;
+  Promise.resolve(p).then(init,init);
+});
+})();
 </script>
 </body>
 </html>

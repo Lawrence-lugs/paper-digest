@@ -1,4 +1,5 @@
 .agents
+reference/
 node_modules/
 outputs/
 digest.json

@@ -5,11 +5,6 @@
  * digest JSON file (or point `digestPath` at any vault file).
  *
  * ```dataviewjs
- * const { renderDigest } = await dv.fetch("ui/obsidian-dataviewjs.js") // not needed; inline below
- * ```
- *
- * Usage in a note:
- * ```dataviewjs
  * let digestPath = dv.current().file.folder + "/Vaswani-2017-Neurips-attention_all_you_need.json";
  * await renderPaperDigest(dv, container, digestPath);
  * ```
@@ -17,28 +12,30 @@
 
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ESC[c] || c); }
-function confidenceChip(conf) { return `<span class="pd-conf">${conf == null ? 0 : Number(conf)}%</span>`; }
+function normalizeLatex(s) { const t=String(s);const out=[];const DELIM="[(){}_]";for(let i=0;i<t.length;i++){const c=t[i];if(c==="\\"&&i+2<t.length&&t[i+1]==="\\"&&DELIM.includes(t[i+2])){out.push("\\",t[i+2]);i+=2}else{out.push(c)}}return out.join(""); }
+function stripMathDelimiters(s) { return String(s).replace(/^\\\[\s*/, "").replace(/\s*\\\]$/, "").replace(/^\\\(\s*/, "").replace(/\s*\\\)$/, ""); }
+function confidenceChip(conf) { return `<span class="conf">${conf == null ? 0 : Number(conf)}%</span>`; }
 function chipSign(tag) { return { pos: "+", neg: "−", neu: "·" }[tag] || "·"; }
 function renderSection(s) {
   const conf = confidenceChip(s.confidence);
   let body = "";
   switch (s.id) {
     case "mot": case "diff": case "core": case "eval":
-      body = `<p>${esc(s.content || "")}</p>`;
+      body = `<p>${esc(normalizeLatex(s.content || ""))}</p>`;
       if (s.id === "core") {
-        if (s.equations?.length) body += s.equations.map(e => `<p>\\[${esc(e)}\\]</p>`).join("");
+        if (s.equations?.length) body += s.equations.map(e => { const clean = stripMathDelimiters(normalizeLatex(e)); return `<p>\\[${esc(normalizeLatex(clean))}\\]</p>`; }).join("");
         if (s.figureId) body += `<figure data-n="${esc(String(s.figureId))}" data-a="${esc(String(s.figureId))}"><figcaption>Framework figure (${esc(String(s.figureId))}).</figcaption></figure>`;
       }
       if (s.id === "eval") {
-        if (s.results?.length) body += `<ul class="pd-b">` + s.results.map(r => `<li class="pd-item">${esc(r)}</li>`).join("") + `</ul>`;
-        if (s.conclusion) body += `<p class="pd-item">${esc(s.conclusion)}</p>`;
+        if (s.results?.length) body += `<ul class="b">` + s.results.map(r => `<li class="item">${esc(r)}</li>`).join("") + `</ul>`;
+        if (s.conclusion) body += `<p class="item">${esc(s.conclusion)}</p>`;
       }
       break;
     case "icymi":
-      body = `<ul class="pd-b">` + (s.entries || []).map(e => `<li class="pd-item">${esc(e.text)} <span class="pd-chip pd-${esc(e.tag || "neu")}">${chipSign(e.tag)}</span></li>`).join("") + `</ul>`;
+      body = (s.entries || []).map(e => `<div class="item"><span class="chip ${esc(e.tag || "neu")}">${chipSign(e.tag)}</span>${esc(e.text)}</div>`).join("");
       break;
     case "judge":
-      body = `<div class="pd-wrap"><table><thead><tr><th>Question</th><th>Answer</th><th>Conf.</th></tr></thead><tbody>` + (s.rows || []).map(r => `<tr><td>${esc(r.question)}</td><td>${esc(r.answer)}</td><td>${r.conf == null ? "" : r.conf}%</td></tr>`).join("") + `</tbody></table></div>`;
+      body = `<div class="wrap"><table><thead><tr><th>Question</th><th>Answer</th><th>Conf.</th></tr></thead><tbody>` + (s.rows || []).map(r => `<tr><td>${esc(r.question)}</td><td>${esc(r.answer)}</td><td>${r.conf == null ? "" : r.conf}%</td></tr>`).join("") + `</tbody></table></div>`;
       break;
     case "src":
       body = `<p>${esc(s.content || "")}</p>`;
@@ -46,7 +43,7 @@ function renderSection(s) {
     default:
       body = `<p>${esc(s.content || "")}</p>`;
   }
-  return `<section><h2 class="pd-s" id="${esc(s.id)}">${esc(s.title)}${conf}</h2>${body}</section>`;
+  return `<h2 class="s" id="${esc(s.id)}">${esc(s.title)}${conf}</h2>${body}`;
 }
 
 function renderDigestHtml(digest, source = {}) {
@@ -55,10 +52,9 @@ function renderDigestHtml(digest, source = {}) {
   const map = {};
   figures.forEach((f, i) => { const key = String(f.n != null ? f.n : i + 1); map[key] = f.src || f.dataA || ""; });
   const mapJson = JSON.stringify(map);
-  const navLinks = (digest.sections || []).map(s => `<a href="#${esc(s.id)}">${esc(s.title)}</a>`).join("");
+  const navLinks = (digest.sections || []).map(s => `<a class="block py-1" href="#${esc(s.id)}">${esc(s.title)}</a>`).join("");
   const sectionsHtml = (digest.sections || []).map(s => renderSection(s)).join("");
-  const srcSection = (digest.sections || []).find(s => s.id === "src") || {};
-  const citationsHtml = (srcSection.citations || []).map(c => `<p class="pd-cite mt-1">${esc(c)}</p>`).join("");
+  const citations = (((digest.sections || []).find(s => s.id === "src") || {}).citations || []).map(c => `<p class="cite">${esc(c)}</p>`).join("");
   const mapJs = Object.entries(map).map(([k, v]) => `    ${JSON.stringify(k)}: ${JSON.stringify(v)},`).join("\n");
   let html = TEMPLATE;
   for (const [token, value] of Object.entries({
@@ -70,9 +66,7 @@ function renderDigestHtml(digest, source = {}) {
     "{{VERDICT}}": esc(digest.verdict || ""),
     "{{OVERALL_CONF}}": esc(digest.overallConfidence || 0),
     "{{SECTIONS}}": sectionsHtml,
-    "{{SRC_CONF}}": esc(srcSection.confidence || 0),
-    "{{SRC_CONTENT}}": esc(srcSection.content || ""),
-    "{{CITATIONS}}": citationsHtml,
+    "{{CITATIONS}}": citations,
     "{{NAV_LINKS}}": navLinks,
     "{{BASE}}": esc(base),
     "{{MAP}}": mapJson,
@@ -80,8 +74,69 @@ function renderDigestHtml(digest, source = {}) {
   return html.replace("const MAP = {{MAP}};", `const MAP = {\n${mapJs}\n  };`);
 }
 
-const TEMPLATE = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>{{TITLE}} — Paper Digest</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.6;color:#1e293b;max-width:72ch;margin:0 auto;padding:1.5rem}h1{font-size:1.5rem;margin-bottom:.5rem}h2{margin-top:1.2rem}nav{position:sticky;top:0;background:#f8fafc;border-bottom:1px solid #e2e8f0;z-index:20;padding:.4rem .8rem}nav a{display:block;padding:.4em .8em;font-size:.85em;color:#475569;text-decoration:none}nav a:hover{background:#f1f5f9}.conf{font-size:.75em;opacity:.7;margin-left:.5em}.chip{display:inline-block;padding:.05em .4em;border-radius:.35em;font-size:.75em;margin-left:.35em}.pd-chip.pos{background:#e7f7ec;color:#166534}.pd-chip.neg{background:#fdecea;color:#991b1b}.pd-chip.neu{background:#f1f5f9;color:#334155}.pd-wrap{overflow-x:auto;margin:1em 0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:.4em .6em;text-align:left;font-size:.9em}th{background:#f8fafc}figure{margin:1em 0;text-align:center}figure img{max-width:100%;height:auto;border:1px solid #e2e8f0}figcaption{font-size:.85em;color:#475569;margin-top:.4em}.pd-cite{font-size:.8em;color:#64748b;margin-top:.2em}.pd-b li{margin:.25em 0}.pd-s{margin-top:1.2em}</style></head><body><nav>{{NAV_LINKS}}</nav><article><header><h1>{{TITLE}}</h1><p>{{AUTHORS}} — {{VENUE}} ({{ID}})</p><p><b>Read:</b> {{WHAT_READ}}</p><div style="padding:.75rem;border:1px solid #bae6fd;background:#eff6ff;border-radius:.5rem;margin-top:.75rem"><p>{{VERDICT}}</p><p style="font-size:.875rem;color:#64748b;margin-top:.25rem"><b>Overall confidence:</b> {{OVERALL_CONF}}%</p></div></header>{{SECTIONS}}<section id="src" style="margin-top:2rem;padding-top:1rem;border-top:1px solid #e2e8f0"><h2 class="pd-s" id="src">Sources and limits<span class="pd-conf">{{SRC_CONF}}%</span></h2><p>{{SRC_CONTENT}}</p>{{CITATIONS}}</section></article><script>const BASE="{{BASE}}";const MAP={{MAP}};window.addEventListener("load",()=>{document.querySelectorAll("figure[data-n]").forEach(fig=>{const n=fig.getAttribute("data-n");const file=MAP&&MAP[n];const img=fig.querySelector("img");if(!img&&file){const a=document.createElement("a");a.href=new URL(file,BASE).href;a.target="_blank";a.rel="noopener";a.textContent="Open figure on arXiv";a.style.display="block";a.style.marginTop=".5rem";a.style.color="#475569";fig.appendChild(a)}});document.querySelectorAll("figure img").forEach(img=>{img.addEventListener("error",()=>{const fig=img.closest("figure");const n=fig?fig.getAttribute("data-n"):null;const file=n&&MAP&&MAP[n];const url=file?new URL(file,BASE).href:img.src;const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";a.textContent="Open figure on arXiv";a.style.display="block";a.style.marginTop=".5rem";a.style.color="#475569";img.replaceWith(a)})}})</script></body></html>`;
+const TEMPLATE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digest: {{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F2F5F3;--ink:#16252C;--mute:#5B6C73;--rule:#CBD6D3;--teal:#0E6B73;--gain:#2B7A4B;--risk:#A83A2C;--warn:#9A6A12;--card:#FBFCFB}
+body{background:var(--paper);color:var(--ink);font-family:Literata,Georgia,serif;line-height:1.65}
+.ui{font-family:'Instrument Sans',system-ui,sans-serif}
+h2.s{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;font-size:1.35rem;border-left:4px solid var(--teal);padding-left:.7rem;margin:2.6rem 0 .8rem}
+p,li{max-width:72ch}
+ul.b{list-style:disc;padding-left:1.2rem;margin:.4rem 0}
+.conf{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.75rem;font-weight:600;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:.05rem .5rem;margin-left:.5rem;white-space:nowrap;vertical-align:middle}
+.chip{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.72rem;font-weight:600;border-radius:4px;padding:.05rem .4rem;margin-right:.4rem;color:#fff}
+.neg{background:var(--risk)}.pos{background:var(--gain)}.neu{background:var(--warn)}
+.item{border-bottom:1px solid var(--rule);padding:.7rem 0;max-width:72ch}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--rule);padding:.45rem .5rem;text-align:left;vertical-align:top}
+th{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;color:var(--mute)}
+.wrap{overflow-x:auto}
+blockquote{border-left:3px solid var(--rule);padding-left:1rem;color:var(--mute)}
+code,.cite{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--mute)}
+figure{background:var(--card);border:1px solid var(--rule);padding:.6rem;width:100%;max-width:72ch}
+figure img{display:block;width:100%;max-width:100%;height:auto;margin:0}
+figcaption{font-size:.8rem;color:var(--mute);margin-top:.4rem}
+main p,main li,main .item,main blockquote{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+main .cite,main .conf{text-align:left;hyphens:none}
+main p{margin:.75rem 0}
+main blockquote{margin:1.25rem 0}
+main figure{margin:1.5rem 0}
+#rd-hint{position:fixed;right:.8rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:var(--mute);background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
+</style>
+</head>
+<body class="antialiased">
+<div class="mx-auto max-w-6xl px-5 py-10 lg:flex lg:gap-12">
+<nav class="ui hidden lg:block w-44 shrink-0 text-sm sticky top-8 self-start" style="color:var(--mute)">
+{{NAV_LINKS}}
+</nav>
+<main class="min-w-0 flex-1">
+<header>
+<p class="ui text-sm" style="color:var(--mute)">{{VENUE}} &middot; {{ID}} &middot; read: {{WHAT_READ}}</p>
+<h1 class="ui text-3xl font-semibold leading-tight mt-1">{{TITLE}}</h1>
+<p class="ui text-sm mt-1" style="color:var(--mute)">{{AUTHORS}}</p>
+<p class="mt-4"><b>Verdict.</b> {{VERDICT}} <span class="conf">{{OVERALL_CONF}}%</span></p>
+</header>
 
+{{SECTIONS}}
+
+{{CITATIONS}}
+</main>
+</div>
+<script>const BASE="{{BASE}}";const MAP={{MAP}};</script>
+`;
+
+/**
+ * Render a digest into an Obsidian container.
+ * @param {import('obsidian').MetadataCache} dv - dataview API
+ * @param {HTMLElement} container - obsidian container to render into
+ * @param {string} digestPath - path to the digest JSON file
+ */
 window.renderPaperDigest = async function renderPaperDigest(dv, container, digestPath) {
   container.empty();
   container.createEl("div", { text: "Loading digest…", cls: "pd-loading" });
@@ -93,7 +148,6 @@ window.renderPaperDigest = async function renderPaperDigest(dv, container, diges
     const wrapper = container.createDiv({ cls: "paper-digest" });
     wrapper.innerHTML = html;
     container.querySelector(".pd-loading")?.remove();
-    // Obsidian will re-run MathJax on the new DOM shortly.
   } catch (e) {
     container.empty();
     container.createEl("div", { text: `Failed to render ${digestPath}: ${e.message}`, cls: "pd-error" });
