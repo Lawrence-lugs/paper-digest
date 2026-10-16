@@ -263,7 +263,43 @@ export function extractMarkdown(content) {
 
   // Parse YAML frontmatter: --- ... ---
   const fmRe = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
-  const m = fmRe.exec(text);
+  let m = fmRe.exec(text);
+
+  if (!m && text.startsWith("---\n")) {
+    // Frontmatter opened with --- but never closed. Salvage by treating
+    // everything up to the first real section header as frontmatter, then the
+    // rest as body. Corrupted frontmatter fields that the agent wrote as
+    // markdown headers (e.g. "## title: ...") are demoted back to fields.
+    const sectionTitles = new Set([
+      "motivation",
+      "core idea",
+      "distinguishing factor",
+      "evaluation and conclusions",
+      "in case you missed it",
+      "cautious judgement",
+      "sources and limits",
+    ]);
+    const rest = text.slice(4); // drop the leading "---\n"
+    const lines = rest.split("\n");
+    let splitIdx = lines.length;
+    for (let i = 0; i < lines.length; i++) {
+      const hm = /^##\s+(.+)$/.exec(lines[i]);
+      if (!hm) continue;
+      const t = hm[1]
+        .trim()
+        .replace(/\s*\([^)]*confidence[^)]*\)\s*$/i, "")
+        .trim()
+        .toLowerCase();
+      if (sectionTitles.has(t)) {
+        splitIdx = i;
+        break;
+      }
+    }
+    const fmLines = lines.slice(0, splitIdx).map((l) => l.replace(/^##\s+/, ""));
+    m = [text, fmLines.join("\n"), lines.slice(splitIdx).join("\n")];
+    markSalvaged();
+  }
+
   if (!m) {
     throw new Error("no parseable Markdown frontmatter in response");
   }
