@@ -79,6 +79,8 @@
 /* ---------- Pure render (same logic as src/render.js) ---------- */
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ESC[c] || c); }
+function normalizeLatex(s) { const t=String(s);const out=[];const DELIM="[(){}_]";for(let i=0;i<t.length;i++){const c=t[i];if(c==="\\"&&i+2<t.length&&t[i+1]==="\\"&&DELIM.includes(t[i+2])){out.push("\\",t[i+2]);i+=2}else{out.push(c)}}return out.join(""); }
+function stripMathDelimiters(s) { return String(s).replace(/^\\\[\s*/, "").replace(/\s*\\\]$/, "").replace(/^\\\(\s*/, "").replace(/\s*\\\)$/, ""); }
 function confidenceChip(conf) { return `<span class="conf">${conf == null ? 0 : Number(conf)}%</span>`; }
 function chipSign(tag) { return { pos: "+", neg: "−", neu: "·" }[tag] || "·"; }
 function renderSection(s) {
@@ -86,9 +88,9 @@ function renderSection(s) {
   let body = "";
   switch (s.id) {
     case "mot": case "diff": case "core": case "eval":
-      body = `<p>${esc(s.content || "")}</p>`;
+      body = `<p>${esc(normalizeLatex(s.content || ""))}</p>`;
       if (s.id === "core") {
-        if (s.equations?.length) body += s.equations.map(e => `<p>\\[${esc(e)}\\]</p>`).join("");
+        if (s.equations?.length) body += s.equations.map(e => { const clean = stripMathDelimiters(normalizeLatex(e)); return `<p>\\[${esc(normalizeLatex(clean))}\\]</p>`; }).join("");
         if (s.figureId) body += `<figure data-n="${esc(String(s.figureId))}" data-a="${esc(String(s.figureId))}"><figcaption>Framework figure (${esc(String(s.figureId))}).</figcaption></figure>`;
       }
       if (s.id === "eval") {

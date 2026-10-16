@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digest: Back to the Future: Rethinking EDA Infrastructure for Agentic Systems in Chip Design Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<style>
+:root{--paper:#F2F5F3;--ink:#16252C;--mute:#5B6C73;--rule:#CBD6D3;--teal:#0E6B73;--gain:#2B7A4B;--risk:#A83A2C;--warn:#9A6A12;--card:#FBFCFB}
+body{background:var(--paper);color:var(--ink);font-family:Literata,Georgia,serif;line-height:1.65}
+.ui{font-family:'Instrument Sans',system-ui,sans-serif}
+h2.s{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;font-size:1.35rem;border-left:4px solid var(--teal);padding-left:.7rem;margin:2.6rem 0 .8rem}
+p,li{max-width:72ch}
+ul.b{list-style:disc;padding-left:1.2rem;margin:.4rem 0}
+.conf{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.75rem;font-weight:600;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:.05rem .5rem;margin-left:.5rem;white-space:nowrap;vertical-align:middle}
+.chip{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.72rem;font-weight:600;border-radius:4px;padding:.05rem .4rem;margin-right:.4rem;color:#fff}
+.neg{background:var(--risk)}.pos{background:var(--gain)}.neu{background:var(--warn)}
+.item{border-bottom:1px solid var(--rule);padding:.7rem 0;max-width:72ch}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--rule);padding:.45rem .5rem;text-align:left;vertical-align:top}
+th{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;color:var(--mute)}
+.wrap{overflow-x:auto}
+blockquote{border-left:3px solid var(--rule);padding-left:1rem;color:var(--mute)}
+code,.cite{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--mute)}
+figure{background:var(--card);border:1px solid var(--rule);padding:.6rem;width:100%;max-width:72ch}
+figure img{display:block;width:100%;max-width:100%;height:auto;margin:0}
+figcaption{font-size:.8rem;color:var(--mute);margin-top:.4rem}
+main p,main li,main .item,main blockquote{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+main .cite,main .conf{text-align:left;hyphens:none}
+/* Tailwind Preflight zeroes margins and is injected after this sheet; `main` raises specificity */
+main p{margin:.75rem 0}
+main blockquote{margin:1.25rem 0}
+main figure{margin:1.5rem 0}
+/* Preflight forces svg{display:block}: keep inline math inline; scroll only display math */
+mjx-container[jax="SVG"]{display:inline-block!important;overflow:visible}
+mjx-container[jax="SVG"] svg{display:inline-block!important}
+mjx-container[jax="SVG"][display="true"]{display:flex!important;justify-content:safe center;overflow-x:auto;overflow-y:hidden;max-width:100%;margin:1rem 0}
+/* Reading marker: darkened sentence selector, moved with arrow keys (see script at end of body) */
+.rd.on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+body.rd-active .rd:hover:not(.on){background:rgba(22,37,44,.06)}
+#rd-hint{position:fixed;right:.8rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:var(--mute);background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
+@media print{.rd.on{background:none;box-shadow:none}#rd-hint{display:none}}
+</style>
+</head>
+<body class="antialiased">
+<div class="mx-auto max-w-6xl px-5 py-10 lg:flex lg:gap-12">
+<nav class="ui hidden lg:block w-44 shrink-0 text-sm sticky top-8 self-start" style="color:var(--mute)">
+<a class="block py-1" href="#mot">Motivation</a>
+<a class="block py-1" href="#core">Core idea</a>
+<a class="block py-1" href="#diff">Distinguishing factor</a>
+<a class="block py-1" href="#eval">Evaluation</a>
+<a class="block py-1" href="#icymi">In case you missed it</a>
+<a class="block py-1" href="#judge">Cautious judgement</a>
+<a class="block py-1" href="#cmp">Your read vs. mine</a>
+<a class="block py-1" href="#src">Sources and limits</a>
+</nav>
+<main class="min-w-0 flex-1">
+<header>
+<p class="ui text-sm" style="color:var(--mute)">arXiv cs.AI preprint (workshop: AI for Chip Design) &middot; arXiv:2610.06790v1, 5 Oct 2026 &middot; read: full text and appendix; figure images not seen</p>
+<h1 class="ui text-3xl font-semibold leading-tight mt-1">Back to the Future: Rethinking EDA Infrastructure for Agentic Systems in Chip Design Verification</h1>
+<p class="ui text-sm mt-1" style="color:var(--mute)">Je Yang (Columbia University; work done while interning at Google), Ivan Lobov (Google DeepMind), Thomas Karpati (Google)</p>
+<p class="mt-4"><b>Verdict.</b> A sensible, cheap pattern: load the VCD into a two-table SQLite store, prune clocks and silent nets, and let tool-calling agents query it. The evidence is thin: a self-built 150-query benchmark scored 143/150 with no external baseline, no accuracy-under-pruning run, and a thesis (infrastructure, not model capability, is the bottleneck) that is never tested without the database. Reuse the idea and treat the numbers as illustrative; the weakest points are the undefined "coverage" metric and root-cause analysis that is advertised but never evaluated. <span class="conf">overall confidence 70%</span></p>
+</header>
+
+<h2 class="s" id="mot">Motivation<span class="conf">86%</span></h2>
+<p>The authors argue that LLM-for-EDA work is lopsided: approximately 74.6% of studies target static RTL generation, so post-simulation waveform debugging is neglected, even though verification is said to take over 70% of the design cycle. Engineers debug by scrubbing waveform viewers, while agents are locked out because raw ASCII dumps exceed context windows by orders of magnitude, carry no semantic index and expose no query interface. The paper names this gap "Infrastructural Impedance".</p>
+<p><b>Convincing?</b> The pain point is real and the diagnosis (agents see logs, humans see waveforms) is persuasive. The two supporting statistics are weaker than they look: 74.6% comes from a 2024 scoping review that cannot reflect the 2025-26 agentic wave, and the 70% figure is cited to a Cadence web page.</p>
+
+<h2 class="s" id="core">Core idea<span class="conf">88%</span></h2>
+<p>Two coupled parts. Offline, a VCD dump is loaded into SQLite as <code>signal_metadata</code> (id, RTL signal name, variable type) and <code>signal_changes</code> (timestamp, value, foreign key to metadata), with rows pruned at insertion. Online, an orchestrator and three agents turn natural-language questions into tool or SQL calls over that database.</p>
+<p>The pruning policies, as I formalize the paper's prose (it gives no equation): let \(n_s\) be the transition count of signal \(s\), \(S\) the set of signals and \(\mathcal{C}\subseteq S\) the clocks.</p>
+\[ \mathrm{keep}(s)\iff s\notin\mathcal{C}\ \wedge\ n_s\ge\tau,\qquad \tau_{\text{zero}}=1,\quad \tau_{\text{avg}}=\bar n=\frac{1}{|S|}\sum_{s\in S}n_s \]
+<p>Table 1 appears to apply the policies cumulatively. Splitting its reductions into marginal contributions shows that clock removal does nearly all the work (percentage points of the unpruned 1,420 MB):</p>
+\[ 86.97\%\;\approx\;\underbrace{66.2}_{\text{clocks}}+\underbrace{6.0}_{\text{zero-toggle}}+\underbrace{14.8}_{\text{below-average}}\ \text{pp} \]
+<figure data-n="1" data-a="S3.F1"><figcaption>Fig. 1. BTTF overview: offline waveform preprocessing into waves.db, online agentic orchestration over it.</figcaption></figure>
+<ul class="b">
+<li><b>Orchestration Agent:</b> decomposes the query into sub-goals, routes them and audits the merged answer.</li>
+<li><b>Analysis Agent:</b> composes queries for scope discovery, event inspection and toggle counting, with an iterative function-calling loop for hotspots.</li>
+<li><b>Verification Agent:</b> ties waveform anomalies to versioned source by matching five SVA macro names (ASSERT, ASSERT_STATIC, ASSERT_NEVER, ASSERT_KNOWN, COVER) with regular expressions.</li>
+<li><b>Evaluation Agent:</b> audits candidate queries on correctness, completeness, efficiency, schema adherence and context understanding.</li>
+</ul>
+<p>Agents communicate only through a shared session context, with a self-correction loop on failed queries. <b>My read:</b> the pruning pipeline is the only part with a measured trade-off. The agent layer gets equal billing in the paper, so I treat it as a second core idea even though its evidence is thin.</p>
+
+<h2 class="s" id="diff">Distinguishing factor<span class="conf">62%</span></h2>
+<ul class="b">
+<li><b>LLM RTL-generation and verification agents</b> (VeriMoA, MAGE, UVLLM, FVEval). The paper says these work on static source, assertion lists or small simulation logs, and BTTF differs by consuming simulation waveforms. I did not open these papers to check that characterization.</li>
+<li><b>Waveform-aware coding agents</b> (VerilogCoder, AST-based waveform tracing). The closest prior work, dismissed as tied to small code-centric examples. There is no head-to-head run, so the difference in scale is asserted, not shown.</li>
+<li><b>Text-to-SQL</b> (Gao et al. 2023). Used as an enabling capability, not extended. With two tables the SQL itself is easy; the hard parts are scope-name resolution and timescales, which the paper handles with helper tools.</li>
+<li><b>Not discussed:</b> conventional waveform tooling such as viewer scripting, vendor waveform-database APIs and Python VCD parsers (from my background knowledge, unverified). A VCD already consists of declarations plus timestamped changes, which is exactly the two tables, so the schema is a transcription. The contribution is the pruning policies and the agent tool layer.</li>
+</ul>
+<p>No earlier version by the same authors is cited, so there is no comparison to a prior BTTF.</p>
+
+<h2 class="s" id="eval">Evaluation, conclusions, rigor<span class="conf">72%</span></h2>
+<div class="wrap"><table>
+<thead><tr><th>Section</th><th>Setup</th><th>Reported result</th><th>My read</th></tr></thead>
+<tbody>
+<tr><td>§4, Table 1</td><td>One benchmark database (4.2 GB of VCD, 18,450 nets), four pruning policies.</td><td>Footprint 1,420 MB to 480 / 395 / 185 MB (66.20 / 72.18 / 86.97% smaller). Latency 410.5 to 125.2 / 94.8 / 41.6 ms. "Coverage" 100 / 98.51 / 100 / 64.23%.</td><td>Arithmetic checks out. "Coverage" is never defined; 98.51% after removing rows that make up two thirds of the table is only plausible as a net count. No accuracy-versus-policy run, which is the experiment pruning needs. Latency falls at least in proportion to size, which suggests scans rather than an index on (signal, time).</td></tr>
+<tr><td>§4, Fig. 2</td><td>Database generation with batched insertion.</td><td>240.5 s to 83.2 s, a \(2.89\times\) speed-up.</td><td>Standard executemany batching; gains flatten between the last two batch sizes (85.4 s to 83.2 s). The claim that it removes the bottleneck for multi-terabyte waveforms rests on a 4.2 GB test.</td></tr>
+<tr><td>§4, Table 2</td><td>150 expert-annotated queries, 9 task types, Gemini-2.5-Pro, no baseline.</td><td>95.33% overall; 84.62% (static SVA) to 100% per type.</td><td>Equals \(143/150\), Wilson 95% interval about 90.7 to 97.8%. The weaker types rest on roughly 8 to 13 queries each (implied by 87.50, 91.67, 84.62 and 90.91%), so one query moves a type by 8 to 13 points. The scoring rule for "execution accuracy" is not stated, and five of nine types are single-hop lookups.</td></tr>
+<tr><td>§4, agent ablation</td><td>Monolithic agent versus BTTF, autorater using the Evaluation Agent's five criteria.</td><td>Monolithic 3.35/5; BTTF 17.3% higher (about 3.93/5, my arithmetic); \(1.96\times\) latency.</td><td>Judge model unnamed, and the rubric is the one the Evaluation Agent itself applies, which is circular. No execution accuracy for the single agent, no seeds, no variance.</td></tr>
+<tr><td>App. A, Table 3</td><td>Worked examples of tool calls and outputs.</td><td>One example per task type.</td><td>Two entries disagree with themselves: the hotspot example is described as sliding 100 ns intervals (Table 2 asks for a 100 ns window) yet reports a 2,332 ns range with 27 toggles, and a toggle count called with picosecond arguments 6,800,000 to 8,000,000 reports the interval 680 to 800 ns.</td></tr>
+</tbody></table></div>
+<p><b>Paper's conclusion.</b> The binding constraint on agentic waveform debugging is data infrastructure, not model capability, and agent specialization adds a 17.3% quality gain. <b>My read:</b> not supported. There is no run without the database (raw VCD plus a code interpreter, say), only one model is used, and the closing paragraph defers multi-hop causal tracing to larger models, which concedes that capability still binds. The text also calls the system hallucination-free while 7 of 150 queries fail.</p>
+
+<h2 class="s" id="icymi">In case you missed it<span class="conf">70%</span></h2>
+<div class="item"><span class="chip neg">−</span><b>Root-cause analysis is advertised, not evaluated.</b> Table 2 has no root-cause category, and the "backward causal tracing" of Appendix A.1 looks up the prior values of the assertion's own operands, which names the violating symptom rather than a cause upstream in the design. The intro's "formal verification" is dynamic assertion checking on a single trace.</div>
+<div class="item"><span class="chip neg">−</span><b>Less open-ended than "text-to-SQL" suggests.</b> The Verification Agent is five hard-coded macro names matched by regex plus per-rule checkers such as <code>verify_known_rule</code>, and most Analysis Agent actions in Table 3 are named helper functions. This is closer to natural-language tool selection.</div>
+<div class="item"><span class="chip neg">−</span><b>Pruning blind spots.</b> Zero-toggle pruning drops constant values, yet a signal that never moves is a common bug symptom. Clock pruning is justified by timestamps preserving temporal anchoring, but the paper never says the clock period is stored, while the ASSERT_KNOWN example samples at clock edges and the A.1 example reports a net going unknown "while clk was high".</div>
+<div class="item"><span class="chip neg">−</span><b>Scale gap.</b> The motivation talks about terabytes and dumps above 10 GB; the benchmark is 4.2 GB, 18,450 nets and 50 to 800 ns windows, and the unpruned database (1,420 MB) is already smaller than the VCD. No code or benchmark release is mentioned.</div>
+<div class="item"><span class="chip neu">·</span><b>"On-the-fly" is doing a lot of work.</b> Pruning by the design-wide average toggle rate needs global statistics, so it cannot be single pass, the ingestion cost of that policy is not reported, and streaming ingestion is listed as future work.</div>
+<div class="item"><span class="chip neu">·</span><b>Loose citations.</b> A prefix-caching systems paper (KVflow) and a Copilot robustness study are cited as EDA-verification evidence, in a reference list of only 12 entries.</div>
+<div class="item"><span class="chip pos">+</span><b>Right kind of boring.</b> Windowed and aggregate questions (toggle counts, first time a value occurs) are exactly what a context window cannot hold and a database answers trivially, and Table 3 gives concrete calls that make the design easy to reimplement.</div>
+<div class="item"><span class="chip pos">+</span><b>An explicit lossy boundary.</b> The pruning ladder with a stated 35.77% coverage loss is the most reusable contribution, once the fidelity metric is defined.</div>
+
+<h2 class="s" id="judge">Cautious judgement<span class="conf">66%</span></h2>
+<div class="wrap"><table>
+<thead><tr><th>Question</th><th>Answer</th><th>Conf.</th></tr></thead>
+<tbody>
+<tr><td>Fair comparison to external baselines?</td><td>No external baseline at all. Missing: VerilogCoder's waveform tracer, a code-interpreter agent over a raw or windowed VCD, and vendor scripting. The only comparison is internal and judged on the system's own rubric.</td><td>88%</td></tr>
+<tr><td>Invents its own FoM?</td><td>Yes, three: "coverage" (undefined, Table 1), "execution accuracy" (scoring unstated) and the five-criterion autorater score, whose 17.3% is a relative change on a custom 5-point scale and cannot be converted to a standard metric.</td><td>80%</td></tr>
+<tr><td>Rewrite of an existing idea?</td><td>Largely. The VCD's own declarations-plus-changes layout is the two-table schema, and text-to-SQL (Gao et al. 2023) and role-split agent stacks (VeriMoA, MAGE) are existing patterns. New: the pruning policies and the SVA-macro checker.</td><td>70%</td></tr>
+<tr><td>Reliable enough to reuse?</td><td>The pattern yes, the numbers no. No code or benchmark, the effect of pruning on answer accuracy is unmeasured, and Table 3 has unit and window inconsistencies.</td><td>62%</td></tr>
+</tbody></table></div>
+
+<h2 class="s" id="cmp">Your read vs. mine<span class="conf">84%</span></h2>
+<p>Your MD was attached from the start, so my read is not blind to it; I wrote my notes from the paper text first and then re-opened the MD. Mine is the digest above; yours is quoted or paraphrased here, with the differences in the last column.</p>
+<div class="wrap"><table>
+<thead><tr><th>Topic</th><th>Your read</th><th>My read</th><th>Difference</th></tr></thead>
+<tbody>
+<tr><td>Motivation</td><td>Agent frameworks do RTL generation plus synthesis and test with logs, asserts and prints; humans use waveforms; VCDs are too big for context.</td><td>Same, and the paper adds two more blockers: no semantic index and no query interface.</td><td>Agree. The 74.6% line you quoted comes from a 2024 scoping review, which dates the claim.</td></tr>
+<tr><td>Schema</td><td>Two tables: signal name plus type, and switching instances.</td><td>Same.</td><td>Agree. The second table is <code>signal_changes</code> in the text and "changes" in Appendix A.2.</td></tr>
+<tr><td>"Impossibly large"</td><td>The database from the raw VCD becomes impossibly large.</td><td>The paper says a naive translation moves the scalability problem into the database; its unpruned database is 1,420 MB against a 4.2 GB VCD, if Table 1 covers the whole benchmark.</td><td>Softer than your wording; "impossibly" is not shown at the tested scale.</td></tr>
+<tr><td>Compression numbers</td><td>Clocks about 80%, zero-switching about 60%, low-switching about 30% (your question marks).</td><td>Clocks 66.20%; zero-toggle 72.18% total (about +6.0 pp); below-average 86.97% total (about +14.8 pp).</td><td>Yours read as standalone guesses; the paper's are cumulative (my inference) and clocks dominate.</td></tr>
+<tr><td>"Note down the frequency"</td><td>Clocks are removed but their frequency is recorded.</td><td>The paper says only that timestamps preserve temporal anchoring; it never states that period or frequency is stored.</td><td>Your addition, not the paper's, and it matters: the ASSERT_KNOWN check needs clock edges.</td></tr>
+<tr><td>What is lossy</td><td>Only low-switch-rate removal.</td><td>Clock removal also loses coverage (98.51%), and zero-toggle pruning drops constant values that the coverage metric cannot see.</td><td>The lossy surface is larger than you noted.</td></tr>
+<tr><td>Results</td><td>Evaluated only on their own task; no external comparison to be made; no other agent loop can debug from waveforms.</td><td>Own 150-query set only: agree. But comparisons were possible (VerilogCoder's tracer, a code-interpreter baseline, a no-database run), and the paper itself cites VerilogCoder as a waveform-tracing agent.</td><td>Main disagreement: missing baselines are a weakness, not a given, and "no other loop can" is stronger than the paper shows. Your note also records none of its numbers (143/150, 3.35/5 and +17.3%, \(1.96\times\), \(2.89\times\)).</td></tr>
+<tr><td>Agents</td><td>1+3 agents; verification uses SystemVerilog functionality and the usual logging; shared context only.</td><td>Same roster and shared context. The Verification Agent matches five SVA macro names by regex and calls hand-written checkers; I find no logging mechanism. Your example queries map to the Event Timing and Power Hotspot types.</td><td>Mostly agree, one fix. I list the agents as a second core idea and you as ICYMI; your placement is defensible given the thin evidence.</td></tr>
+<tr><td>Your quotes 2 and 3</td><td>Kept the "who a signal is vs what it does" line and the 35.77% "boundary of safe reduction" line.</td><td>The first is standard normalization that mirrors the VCD header and change split. For the second, only three policies are tested, so the boundary lies anywhere between 72% and 87% reduction, judged by an undefined metric.</td><td>I read both as packaging rather than findings.</td></tr>
+</tbody></table></div>
+<p>Not in your note, all covered above: no root-cause category in the benchmark, the circular autorater rubric, the Table 3 inconsistencies, the "formal verification" wording and the absence of released code.</p>
+
+<h2 class="s" id="src">Sources and limits<span class="conf">90%</span></h2>
+<p>Read: the full main text and appendix (including Tables 1 to 3) from the saved arXiv HTML, plus your MD. Not seen: figure images (the values for Fig. 2 came from its text labels), code or benchmark (none mentioned), the cited papers themselves and the PDF. Cannot be checked: the 150 queries, the scoring rule, the autorater identity and the definition of "coverage". The arithmetic (143/150, the Wilson interval, 3.93/5, the marginal reductions) is mine, and statements about vendor tooling are background knowledge rather than from the paper.</p>
+<p class="cite">"Verilogcoder: autonomous verilog coding agents with graph-based planning and abstract syntax tree (ast)-based waveform tracing tool" Ho 2025</p>
+<p class="cite">"Text-to-sql empowered by large language models: a benchmark evaluation" Gao 2023</p>
+<p class="cite">"Hardware design and verification with large language models: a scoping review, challenges, and open issues" Abdollahi 2024</p>
+<p class="cite">"Uvllm: an automated universal RTL verification framework using LLMs" Hu 2025</p>
+<p class="cite">"Mage: a multi-agent engine for automated RTL code generation" Zhao 2025</p>
+<p class="cite">"Verimoa: a mixture-of-agents framework for spec-to-hdl generation" Ping 2026</p>
+<p class="cite">"Fveval: understanding language model capabilities in formal verification of digital hardware" Kang 2025</p>
+<p class="cite">"Kvflow: efficient prefix caching for accelerating LLM-based multi-agent workflows" Pan 2026</p>
+<p class="cite">"On the robustness of code generation techniques: an empirical study on github copilot" Mastropaolo 2023</p>
+
+</main>
+</div>
+<script>
+const BASE='https://arxiv.org/html/2610.06790v1/';
+const MAP={1:'overall.png'};
+document.querySelectorAll('figure[data-n]').forEach(f=>{
+  const n=f.dataset.n,img=new Image();img.loading='lazy';img.alt='Figure '+n;
+  img.onerror=()=>{const a=document.createElement('a');a.href='https://arxiv.org/html/2610.06790#'+f.dataset.a;a.textContent='Open Fig. '+n+' on arXiv';a.className='ui text-sm underline';a.style.color='var(--teal)';img.replaceWith(a);};
+  img.src=BASE+MAP[n];f.prepend(img);
+});
+</script>
+<script>
+/* Reading marker. R or a click on a sentence starts it; Up/Down (or k/j) move it; Esc or R stops it.
+   Arrow keys scroll the page normally unless the marker is active. Runs after MathJax has typeset. */
+(function(){
+const BLK='main p:not(.cite),main li:not(.cite),main .item,main blockquote,main figcaption,main td';
+const ALL=BLK+',main mjx-container[display="true"]';
+const ABBR=/(?:\b(?:e\.g|i\.e|et al|etc|vs|cf|Figs?|Eqs?|Secs?|Tab|Refs?|Algs?|approx|resp|No)|\b[A-Z])\.$/;
+const OBJ='\uFFFC';
+let units=[],idx=-1,on=false,ready=false,hintEl;
+
+function tokens(block){
+  const items=[];let run=[];
+  const flush=()=>{if(run.length)items.push({run});run=[];};
+  const walk=n=>{
+    for(let c=n.firstChild;c;c=c.nextSibling){
+      if(c.nodeType===3){run.push({t:c});}
+      else if(c.nodeType===1){
+        const tag=c.tagName;
+        if(tag==='MJX-CONTAINER'){
+          if(c.getAttribute('display')==='true'){flush();items.push({disp:c});}
+          else run.push({a:c});
+        }else if(tag==='SCRIPT'||tag==='STYLE'||tag==='MJX-ASSISTIVE-MML'||tag==='IMG'){}
+        else walk(c);
+      }
+    }
+  };
+  walk(block);flush();return items;
+}
+
+function sentences(run){
+  let s='';const map=[];
+  for(const p of run){
+    if(p.t){const v=p.t.nodeValue;for(let i=0;i<v.length;i++)map.push({n:p.t,o:i,L:v.length});s+=v;}
+    else{map.push({a:p.a});s+=OBJ;}
+  }
+  const cuts=[0];
+  const re=/[.!?]+["'’”)\]]*(?=\s+[A-Z0-9"'“‘(\[\uFFFC])/g;
+  let m;
+  while((m=re.exec(s))){const end=m.index+m[0].length;if(!ABBR.test(s.slice(Math.max(0,end-10),end)))cuts.push(end);}
+  cuts.push(s.length);
+  const out=[];
+  for(let i=0;i<cuts.length-1;i++){
+    let a=cuts[i],b=cuts[i+1];
+    while(a<b&&/\s/.test(s[a]))a++;
+    while(b>a&&/\s/.test(s[b-1]))b--;
+    if(b>a)out.push([a,b]);
+  }
+  return {out,map};
+}
+
+function rangeFor(block,map,a,b){
+  const r=document.createRange(),f=map[a],l=map[b-1];
+  if(f.a)r.setStartBefore(f.a);
+  else if(f.o===0){let n=f.n;while(n.parentNode!==block&&n===n.parentNode.firstChild)n=n.parentNode;r.setStartBefore(n);}
+  else r.setStart(f.n,f.o);
+  if(l.a)r.setEndAfter(l.a);
+  else if(l.o===l.L-1){let n=l.n;while(n.parentNode!==block&&n===n.parentNode.lastChild)n=n.parentNode;r.setEndAfter(n);}
+  else r.setEnd(l.n,l.o+1);
+  return r;
+}
+
+function build(block){
+  const out=[];
+  for(const it of tokens(block)){
+    if(it.disp){it.disp.classList.add('rd');out.push(it.disp);continue;}
+    const {out:ss,map}=sentences(it.run),spans=[];
+    for(let i=ss.length-1;i>=0;i--){   /* last sentence first, so earlier offsets stay valid */
+      const r=rangeFor(block,map,ss[i][0],ss[i][1]);
+      const sp=document.createElement('span');sp.className='rd';
+      sp.appendChild(r.extractContents());r.insertNode(sp);spans.push(sp);
+    }
+    out.push(...spans.reverse());
+  }
+  return out;
+}
+
+function hint(){
+  if(!hintEl){hintEl=document.createElement('div');hintEl.id='rd-hint';document.body.appendChild(hintEl);}
+  hintEl.textContent=on?'\u2191 \u2193 move \u00b7 Esc exit':'R: reading marker';
+}
+function inView(i){const r=units[i].getBoundingClientRect();return r.bottom>0&&r.top<innerHeight;}
+function firstVisible(){for(let i=0;i<units.length;i++)if(units[i].getBoundingClientRect().top>=48)return i;return units.length-1;}
+function ensure(u,fast){
+  const r=u.getBoundingClientRect(),h=innerHeight;
+  if(r.top<h*.18||r.bottom>h*.78)scrollBy({top:r.top-h*.38,behavior:fast?'auto':'smooth'});
+}
+function set(i,scroll,fast){
+  if(units[idx])units[idx].classList.remove('on');
+  idx=Math.max(0,Math.min(units.length-1,i));
+  units[idx].classList.add('on');
+  if(scroll)ensure(units[idx],fast);
+}
+function activate(i){
+  on=true;document.body.classList.add('rd-active');
+  set(i!==undefined?i:(idx>=0&&inView(idx)?idx:firstVisible()),i===undefined);hint();
+}
+function deactivate(){
+  on=false;document.body.classList.remove('rd-active');
+  if(units[idx])units[idx].classList.remove('on');hint();
+}
+
+document.addEventListener('keydown',e=>{
+  if(!units.length||e.ctrlKey||e.metaKey||e.altKey)return;
+  const t=e.target;if(t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable))return;
+  if(e.key==='r'||e.key==='R'){e.preventDefault();on?deactivate():activate();return;}
+  if(!on)return;
+  if(e.key==='ArrowDown'||e.key==='j'){e.preventDefault();set(idx+1,true,e.repeat);}
+  else if(e.key==='ArrowUp'||e.key==='k'){e.preventDefault();set(idx-1,true,e.repeat);}
+  else if(e.key==='Escape')deactivate();
+});
+document.addEventListener('click',e=>{
+  const sel=getSelection();if(sel&&!sel.isCollapsed)return;
+  if(!units.length||e.target.closest('a,button,nav'))return;
+  const u=e.target.closest('.rd');if(!u)return;
+  const i=units.indexOf(u);if(i<0)return;
+  if(on){set(i,false);}else activate(i);
+});
+
+function init(){
+  if(ready)return;ready=true;
+  for(const el of Array.from(document.querySelectorAll(ALL))){
+    if(el.tagName==='MJX-CONTAINER'){if(!el.parentElement.closest(BLK)){el.classList.add('rd');units.push(el);}continue;}
+    if(el.querySelector(BLK))continue;
+    units.push(...build(el));
+  }
+  hint();
+}
+addEventListener('load',()=>{
+  const p=window.MathJax&&window.MathJax.startup&&window.MathJax.startup.promise;
+  Promise.resolve(p).then(init,init);
+});
+})();
+</script>
+</body>
+</html>

@@ -80,7 +80,7 @@ Section-by-section requirements (in this order):
 
 2. Motivation ("mot"): the problem and why the authors say it matters. Add a line on whether the motivation is itself convincing.
 
-3. Core idea ("core"): include the key equations as LaTeX (inline \\(...\\) or display \\[...\\]), and the framework figure if one exists (reference its data-a id). Large papers can contain several core ideas; whether something is a core idea or an ICYMI entry is a judgement call - make it and keep it consistent.
+3. Core idea ("core"): include the key equations as raw LaTeX (no inline or display math delimiters — the template wraps display equations in \[ \]). Use \\ for line breaks only where the paper shows them. Reference the framework figure by its data-a id if one exists.
 
 4. Distinguishing factor ("diff"): compare against each family of prior work separately. If the paper extends the authors' own earlier version, add a short "vs. their earlier version" paragraph. Do not go and fetch the earlier version.
 

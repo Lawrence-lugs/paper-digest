@@ -87,6 +87,13 @@ export function extractJson(content) {
     markSalvaged();
   }
 
+  // JSON \f is form feed (U+000C), which breaks LaTeX \frac etc. Replace a
+  // standalone \f (not preceded by backslash) with \\f so JSON.parse yields
+  // \f (backslash + f) instead of a form feed character.
+  const beforeFf = text.length;
+  text = text.replace(/(?<!\\)\\f/g, "\\\\f");
+  if (text.length !== beforeFf) markSalvaged();
+
   // Fix invalid backslash escape sequences. JSON only allows \" \\ \/ \b \f
   // \n \r \t \uXXXX after a backslash. Agents often emit LaTeX like \hat,
   // \mathrm, \(...\) with a single or wrong number of backslashes, and may
@@ -160,6 +167,30 @@ export function extractJson(content) {
   if (!parsed) {
     throw new Error("no parseable JSON object in response");
   }
+
+  // JSON \f is form feed (U+000C), which breaks LaTeX \frac etc. Walk the
+  // parsed object and replace any form feed chars in string values with f
+  // (the preceding backslash, if any, is already present from \\ in the
+  // JSON source).
+  const FF = "\f";
+  function fixFormFeeds(obj) {
+    if (typeof obj === "string") {
+      if (obj.includes(FF)) {
+        salvaged = true;
+        return obj.split(FF).join("f");
+      }
+      return obj;
+    }
+    if (Array.isArray(obj)) return obj.map(fixFormFeeds);
+    if (obj && typeof obj === "object") {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) out[k] = fixFormFeeds(v);
+      return out;
+    }
+    return obj;
+  }
+  parsed = fixFormFeeds(parsed);
+
   return { _salvaged: salvaged, ...parsed };
 }
 

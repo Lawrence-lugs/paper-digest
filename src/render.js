@@ -12,6 +12,46 @@ export function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ESC[c] || c);
 }
 
+/**
+ * Normalize LaTeX math delimiters and escapes. Agents commonly emit doubled
+ * backslashes before delimiters (e.g. `\\(` instead of `\(`) because their
+ * output was double-escaped through JSON. Collapse `\\X` → `\X` for math
+ * delimiters and common LaTeX escapes so MathJax recognizes them.
+ */
+function normalizeLatex(s) {
+  const t = String(s);
+  const out = [];
+  for (let i = 0; i < t.length; i++) {
+    if (t[i] === "\\" && t[i + 1] === "\\") {
+      const next = t[i + 2];
+      // Collapse \\X → \X for math delimiters and LaTeX command letters so
+      // MathJax recognizes them. \\ (line break, before space/end) is kept.
+      if (next && ("[(){}_]".includes(next) || /[a-zA-Z]/.test(next))) {
+        out.push("\\", next);
+        i += 2;
+      } else {
+        out.push("\\", "\\");
+        i += 1;
+      }
+    } else {
+      out.push(t[i]);
+    }
+  }
+  return out.join("");
+}
+
+/**
+ * Strip existing math delimiters from an equation string so the template can
+ * re-wrap it consistently in `\[` `\]`.
+ */
+function stripMathDelimiters(s) {
+  return String(s)
+    .replace(/^\\\[\s*/, "")
+    .replace(/\s*\\\]$/, "")
+    .replace(/^\\\(\s*/, "")
+    .replace(/\s*\\\)$/, "");
+}
+
 function confidenceChip(conf) {
   const c = conf == null ? 0 : Number(conf);
   return `<span class="conf">${c}%</span>`;
@@ -29,10 +69,15 @@ function renderSection(s) {
     case "diff":
     case "core":
     case "eval":
-      body = `<p>${esc(s.content || "")}</p>`;
+      body = `<p>${esc(normalizeLatex(s.content || ""))}</p>`;
       if (s.id === "core") {
         if (s.equations && s.equations.length) {
-          body += s.equations.map((e) => `<p>\\[${esc(e)}\\]</p>`).join("");
+          body += s.equations
+            .map((e) => {
+              const clean = stripMathDelimiters(normalizeLatex(e));
+              return `<p>\\[${esc(normalizeLatex(clean))}\\]</p>`;
+            })
+            .join("");
         }
         if (s.figureId) {
           body += `<figure data-n="${esc(String(s.figureId))}" data-a="${esc(String(s.figureId))}"><figcaption>Framework figure (${esc(String(s.figureId))}).</figcaption></figure>`;
