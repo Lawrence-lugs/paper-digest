@@ -53,9 +53,19 @@ function splitSections(body) {
         current.content = buf.join("\n").trim();
         sections.push(current);
       }
-      const title = h[1].trim();
+      const rawTitle = h[1].trim();
+      // A section header may carry an inline confidence, e.g.
+      // "## Motivation (Confidence: 90%)". Strip it so the clean title
+      // matches the known section ids, and carry the confidence through.
+      const confM = /\(\s*[Cc]onfidence:\s*(\d+(?:\.\d+)?)\s*%?\s*\)\s*$/i.exec(rawTitle);
+      let title = rawTitle;
+      let confidence = null;
+      if (confM) {
+        confidence = Number(confM[1]);
+        title = rawTitle.slice(0, confM.index).trimEnd();
+      }
       const id = SECTION_IDS[title.toLowerCase()] || slug(title);
-      current = { id, title, content: "", raw: "" };
+      current = { id, title, content: "", raw: "", confidence };
       buf = [];
     } else {
       if (current) buf.push(line);
@@ -85,16 +95,13 @@ function slug(title) {
  */
 function parseIcymi(content) {
   const entries = [];
-  const re = /^-\s*\[(pos|neg|neu)\]\s*(.*)$/im;
-  let m;
-  const text = content;
-  let last = 0;
-  // Find all - [tag] lines
-  const lines = text.split("\n");
-  for (const line of lines) {
-    const m2 = /^-\s*\[(pos|neg|neu)\]\s*(.*)$/.exec(line);
-    if (m2) {
-      entries.push({ text: m2[2].trim(), tag: m2[1] });
+  // Entries look like: "- [pos] text" or "* `[neu]` text" (backticks around
+  // the tag are optional).
+  const re = /^[*-]\s*`?\[(pos|neg|neu)\]`?\s*(.*)$/;
+  for (const line of content.split("\n")) {
+    const m = re.exec(line);
+    if (m) {
+      entries.push({ text: m[2].trim(), tag: m[1] });
     }
   }
   return entries;

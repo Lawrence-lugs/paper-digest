@@ -44,6 +44,18 @@ function renderContent(content) {
     return `\x00MATH${idx}\x00`;
   });
 
+  // Protect inline math $...$ (single dollar) so marked leaves it alone.
+  // Agents default to $...$ for inline equations, so account for it just like
+  // \( ... \). The content may not contain a raw `$` (that would be a separate
+  // inline math or display math delimiter), which keeps multiple $...$ pairs on
+  // one line from being swallowed into a single match.
+  const singleDollarRe = /\$([^$]+)\$/g;
+  p = p.replace(singleDollarRe, (_, math) => {
+    const idx = mathBlocks.length;
+    mathBlocks.push(`\\(${math}\\)`);
+    return `\x00MATH${idx}\x00`;
+  });
+
   const html = marked.parse(p);
 
   // Restore math placeholders raw.
