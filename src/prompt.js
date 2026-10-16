@@ -1,12 +1,10 @@
 /**
  * Master prompt for the paper-digest agent.
  *
- * Keeps the logical and writing guides from the paper-digest skill, but
- * instructs the agent to emit a single JSON object instead of HTML. The JSON
- * schema is consumed by src/template.js to render the digest HTML.
+ * Instructs the agent to emit a single Markdown document with YAML frontmatter
+ * for metadata and markdown body for sections. No JSON, no escaping. The
+ * Markdown is consumed by src/render.js to produce the digest HTML.
  */
-
-const INDENT = "  ";
 
 function q(s) {
   return JSON.stringify(String(s));
@@ -53,64 +51,61 @@ FIGURES (arXiv HTML, file names and element ids recorded for the template):
 ${figureList}
 BASE URL (the arXiv HTML version actually read): ${baseUrl}
 
-TASK: Produce a single JSON object (no markdown fences, no prose before/after) with exactly this schema:
+TASK: Produce a single Markdown document with YAML frontmatter for metadata and a markdown body for sections. No code fences, no prose before/after the frontmatter. No JSON. No string escaping needed — write plain Markdown.
 
-{
-  "title": string,                          // paper title
-  "authors": string[],                      // author surnames as in the paper
-  "venue": string,                          // venue and id (e.g. "NeurIPS 2017", "arXiv:2301.00001")
-  "id": string,                             // arxiv id or similar
-  "whatRead": string,                       // exactly what was read (full text / abstract only / main body without appendix)
-  "verdict": string,                        // 2-3 sentence verdict
-  "overallConfidence": number,              // 0-100
-  "sections": [
-    { "id": "mot", "title": "Motivation", "content": string, "confidence": number },
-    { "id": "core", "title": "Core idea", "content": string, "confidence": number },
-    { "id": "diff", "title": "Distinguishing factor", "content": string, "confidence": number },
-    { "id": "eval", "title": "Evaluation and conclusions", "content": string, "confidence": number, "results": string[], "conclusion": string },
-    { "id": "icymi", "title": "In case you missed it", "entries": [{ "text": string, "tag": "pos|neg|neu" }] },
-    { "id": "judge", "title": "Cautious judgement", "rows": [{ "question": string, "answer": string, "conf": number }] },
-    { "id": "src", "title": "Sources and limits", "content": string, "citations": string[] }
-  ]
-}
+---
+title: Paper title
+authors: Author1, Author2
+venue: venue and id (e.g. "arXiv:2610.20359v1 [cs.ET]")
+id: arxiv id or similar
+whatRead: exactly what was read (full text / abstract only / main body without appendix)
+verdict: 2-3 sentence verdict
+overallConfidence: 90
+---
 
-Equations and figures are written inline in content strings, not as separate JSON fields. You are free to place equations and important figures anywhere in any section's content string.
+## Motivation
+The problem and why the authors say it matters. Add a line on whether the motivation is itself convincing.
 
-- Equations: write display equations as \[ ... \] and inline equations as \( ... \), directly in the content string. Use raw LaTeX and write the delimiters yourself. Use \\ for line breaks only where the paper shows them. Write < as &lt; (or \\lt) inside math so the JSON/HTML pipeline does not eat it.
-- Figures: embed important figures inline in content as <figure data-n="N" data-a="ID"><figcaption>CAPTION</figcaption></figure>, where N is the figure's index (1, 2, ...) and ID is its data-a id from the figure list below. Do not add the  tag yourself — the pipeline adds it as a lazyloaded image with a link fallback.
+## Core idea
+The key ideas, with key equations written inline as \$\$ ... \$\$ (display) or \\( ... \\) (inline). Use raw LaTeX and write the delimiters yourself. Use \\ for line breaks only where the paper shows them. You may embed figures as raw HTML <figure data-n="N" data-a="ID">...</figure> tags (N = figure index from the list above). No escaping needed.
 
-Section-by-section requirements (in this order):
+## Distinguishing factor
+Compare against each family of prior work separately. If the paper extends the authors' own earlier version, add a short "vs. their earlier version" paragraph. Do not go and fetch the earlier version.
 
-1. Header + Verdict: title, authors, venue and id, what was read, a 2-3 sentence verdict, and overall confidence.
+## Evaluation and conclusions
+Prose in the same style. Pick the results that carry the paper's claims (usually 2 to 5, plus any one surprising). For each: lead with the result and how it was evaluated, then a sentence or two of "my read". Close with the paper's own conclusion and your read of whether the evidence supports it.
 
-2. Motivation ("mot"): the problem and why the authors say it matters. Add a line on whether the motivation is itself convincing.
+## In case you missed it
+Interesting concrete things the paper did or assumed that someone building on or reimplementing the work would want to know. Write as a tag list:
 
-3. Core idea ("core"): include the key equations as raw LaTeX inline in the content string (display: \[ ... \], inline: \( ... \); write the delimiters yourself). Use \\ for line breaks only where the paper shows them. You may embed the framework figure inline in content using its data-a id (see figures below).
+- [pos] a positive entry
+- [neg] a negative entry
+- [neu] a neutral entry
 
-4. Distinguishing factor ("diff"): compare against each family of prior work separately. If the paper extends the authors' own earlier version, add a short "vs. their earlier version" paragraph. Do not go and fetch the earlier version.
+3-6 typical entries; an empty section is better than padding.
 
-5. Evaluation and conclusions ("eval"): prose in the same style, no table. Pick the results that carry the paper's claims (usually 2 to 5, plus any one surprising). For each: lead with the result and how it was evaluated (benchmark, baselines, metric, scale), then a sentence or two of "my read". Close with an entry for the paper's own conclusion and your read of whether the evidence supports it. Mention rigor (baselines, seeds, variance, custom metrics) only where it changes how far a result can be trusted.
+Tags: "pos" (+), "neg" (-), or "neu" (·).
 
-6. In case you missed it ("icymi"): interesting concrete things the paper did or assumed that someone building on or reimplementing the work would want to know (design choices, hard-coded or hand-tuned parts, odd assumptions/pruning rules, gaps between motivation and tested setting, clever side tricks, implementation details). 3-6 typical entries; an empty section is better than padding.
+## Cautious judgement
+Exactly these four rows, in this order:
 
-   Test each candidate:
-   - Is it a concrete thing the paper did, assumed, or left out? (Verdicts belong in the Verdict or judgement table.)
-   - Is it meta commentary on the paper (citation quality, reference size, venue, writing, novelty rhetoric)? Drop it.
-   - Is it already said in sections 2-5 or 7? Drop it.
-   - If it is a general critique not already elsewhere, does it change a judgement-table answer? If so, put one clause in that answer; if not, drop it.
+| Question | Answer | Confidence |
+| --- | --- | --- |
+| Fair comparison to external baselines? | ... | 90% |
+| Invents its own FoM? | ... | 90% |
+| Rewrite of an existing idea? | ... | 90% |
+| Reliable enough to reuse? | ... | 90% |
 
-   Each entry tagged: "pos" (+), "neg" (-), or "neu" (·).
+Answers should be specific, not "somewhat".
 
-7. Cautious judgement ("judge"): exactly these four rows, in this order:
-   - "Fair comparison to external baselines?"
-   - "Invents its own FoM?"
-   - "Rewrite of an existing idea?"
-   - "Reliable enough to reuse?"
-   Answers should be specific (name the missing baseline, the custom metric, the earlier work it echoes), not "somewhat".
-
-8. Sources and limits ("src"): what was read, what was not (appendix, code, supplementary), and what could not be checked. Then .cite lines, one per paper you actually saw named in the source, formatted as a Google Scholar search string: "exact title" first-author-surname year. Never reconstruct a citation from memory.
+## Sources and limits
+What was read, what was not (appendix, code, supplementary), and what could not be checked. 
 
 Confidence: every section carries a percent confidence (0-100), your confidence that your reading of that section is right and complete - not a rating of the paper. Spread should reflect real differences; do not default everything to 85%.
 
-Escape all strings properly for JSON. Output only the JSON object.`
+Figures: embed important figures inline as raw HTML <figure data-n="N" data-a="ID"><figcaption>CAPTION</figcaption></figure>, where N is the figure's index (1, 2, ...) and ID is its data-a id from the figure list above. Do not add an  tag yourself — the pipeline adds it as a lazyloaded image with a link fallback.
+
+Equations: write display equations as \$\$ ... \$\$ and inline equations as \\( ... \\). No escaping needed — write raw LaTeX directly.
+
+Output only the Markdown document.`
 }

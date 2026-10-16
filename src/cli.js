@@ -5,16 +5,17 @@
  * Subcommands:
  *
  *   paper-digest prompt <source> [--out <file>]
- *       Fetch the source and print the master prompt (JSON-output instructions).
- *       Use this to hand the prompt to a chat AI, which returns the digest JSON.
+ *       Fetch the source and print the master prompt (Markdown-output instructions).
+ *       Use this to hand the prompt to a chat AI, which returns the digest Markdown.
  *
  *   paper-digest digest <source> [--out <dir>]
- *       Full pipeline: fetch -> OpenRouter agent (JSON) -> template -> HTML.
+ *       Full pipeline: fetch -> OpenRouter agent (Markdown) -> template -> HTML.
  *
- *   paper-digest template <digest.json> [--out <dir>] [--stdout]
- *       Take an already-written digest JSON and render it into the HTML template.
- *       Reads JSON from a file argument, from `-`, or from stdin (piped).
- *       With --stdout the rendered HTML is written to stdout instead of a file.
+ *   paper-digest template <digest.md> [--out <dir>] [--stdout]
+ *       Take an already-written digest Markdown (with YAML frontmatter) and render
+ *       it into the HTML template. Reads Markdown from a file argument, from `-`,
+ *       or from stdin (piped). With --stdout the rendered HTML is written to stdout
+ *       instead of a file.
  *
  * source: an arXiv id/link, a URL, raw HTML text, or a local PDF path.
  */
@@ -23,7 +24,7 @@ import { resolve } from "./fetch.js";
 import { buildMasterPrompt } from "./prompt.js";
 import { digestSource, loadConfig, createClient } from "./digest.js";
 import { renderString, renderFile, outputFilenameBase, sanitize, shortenedTitle, extractYear, venueAbbv } from "./template.js";
-import { extractJson } from "./llm.js";
+import { extractMarkdown } from "./llm.js";
 import { readFile, mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { existsSync, readFileSync } from "fs";
@@ -95,46 +96,66 @@ async function runDigest(source, { outDir, cfg }) {
         : "provided HTML";
 
   const llm = createClient(cfg);
-  const digest = await digestSource(resolved, { client: llm });
+  const md = await digestSource(resolved, { client: llm });
 
-  // Carry figure metadata through so standalone template rendering can
-  // resolve image URLs (figures are parsed at fetch time, not by the agent).
-  digest.figures = resolved.figures || [];
-  digest.baseUrl = resolved.baseUrl || "";
+  // Inject figures and baseUrl into frontmatter so standalone template
+  // rendering can resolve image URLs (figures are parsed at fetch time).
+  let mdText = md.raw;
+  const fmEnd = mdText.indexOf("\n---\n", 4);
+  if (fmEnd !== -1) {
+    const injection = `figures: ${JSON.stringify(md.figures || [])}\nbaseUrl: ${JSON.stringify(md.baseUrl || "")}\n`;
+    mdText = mdText.slice(0, fmEnd + 1) + injection + mdText.slice(fmEnd + 1);
+  }
 
-  // Persist intermediate digest JSON next to the output.
+  // Persist intermediate digest Markdown next to the output.
   await mkdir(outDir, { recursive: true });
-  const baseName = outputFilenameBase(digest, resolved);
-  const jsonPath = join(outDir, baseName + ".json");
-  await writeFile(jsonPath, JSON.stringify(digest, null, 2), "utf8");
+  const baseName = outputFilenameBase(md, resolved);
+  const mdPath = join(outDir, baseName + ".md");
+  await writeFile(mdPath, mdText, "utf8");
 
-  const html = await renderString(digest, resolved);
+  const html = await renderString(md, resolved);
   const htmlPath = join(outDir, baseName + ".html");
   await writeFile(htmlPath, html, "utf8");
 
-  return { digest, jsonPath, htmlPath, source: resolved };
+  return { digest: md, mdPath, htmlPath, source: resolved };
 }
 
-async function runTemplate(jsonPath, { outDir, stdout }) {
+async function runTemplate(mdPath, { outDir, stdout }) {
   let text;
   let sourceLabel;
-  if (jsonPath === undefined || jsonPath === "-" || jsonPath === "") {
+  if (mdPath === undefined || mdPath === "-" || mdPath === "") {
     text = await readStdin();
     sourceLabel = "<stdin>";
   } else {
-    text = await readFile(jsonPath, "utf8");
-    sourceLabel = jsonPath;
+    text = await readFile(mdPath, "utf8");
+    sourceLabel = mdPath;
   }
-  const { _salvaged, ...digest } = extractJson(text);
+  const { metadata, body, _salvaged, raw } = extractMarkdown(text);
   if (_salvaged) {
-    console.warn(`[paper-digest] salvaged malformed JSON from ${sourceLabel}`);
+    console.warn(`[paper-digest] salvaged malformed Markdown from ${sourceLabel}`);
   }
-  // Reconstruct a minimal source descriptor from whatever metadata the JSON carries.
+  // Reconstruct a minimal source descriptor from whatever metadata the markdown carries.
   const source = {
-    figures: digest.figures || [],
-    baseUrl: digest.baseUrl || "",
+    figures: metadata.figures || [],
+    baseUrl: metadata.baseUrl || "",
     value: sourceLabel,
   };
+  const digest = {
+    ...metadata,
+    sections: [], // filled by render? No - need sections from body
+    body,
+    raw,
+  };
+  // We need to parse sections from body. digestSource does this, but here we
+  // only have raw markdown. Re-run the split locally.
+  const { splitSections, parseIcymi, parseJudge, parseCitations } = await import("./digest.js");
+  const sections = splitSections(body);
+  for (const s of sections) {
+    if (s.id === "icymi") s.entries = parseIcymi(s.content);
+    if (s.id === "judge") s.rows = parseJudge(s.content);
+    if (s.id === "src") s.citations = parseCitations(s.content);
+  }
+  digest.sections = sections;
   const html = await renderString(digest, source);
   let outPath = null;
   if (!stdout) {
@@ -184,18 +205,18 @@ export async function run(argv) {
     const cfg = loadConfig();
     const result = await runDigest(positional[0], { outDir: out, cfg });
     console.log(`Wrote ${result.htmlPath}`);
-    console.log(`Digest JSON: ${result.jsonPath}`);
+    console.log(`Digest Markdown: ${result.mdPath}`);
     console.log(`Verdict: ${result.digest.verdict}`);
     return;
   }
 
   if (subcommand === "template") {
     if (positional.length > 1) {
-      console.error("Usage: paper-digest template [digest.json|-] [--out <dir>] [--stdout]");
+      console.error("Usage: paper-digest template [digest.md|-] [--out <dir>] [--stdout]");
       process.exit(1);
     }
     if (positional.length === 0 && process.stdin.isTTY) {
-      console.error("Usage: paper-digest template [digest.json|-] [--out <dir>] [--stdout]");
+      console.error("Usage: paper-digest template [digest.md|-] [--out <dir>] [--stdout]");
       process.exit(1);
     }
     const { html, digest, outPath } = await runTemplate(positional[0], { outDir: out, stdout });
@@ -208,7 +229,7 @@ export async function run(argv) {
   }
 
   console.error(
-    "Usage: paper-digest <prompt|digest|template> <source|digest.json> [--out <dir|file>] [--stdout]"
+    "Usage: paper-digest <prompt|digest|template> <source|digest.md> [--out <dir|file>] [--stdout]"
   );
   process.exit(1);
 }

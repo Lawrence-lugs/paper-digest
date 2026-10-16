@@ -3,3 +3,4 @@ reference/
 node_modules/
 outputs/
 digest.json
+digest.md

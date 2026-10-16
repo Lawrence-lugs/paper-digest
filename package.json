@@ -16,11 +16,17 @@
     "type": "git",
     "url": "https://github.com/lafqu/paper-digest.git"
   },
-  "keywords": ["arxiv", "digest", "paper"],
+  "keywords": [
+    "arxiv",
+    "digest",
+    "paper"
+  ],
   "author": "paper-digest",
   "license": "MIT",
   "engines": {
     "node": ">=18"
   },
-  "dependencies": {}
+  "dependencies": {
+    "marked": "^18.1.1"
+  }
 }

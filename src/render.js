@@ -1,10 +1,13 @@
 /**
- * Pure digest JSON -> HTML renderer. No filesystem, no network: safe to use
+ * Pure digest Markdown -> HTML renderer. No filesystem, no network: safe to use
  * in Node, in a browser, and inside Obsidian dataviewjs.
  *
- * Renders a digest JSON object (as produced by the agent in src/prompt.js)
- * into assets/template.html markup.
+ * Renders a digest object (as produced by src/digest.js from the agent's
+ * Markdown response) into assets/template.html markup using `marked` for
+ * Markdown parsing.
  */
+
+import { marked } from "marked";
 
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
 
@@ -13,67 +16,42 @@ export function esc(s) {
 }
 
 /**
- * Normalize LaTeX math delimiters and escapes. Agents commonly emit doubled
- * backslashes before delimiters (e.g. `\\(` instead of `\(`) because their
- * output was double-escaped through JSON. Collapse `\\X` → `\X` for math
- * delimiters and common LaTeX escapes so MathJax recognizes them.
- */
-function normalizeLatex(s) {
-  const t = String(s);
-  const out = [];
-  for (let i = 0; i < t.length; i++) {
-    if (t[i] === "\\" && t[i + 1] === "\\") {
-      const next = t[i + 2];
-      // Collapse \\X → \X for math delimiters and LaTeX command letters so
-      // MathJax recognizes them. \\ (line break, before space/end) is kept.
-      if (next && ("[(){}_]".includes(next) || /[a-zA-Z]/.test(next))) {
-        out.push("\\", next);
-        i += 2;
-      } else {
-        out.push("\\", "\\");
-        i += 1;
-      }
-    } else {
-      out.push(t[i]);
-    }
-  }
-  return out.join("");
-}
-
-/**
- * Strip existing math delimiters from an equation string so the template can
- * re-wrap it consistently in `\[` `\]`.
- */
-function stripMathDelimiters(s) {
-  return String(s)
-    .replace(/^\\\[\s*/, "")
-    .replace(/\s*\\\]$/, "")
-    .replace(/^\\\(\s*/, "")
-    .replace(/\s*\\\)$/, "");
-}
-
-/**
- * Render a section's content string to HTML.
+ * Render a section's markdown content to HTML.
  *
- * Equations (\[ ... \] / \( ... \)) pass through unchanged so MathJax can
- * render them. Figure blocks (<figure data-n="...">...</figure>) are kept
- * raw (not entity-escaped) so the browser-side template script can turn each
- * figure[data-n] into a lazyloaded image with a link fallback. Everything
- * else is entity-escaped for safe HTML insertion.
+ * Protects math ($$...$$ and \(...\)) so marked does not touch it, then
+ * runs marked. Figure blocks (<figure data-n="...">...</figure>) pass
+ * through as raw HTML so the browser-side template script can turn each
+ * figure[data-n] into a lazyloaded image with a link fallback.
  */
-export function renderContent(content) {
-  const t = normalizeLatex(String(content || ""));
-  const parts = [];
-  const figureRe = /<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
-  let last = 0;
-  let m;
-  while ((m = figureRe.exec(t)) !== null) {
-    if (m.index > last) parts.push(esc(t.slice(last, m.index)));
-    parts.push(m[0]);
-    last = m.index + m[0].length;
+function renderContent(content) {
+  const t = String(content || "");
+  const mathBlocks = [];
+  let p = t;
+
+  // Protect display math $$...$$ as placeholders so marked leaves them alone.
+  p = p.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
+    const idx = mathBlocks.length;
+    mathBlocks.push(`\\[${math}\\]`);
+    return `\x00MATH${idx}\x00`;
+  });
+
+  // Protect inline math \(...\) so marked leaves it alone.
+  // Use RegExp constructor to avoid literal-slash escaping issues in regex literals.
+  const inlineRe = new RegExp("\\\\\\(([\\s\\S]*?)\\\\\\)", "g");
+  p = p.replace(inlineRe, (_, math) => {
+    const idx = mathBlocks.length;
+    mathBlocks.push(`\\(${math}\\)`);
+    return `\x00MATH${idx}\x00`;
+  });
+
+  const html = marked.parse(p);
+
+  // Restore math placeholders raw.
+  let out = html;
+  for (let i = 0; i < mathBlocks.length; i++) {
+    out = out.replace(`\x00MATH${i}\x00`, mathBlocks[i]);
   }
-  if (last < t.length) parts.push(esc(t.slice(last)));
-  return parts.join("");
+  return out;
 }
 
 function confidenceChip(conf) {
@@ -88,24 +66,13 @@ function chipSign(tag) {
 function renderSection(s) {
   const conf = confidenceChip(s.confidence);
   let body = "";
+
   switch (s.id) {
     case "mot":
     case "diff":
     case "core":
     case "eval":
-      body = `<p>${renderContent(s.content || "")}</p>`;
-      break;
-      if (s.id === "eval") {
-        if (s.results && s.results.length) {
-          body +=
-            `<ul class="b">` +
-            s.results.map((r) => `<li class="item">${esc(r)}</li>`).join("") +
-            `</ul>`;
-        }
-        if (s.conclusion) {
-          body += `<p class="item">${esc(s.conclusion)}</p>`;
-        }
-      }
+      body = `<div class="prose">${renderContent(s.content || "")}</div>`;
       break;
     case "icymi":
       body =
@@ -128,18 +95,18 @@ function renderSection(s) {
         `</tbody></table></div>`;
       break;
     case "src":
-      body = `<p>${esc(s.content || "")}</p>`;
+      body = `<div class="prose">${renderContent(s.content || "")}</div>`;
       break;
     default:
-      body = `<p>${esc(s.content || "")}</p>`;
+      body = `<div class="prose">${renderContent(s.content || "")}</div>`;
   }
   return `<h2 class="s" id="${esc(s.id)}">${esc(s.title)}${conf}</h2>${body}`;
 }
 
 /**
- * Render a digest JSON object into a complete HTML document string.
+ * Render a digest object into a complete HTML document string.
  *
- * @param {object} digest - parsed digest object
+ * @param {object} digest - parsed digest object (metadata + sections)
  * @param {object} [source] - resolved source (figures, baseUrl) for the figure pipeline
  * @returns {string} HTML
  */
@@ -160,11 +127,24 @@ export function render(digest, source = {}) {
 
   const sectionsHtml = (digest.sections || []).map((s) => renderSection(s)).join("");
 
+  // Inject  tags into <figure data-n="..."> elements server-side so the
+  // static HTML already contains images (lazyloaded, with link fallback).
+  let sectionsWithImages = sectionsHtml;
+  const figureRe = /<figure\b[^>]*>([\s\S]*?)<\/figure>/g;
+  sectionsWithImages = sectionsWithImages.replace(figureRe, (match, inner) => {
+    const nMatch = /data-n="([^"]+)"/.exec(match);
+    if (!nMatch) return match;
+    const n = nMatch[1];
+    if (/<img\b/.test(inner)) return match; // already has an image
+    const url = map[n] || "";
+    if (!url) return match;
+    const img = `<img loading="lazy" alt="Figure ${n}" src="${esc(url)}">`;
+    return match.replace(">", `>${img}`);
+  });
+
   const citationsHtml = ((digest.sections || []).find((s) => s.id === "src") || {})
     .citations || [];
-  const citations = citationsHtml
-    .map((c) => `<p class="cite">${esc(c)}</p>`)
-    .join("");
+  const citations = citationsHtml.map((c) => `<p class="cite">${esc(c)}</p>`).join("");
 
   const mapJs = Object.entries(map)
     .map(([k, v]) => `    ${JSON.stringify(k)}: ${JSON.stringify(v)},`)
@@ -173,13 +153,13 @@ export function render(digest, source = {}) {
   // assets/template.html is read separately and placeholders replaced here.
   const placeholders = {
     "{{TITLE}}": esc(digest.title || ""),
-    "{{AUTHORS}}": esc((digest.authors || []).join(", ")),
+    "{{AUTHORS}}": esc(Array.isArray(digest.authors) ? digest.authors.join(", ") : String(digest.authors || "")),
     "{{VENUE}}": esc(digest.venue || ""),
     "{{ID}}": esc(digest.id || ""),
     "{{WHAT_READ}}": esc(digest.whatRead || ""),
     "{{VERDICT}}": esc(digest.verdict || ""),
     "{{OVERALL_CONF}}": esc(digest.overallConfidence || 0),
-    "{{SECTIONS}}": sectionsHtml,
+    "{{SECTIONS}}": sectionsWithImages,
     "{{CITATIONS}}": citations,
     "{{NAV_LINKS}}": navLinks,
     "{{BASE}}": esc(base),

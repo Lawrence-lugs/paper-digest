@@ -240,6 +240,55 @@ export function extractJson(content) {
   return { _salvaged: salvaged, ...parsed };
 }
 
+/**
+ * Extract a Markdown document with YAML frontmatter from model output.
+ *
+ * Strips markdown fences, parses the frontmatter block (--- ... ---) into
+ * metadata, and returns the body text. Sets _salvaged: true when the raw text
+ * needed repair. Throws when no frontmatter can be found.
+ */
+export function extractMarkdown(content) {
+  // Normalize CRLF to LF so frontmatter parsing works regardless of platform.
+  let text = String(content).replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+  let salvaged = false;
+  const markSalvaged = () => { salvaged = true; };
+
+  const fence =
+    /```markdown\n([\s\S]*?)\n```/i.exec(text) ||
+    /```\n([\s\S]*?)\n```/i.exec(text);
+  if (fence) {
+    text = fence[1].trim();
+    markSalvaged();
+  }
+
+  // Parse YAML frontmatter: --- ... ---
+  const fmRe = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+  const m = fmRe.exec(text);
+  if (!m) {
+    throw new Error("no parseable Markdown frontmatter in response");
+  }
+
+  const fmText = m[1];
+  const body = m[2];
+  const metadata = {};
+  for (const line of fmText.split("\n")) {
+    const colon = line.indexOf(":");
+    if (colon === -1) continue;
+    const key = line.slice(0, colon).trim();
+    let val = line.slice(colon + 1).trim();
+    if (!key) continue;
+    // Try JSON.parse for values that look like JSON (arrays/objects).
+    if ((val.startsWith("[") || val.startsWith("{")) && (val.endsWith("]") || val.endsWith("}"))) {
+      try { val = JSON.parse(val); } catch (_) { /* keep as string */ }
+    } else if (val.includes(",") && !val.includes("[")) {
+      val = val.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+    metadata[key] = val;
+  }
+
+  return { _salvaged: salvaged, metadata, body, raw: text };
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
