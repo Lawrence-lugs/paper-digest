@@ -65,9 +65,11 @@ body.rd-active .rd:hover:not(.on){background:rgba(22,37,44,.06)}
 const BASE = "{{BASE}}";
 const MAP = {{MAP}};
 document.querySelectorAll('figure[data-n]').forEach((f)=>{
+  if (f.querySelector('img')) return;
   const n=f.dataset.n,img=new Image();img.loading='lazy';img.alt='Figure '+n;
   img.onerror=()=>{const a=document.createElement('a');a.href=BASE.replace(/\/$/,'')+'#'+f.dataset.a;a.textContent='Open Fig. '+n+' on arXiv';a.className='ui text-sm underline';a.style.color='var(--teal)';img.replaceWith(a);};
-  img.src=BASE+MAP[n];f.prepend(img);
+  img.src=MAP[n] ? new URL(MAP[n], BASE || window.location.origin).href : "";
+  f.prepend(img);
 });
 </script>
 <script>

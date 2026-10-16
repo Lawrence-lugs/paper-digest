@@ -33,10 +33,17 @@ Fetches the source, runs the OpenRouter agent (`src/llm.js` follows the referenc
 ### 3. `template` — JSON already written, just render to HTML
 
 ```
-paper-digest template <digest.json> [--out <dir>]
+paper-digest template [digest.json|-] [--out <dir>] [--stdout]
 ```
 
 Takes an already-written digest JSON (e.g. produced by a chat AI from `prompt`) and renders it into the self-contained HTML template. No LLM call, no network fetch.
+
+The JSON can come from:
+- a file argument: `paper-digest template digest.json`
+- stdin: `Get-Clipboard | paper-digest template` (writes HTML to `outputs/`)
+- stdin with `--stdout`: `Get-Clipboard | paper-digest template --stdout | Set-Clipboard` (HTML straight to clipboard, no intermediate file)
+
+Use `-` explicitly to read from stdin: `paper-digest template - --stdout`.
 
 Output filename convention (all modes):
 

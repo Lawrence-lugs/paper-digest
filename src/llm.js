@@ -12,7 +12,7 @@ import { existsSync, readFileSync } from "fs";
 
 const OPENROUTER_CHAT = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_KEY = "https://openrouter.ai/api/v1/key";
-const KEY_FILE = join(homedir(), ".paper_digest_key");
+const KEY_FILE = join(homedir(), ".config/.paper_digest_key");
 
 const DEFAULT_CFG = {
   models: [],
@@ -139,6 +139,52 @@ export function extractJson(content) {
   }
   if (changed) {
     text = fixed;
+    markSalvaged();
+  }
+
+  // Salvage unescaped double quotes inside string values — a common LLM slip
+  // (e.g. writing ""title" author" instead of \"title\" author). Walk the
+  // text tracking string state; an unescaped quote inside a string that is
+  // followed by a non-structural character is content, not a terminator.
+  let unescapedFixed = "";
+  let inString = false;
+  let uChanged = false;
+  let u = 0;
+  while (u < text.length) {
+    const c = text[u];
+    if (inString) {
+      if (c === "\\") {
+        unescapedFixed += c;
+        if (u + 1 < text.length) unescapedFixed += text[u + 1];
+        u += 2;
+        continue;
+      }
+      if (c === '"') {
+        let j = u + 1;
+        while (j < text.length && " \t\n\r".includes(text[j])) j += 1;
+        const after = text[j];
+        const isTerminator =
+          after === undefined || ",}]".includes(after) || after === ":";
+        if (isTerminator) {
+          unescapedFixed += c;
+          inString = false;
+        } else {
+          unescapedFixed += '\\"';
+          uChanged = true;
+        }
+        u += 1;
+        continue;
+      }
+      unescapedFixed += c;
+      u += 1;
+    } else {
+      unescapedFixed += c;
+      if (c === '"') inString = true;
+      u += 1;
+    }
+  }
+  if (uChanged) {
+    text = unescapedFixed;
     markSalvaged();
   }
 

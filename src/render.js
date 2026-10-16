@@ -52,6 +52,30 @@ function stripMathDelimiters(s) {
     .replace(/\s*\\\)$/, "");
 }
 
+/**
+ * Render a section's content string to HTML.
+ *
+ * Equations (\[ ... \] / \( ... \)) pass through unchanged so MathJax can
+ * render them. Figure blocks (<figure data-n="...">...</figure>) are kept
+ * raw (not entity-escaped) so the browser-side template script can turn each
+ * figure[data-n] into a lazyloaded image with a link fallback. Everything
+ * else is entity-escaped for safe HTML insertion.
+ */
+export function renderContent(content) {
+  const t = normalizeLatex(String(content || ""));
+  const parts = [];
+  const figureRe = /<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
+  let last = 0;
+  let m;
+  while ((m = figureRe.exec(t)) !== null) {
+    if (m.index > last) parts.push(esc(t.slice(last, m.index)));
+    parts.push(m[0]);
+    last = m.index + m[0].length;
+  }
+  if (last < t.length) parts.push(esc(t.slice(last)));
+  return parts.join("");
+}
+
 function confidenceChip(conf) {
   const c = conf == null ? 0 : Number(conf);
   return `<span class="conf">${c}%</span>`;
@@ -69,20 +93,8 @@ function renderSection(s) {
     case "diff":
     case "core":
     case "eval":
-      body = `<p>${esc(normalizeLatex(s.content || ""))}</p>`;
-      if (s.id === "core") {
-        if (s.equations && s.equations.length) {
-          body += s.equations
-            .map((e) => {
-              const clean = stripMathDelimiters(normalizeLatex(e));
-              return `<p>\\[${esc(normalizeLatex(clean))}\\]</p>`;
-            })
-            .join("");
-        }
-        if (s.figureId) {
-          body += `<figure data-n="${esc(String(s.figureId))}" data-a="${esc(String(s.figureId))}"><figcaption>Framework figure (${esc(String(s.figureId))}).</figcaption></figure>`;
-        }
-      }
+      body = `<p>${renderContent(s.content || "")}</p>`;
+      break;
       if (s.id === "eval") {
         if (s.results && s.results.length) {
           body +=
@@ -137,8 +149,8 @@ export function render(digest, source = {}) {
 
   const map = {};
   figures.forEach((f, i) => {
-    const key = String(f.n != null ? f.n : i + 1);
-    map[key] = f.src || f.dataA || "";
+    const key = String(i + 1);
+    map[key] = f.url || f.src || f.dataA || "";
   });
   const mapJson = JSON.stringify(map);
 

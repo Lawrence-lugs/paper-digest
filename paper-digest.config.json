@@ -1,0 +1,8 @@
+{
+  "models": ["nvidia/nemotron-3-super-120b-a12b:free"],
+  "temperature": 0.2,
+  "max_tokens": 2048,
+  "retries": 2,
+  "max_requests_per_run": 50,
+  "timeout_s": 30
+}

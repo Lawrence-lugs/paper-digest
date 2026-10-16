@@ -68,23 +68,43 @@ function parseTitle(html) {
 }
 
 /**
- * Extract <figure data-n=".." data-a="..">..<img src=".."> entries.
+ * Extract <figure> entries.
+ *
+ * Supports two shapes:
+ *  - arXiv/LaTeXML: <figure id="S3.F1" class="ltx_figure"><object data="...svg">...</object><figcaption>...</figcaption></figure>
+ *  - legacy:       <figure data-n=".." data-a=".."><img src="..">...</figure>
  */
 function parseFigures(html, baseUrl) {
   const figures = [];
-  const figureRe = /<figure\b[^>]*data-n="([^"]+)"[^>]*data-a="([^"]+)"[^>]*>([\s\S]*?)<img\b[^>]*src="([^"]+)"[^>]*>[\s\S]*?<\/figure>/gi;
+  const figureRe = /<figure\b([^>]*)>([\s\S]*?)<\/figure>/gi;
   let m;
   while ((m = figureRe.exec(html)) !== null) {
-    const inner = m[3];
+    const attrs = m[1];
+    const inner = m[2];
+
+    const idM = /id="([^"]+)"/.exec(attrs);
+    const nM = /data-n="([^"]+)"/.exec(attrs);
+    const aM = /data-a="([^"]+)"/.exec(attrs);
+
+    const id = idM ? idM[1] : "";
+    const n = nM ? nM[1] : id;
+    const dataA = aM ? aM[1] : id;
+
+    if (!n && !dataA) continue;
+
+    const objM = /<object\b[^>]*data="([^"]+)"/i.exec(inner);
+    const imgM = /<img\b[^>]*src="([^"]+)"/i.exec(inner);
+    const src = objM ? objM[1] : (imgM ? imgM[1] : "");
+
     const capM = /<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i.exec(inner);
     const caption = capM ? stripTags(capM[1]) : "";
-    const src = m[4];
+
     figures.push({
-      n: m[1],
-      dataA: m[2],
+      n,
+      dataA: dataA || n,
       caption,
       src,
-      url: new URL(src, baseUrl).href,
+      url: src ? new URL(src, baseUrl).href : "",
     });
   }
   return figures;

@@ -1,0 +1,105 @@
+{
+"title": "Closed-Form Optimal Weight Splitting for Matrix–Vector Multiply on Noisy In-Memory Accelerators",
+"authors": [
+"Aktukmak",
+"Roberts"
+],
+"venue": "arXiv:2610.20359v1",
+"id": "2610.20359v1",
+"whatRead": "full text",
+"verdict": "The paper provides an analytical error model for analog in-memory computing (AIMC) weight splitting that incorporates both additive cell read noise and the finite-grid quantization floor. By accounting for finite precision rather than modeling noise alone, it demonstrates that the optimal place-value base is an interior value rather than equal-fill duplication (base 1). The predicted optimum matches device-physics simulations and zero-shot transformer benchmarks without requiring per-model search, though its practical advantage over heuristics like residual redundancy lies in simplicity rather than higher raw accuracy.",
+"overallConfidence": 92,
+"sections": [
+{
+"id": "mot",
+"title": "Motivation",
+"content": "Analog in-memory computing performs matrix–vector multiplication (MVM) directly inside crossbar arrays via Kirchhoff's laws, offering substantial throughput and energy gains. However, individual physical memory cells suffer from severe low-precision constraints and stochastic device noise. To mitigate this, system designers split each weight across multiple cells using a place-value representation analogous to radix multi-word digits. Choosing the base for this split presents a trade-off: a larger base provides fine resolution but exponentially amplifies high-significance cell noise in the bit-line summation, while a base of 1 (equal-fill duplication) maximizes noise-averaging but fails to improve numerical resolution. Prior analytical work modeled device noise without accounting for the finite quantization grid, leading to the theoretical conclusion that a base of 1 is universally optimal. The authors argue that a principled error model capturing both quantization and noise is needed to determine the optimal encoding base directly from device parameters without exhaustive empirical searching. This motivation is highly compelling because hyperparameter searches for crossbar representations across diverse model architectures are computationally expensive, and clarifying the interplay between quantization floors and physical read noise directly impacts AIMC deployment.",
+"confidence": 95
+},
+{
+"id": "core",
+"title": "Core idea",
+"content": "The central contribution is a unified closed-form error model that balances read noise variance against master-grid quantization error. A weight w is stored across ( n_W ) cells with cell state bounds ( [-\mathrm{bound}, \mathrm{bound}] ) and base b. Under the assumption of additive, state-independent per-tile read noise ( n_k \sim \mathcal{N}(0, \sigma_{\mathrm{out}}^2) ) and normalized noise parameter ( \eta ) (per-tile output-noise std relative to signal RMS), the reconstructed MVM output error for ( n_W = 2 ) decomposes into quantization and place-value-weighted noise. The relative mean squared error is modeled as:\n\n[ \mathrm{relMSE}(b) = k_{\sigma}^2 \eta^2 \frac{1+b^2}{(1+b)^2} + \frac{k_{\sigma}^2}{12 \,\mathrm{bound}^2 (1+b)^2} ]\n\nMinimizing this expression with respect to b yields the closed-form continuous optimal base:\n\n[ b_{\mathrm{opt}} = 1 + \frac{1}{12 \,\mathrm{bound}^2 \eta^2} ]\n\nFig. 1: Overlap principle. (a) Value-range covered by each high digit ([kb-\mathrm{bound}, kb+\mathrm{bound}] in low-cell-step units): for base-6 the bands overlap into gap-free coverage, while base-16’s bands leave gaps (e.g. \u00b18) in the representable grid. (b) Noise cost: the tile noise variance amplifier 1+b^2 (Eq. (5)) is 37 for base-6 vs. 257 for base-16, the \u22887\u00d7 gap behind the measured +3.3 dB, shaded over the validity range b \u2264 bound+1.\n\nTo ensure gap-free coverage on the integer grid without digit saturation, the base is constrained to ( b \le \mathrm{bound} + 1 ). The deployable base is simply the nearest integer to ( b_{\mathrm{opt}} ). Furthermore, to enforce the Gaussian operand assumption on arbitrary weight distributions and decorrelate crossbar inputs, the method applies a fixed, shared random orthogonal rotation matrix to the weight matrix prior to programming, which is inverted at the input.",
+"confidence": 95
+},
+{
+"id": "diff",
+"title": "Distinguishing factor",
+"content": "Unlike the primary baseline of Le Gallo et al. [1], whose analytical model considers only device noise and consequently predicts a monotone error drop favoring ( b = 1 ) (equal-fill), this work explicitly adds the master-grid quantization term ( \Delta^2 / 12 ) into the objective function. This addition transforms the monotonic objective into an interior optimum. Compared to empirical parameter sweeps or evolutionary searches (e.g., Mackin et al. [2]), this approach provides a deterministic, zero-overhead closed form driven by a single device-noise measurement ( \eta ). Relative to data-dependent non-uniform encodings or residual redundancy schemes, the proposed method uses standard uniform grid placement and a fixed orthogonal rotation, avoiding per-tile custom codebooks or iterative error-correction programming.",
+"confidence": 90
+},
+{
+"id": "eval",
+"title": "Evaluation and conclusions",
+"content": "The proposed formulation was evaluated across three tiers: synthetic Monte-Carlo simulations, a 512x512 multi-level cell crossbar device-physics simulator (incorporating non-linear IR-drop, ADC quantization, and programming noise), and end-application benchmarks (Gemma-270M and Llama-3.2 1B across 8 zero-shot evaluation tasks).\n\nFig. 2: Theory validation. (a) relative MSE vs. base, Monte-Carlo (markers) vs. closed form (6) (solid). (b) SNR; dashed verticals mark the predicted b_opt from (7). Shading marks b > bound + 1, beyond the analytic validity bound, where Monte-Carlo is expected to depart from theory.\n\nFig. 3: Device-physics simulation: mean per-layer MVM SNR vs. base (IR-drop, programming noise, ADC) for Gemma-3 270M and Llama-3.2 1B. Both trace the same inverted-U, peaking at b = 5 (circled) with a flat top (b = 3 – 8) and \u22883.3 – 3.4 dB over base-16 (a separated point, dashed; nothing sampled in 8 – 16).\n\nIn device-physics simulations, the SNR traced an inverted-U curve peaking at ( b = 5 ) (\u22481.6 dB over ( b = 1 ) and \u22483.3–3.4 dB over base-16), confirming that the predicted interior optimum holds even when non-additive hardware non-idealities like IR-drop are present. My read: The agreement between the additive theoretical model and the non-additive simulator is robust because the per-tile output noise can be effectively lumped into a calibrated aggregate ( \eta \approx 0.02 ). Furthermore, the error basin around ( b = 5 ) is broad (( b \in [3, 8] ) lies within 0.2 dB of peak), rendering the integer rounding of ( b_{\mathrm{opt}} ) negligible.\n\nOn 8-task zero-shot transformer benchmarks, base-N split at ( b = 6 ) achieved +13.1% (Gemma-270M) and +9.0% (Llama-1B) relative accuracy improvements over equal-fill (( b = 1 )). It outperformed rotated non-uniform encodings and matched complex residual redundancy schemes within run-to-run noise (\u00b10.008). My read: The application results validate that equal-fill is inferior in additive-noise-limited regimes. However, the accuracy gains over residual redundancy are statistical ties rather than breakthroughs; the main advantage is eliminating offline codebook optimization.",
+"results": [
+"Monte Carlo simulations match closed-form SNR predictions across varying noise levels \u03b7 within ~1% inside the validity bound.",
+"Device-physics crossbar simulations demonstrate an interior peak at b=5, yielding +1.6 dB over equal-fill (b=1) and +3.3–3.4 dB over base-16.",
+"Zero-shot transformer evaluations show base-N split (b=6) improving accuracy by +13.1% (Gemma) and +9.0% (Llama) over equal-fill, matching residual redundancy without requiring per-tile codebooks."
+],
+"conclusion": "The paper concludes that optimal weight splitting on noisy AIMC units is dictated by a single closed-form equation balancing quantization floor and additive read noise. The experimental evidence across physics simulations and end-to-end models solidly supports this conclusion within the additive-noise regime.",
+"confidence": 90
+},
+{
+"id": "icymi",
+"title": "In case you missed it",
+"entries": [
+{
+"tag": "neu",
+"text": "The derivation relies strictly on an additive tile-output noise assumption; multiplicative (conductance-proportional) noise components pull the optimal base back toward b=1."
+},
+{
+"tag": "pos",
+"text": "Applying a fixed, shared block-diagonal random orthogonal rotation matrix homogenizes weight distributions across tiles, making 92–97% of crossbar tiles prefer the exact same global base (b=5)."
+},
+{
+"tag": "neg",
+"text": "For cell allocations n_W > 2, the quantization floor collapses rapidly, shifting the theoretical interior optimum down toward smaller bases (e.g., b=2 for n_W=3 or 4)."
+},
+{
+"tag": "neu",
+"text": "The single device-noise parameter \u03b7 cannot be read directly from a component datasheet; it must be empirically back-calculated by mapping a measured device crossbar peak (b=5) through the inverse closed-form equation (\u03b7 \u2248 0.02)."
+}
+]
+},
+{
+"id": "judge",
+"title": "Cautious judgement",
+"rows": [
+{
+"question": "Fair comparison to external baselines?",
+"answer": "Yes, it compares against standard equal-fill (b=1), naive bit-slicing (base-16), rotated non-uniform quantization, and residual redundancy under identical cell budgets.",
+"conf": 92
+},
+{
+"question": "Invents its own FoM?",
+"answer": "No, it uses standard relative MSE, SNR (dB), and standard zero-shot accuracy metrics from the LM-Evaluation-Harness.",
+"conf": 95
+},
+{
+"question": "Rewrite of an existing idea?",
+"answer": "No, it directly extends the closed-form noise model of Le Gallo et al. [1] by incorporating the finite quantization floor, transforming a monotone formula into an interior optimization problem.",
+"conf": 90
+},
+{
+"question": "Reliable enough to reuse?",
+"answer": "Yes, the analytical derivation is mathematically sound within its explicit validity range (b \u2264 bound + 1) and is supported by device-physics simulations.",
+"conf": 90
+}
+]
+},
+{
+"id": "src",
+"title": "Sources and limits",
+"content": "Read the full main text of arXiv:2610.20359v1. Derivations for n_W = 2 and general n_W were verified against text descriptions. Supplementary code repository was not inspected.",
+"citations": [
+""Precision of bit slicing with in-memory computing based on analog phase-change memory crossbars" Le Gallo 2022",
+""Optimised weight programming for analogue memory-based deep neural networks" Mackin 2022",
+""A 64-core mixed-signal in-memory compute chip based on phase-change memory for deep neural network inference" Le Gallo 2023",
+""Accurate deep neural network inference using computational phase-change memory" Joshi 2020",
+""QuIP#: Even better LLM quantization with Hadamard incoherence and lattice codebooks" Tseng 2024",
+""SpinQuant: LLM quantization with learned rotations" Liu 2024"
+]
+}
+]
+}

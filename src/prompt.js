@@ -24,8 +24,8 @@ function q(s) {
 export function buildMasterPrompt({ paperText, figures = [], baseUrl = "", whatRead = "" }) {
   const figureList = figures
     .map(
-      (f) =>
-        `    - data-n=${q(f.n)} data-a=${q(f.dataA)} caption=${q(f.caption)} src=${q(f.src)} url=${q(f.url)}`
+      (f, i) =>
+        `    - index=${i + 1} data-n=${q(i + 1)} data-a=${q(f.dataA)} caption=${q(f.caption)} url=${q(f.url)}`
     )
     .join("\n")
     || "    (none)";
@@ -65,7 +65,7 @@ TASK: Produce a single JSON object (no markdown fences, no prose before/after) w
   "overallConfidence": number,              // 0-100
   "sections": [
     { "id": "mot", "title": "Motivation", "content": string, "confidence": number },
-    { "id": "core", "title": "Core idea", "content": string, "confidence": number, "equations": string[], "figureId": string|null },
+    { "id": "core", "title": "Core idea", "content": string, "confidence": number },
     { "id": "diff", "title": "Distinguishing factor", "content": string, "confidence": number },
     { "id": "eval", "title": "Evaluation and conclusions", "content": string, "confidence": number, "results": string[], "conclusion": string },
     { "id": "icymi", "title": "In case you missed it", "entries": [{ "text": string, "tag": "pos|neg|neu" }] },
@@ -74,13 +74,18 @@ TASK: Produce a single JSON object (no markdown fences, no prose before/after) w
   ]
 }
 
+Equations and figures are written inline in content strings, not as separate JSON fields. You are free to place equations and important figures anywhere in any section's content string.
+
+- Equations: write display equations as \[ ... \] and inline equations as \( ... \), directly in the content string. Use raw LaTeX and write the delimiters yourself. Use \\ for line breaks only where the paper shows them. Write < as &lt; (or \\lt) inside math so the JSON/HTML pipeline does not eat it.
+- Figures: embed important figures inline in content as <figure data-n="N" data-a="ID"><figcaption>CAPTION</figcaption></figure>, where N is the figure's index (1, 2, ...) and ID is its data-a id from the figure list below. Do not add the  tag yourself — the pipeline adds it as a lazyloaded image with a link fallback.
+
 Section-by-section requirements (in this order):
 
 1. Header + Verdict: title, authors, venue and id, what was read, a 2-3 sentence verdict, and overall confidence.
 
 2. Motivation ("mot"): the problem and why the authors say it matters. Add a line on whether the motivation is itself convincing.
 
-3. Core idea ("core"): include the key equations as raw LaTeX (no inline or display math delimiters — the template wraps display equations in \[ \]). Use \\ for line breaks only where the paper shows them. Reference the framework figure by its data-a id if one exists.
+3. Core idea ("core"): include the key equations as raw LaTeX inline in the content string (display: \[ ... \], inline: \( ... \); write the delimiters yourself). Use \\ for line breaks only where the paper shows them. You may embed the framework figure inline in content using its data-a id (see figures below).
 
 4. Distinguishing factor ("diff"): compare against each family of prior work separately. If the paper extends the authors' own earlier version, add a short "vs. their earlier version" paragraph. Do not go and fetch the earlier version.
 
@@ -106,8 +111,6 @@ Section-by-section requirements (in this order):
 8. Sources and limits ("src"): what was read, what was not (appendix, code, supplementary), and what could not be checked. Then .cite lines, one per paper you actually saw named in the source, formatted as a Google Scholar search string: "exact title" first-author-surname year. Never reconstruct a citation from memory.
 
 Confidence: every section carries a percent confidence (0-100), your confidence that your reading of that section is right and complete - not a rating of the paper. Spread should reflect real differences; do not default everything to 85%.
-
-LaTeX: write < as &lt; (or \\lt) inside math so the JSON/HTML pipeline does not eat it.
 
 Escape all strings properly for JSON. Output only the JSON object.`
 }
