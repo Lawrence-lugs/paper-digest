@@ -7,7 +7,7 @@
  * models tried in order with retries and a per-run cap.
  */
 
-import { buildMasterPrompt } from "./prompt.js";
+import { buildMasterPrompt, extractFinal, extractDraft } from "./prompt.js";
 import { LLM, loadConfig, extractMarkdown } from "./llm.js";
 
 const SYSTEM = "You are a careful, skeptical research-paper reader. Output only valid Markdown with YAML frontmatter.";
@@ -163,8 +163,17 @@ export async function digestSource(source, { client, cfg } = {}) {
     baseUrl: source.baseUrl || "",
     whatRead: source.whatRead || "unknown",
   });
-  const md = await llm.chat(SYSTEM, user);
-  const parsed = extractMarkdown(md);
+  const response = await llm.chat(SYSTEM, user);
+  let finalMd = extractFinal(response);
+  if (finalMd === null) {
+    // A clean check ("Fixes to apply: 0") means the agent correctly omitted
+    // <final>; the draft IS the document. Fall back to it before failing.
+    finalMd = extractDraft(response);
+    if (finalMd === null) {
+      throw new Error("agent response contains no <final> or <draft> block");
+    }
+  }
+  const parsed = extractMarkdown(finalMd);
 
   const sections = splitSections(parsed.body);
 

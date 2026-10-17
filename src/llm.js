@@ -7,12 +7,19 @@
  */
 
 import { homedir } from "os";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { existsSync, readFileSync } from "fs";
 
 const OPENROUTER_CHAT = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_KEY = "https://openrouter.ai/api/v1/key";
 const KEY_FILE = join(homedir(), ".config/.paper_digest_key");
+
+// Resolve the project config relative to this module's location (the package
+// root) so `paper-digest digest` works no matter what the current working
+// directory is. `process.cwd()` is kept as a fallback.
+const SELF_DIR = dirname(fileURLToPath(import.meta.url));
+const PKG_ROOT = join(SELF_DIR, "..");
 
 const DEFAULT_CFG = {
   models: [],
@@ -45,13 +52,16 @@ function loadKey() {
 }
 
 function loadConfigFile() {
-  const path = join(process.cwd(), "paper-digest.config.json");
-  if (!existsSync(path)) return null;
-  try {
-    return JSON.parse(readFileSync(path, "utf8"));
-  } catch (_) {
-    return null;
+  for (const base of [PKG_ROOT, process.cwd()]) {
+    const path = join(base, "paper-digest.config.json");
+    if (!existsSync(path)) continue;
+    try {
+      return JSON.parse(readFileSync(path, "utf8"));
+    } catch (_) {
+      return null;
+    }
   }
+  return null;
 }
 
 export function loadConfig(cfg = {}) {
@@ -407,7 +417,6 @@ export class LLM {
         model,
         temperature: c.temperature,
         max_tokens: c.max_tokens,
-        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
@@ -446,20 +455,8 @@ export class LLM {
               }, usage=${JSON.stringify(resp.usage ?? null)})`
             );
           }
-          let parsed;
-          try {
-            parsed = extractJson(content);
-          } catch (e) {
-            throw new Error(`invalid JSON: ${e.message}`);
-          }
-          if (parsed._salvaged) {
-            warn(
-              `model ${resp.model ?? model} returned malformed JSON; recovered`
-            );
-          }
           this.models.push(resp.model ?? model);
-          delete parsed._salvaged;
-          return parsed;
+          return content;
         } catch (e) {
           if (e instanceof LLMUnavailable) throw e;
           if (e.name === "HTTPError") {
@@ -487,9 +484,6 @@ export class LLM {
           warn(
             `model ${model} attempt ${attempt + 1}/${c.retries + 1} failed: ${last}`
           );
-          body.messages[body.messages.length - 1].content =
-            user +
-            "\n\nIMPORTANT: your previous reply was not valid JSON. Reply with ONE valid JSON object only, no prose. Keep each blurb to two short sentences.";
           await sleep(3);
         }
       }

@@ -130,8 +130,23 @@ async function runTemplate(mdPath, { outDir, stdout }) {
     text = await readFile(mdPath, "utf8");
     sourceLabel = mdPath;
   }
-  const { metadata, body, _salvaged, raw } = extractMarkdown(text);
-  if (_salvaged) {
+  // Unwrap an agent three-block response (<draft><check><final>) so the
+  // Markdown document inside <final> is what gets templated. Takes the last
+  // <final> match (like extractFinal in prompt.js), falls back to <draft>,
+  // and falls back to the raw text if neither wrapper is present.
+  let unwrapped = text;
+  const finalMatches = [...String(text).matchAll(/<final>([\s\S]*?)<\/final>/g)];
+  if (finalMatches.length > 0) {
+    unwrapped = finalMatches[finalMatches.length - 1][1].trim();
+  } else {
+    const draftMatches = [...String(text).matchAll(/<draft>([\s\S]*?)<\/draft>/g)];
+    if (draftMatches.length > 0) {
+      unwrapped = draftMatches[draftMatches.length - 1][1].trim();
+    }
+  }
+  const salvagedByUnwrap = unwrapped !== text;
+  const { metadata, body, _salvaged, raw } = extractMarkdown(unwrapped);
+  if (_salvaged || salvagedByUnwrap) {
     console.warn(`[paper-digest] salvaged malformed Markdown from ${sourceLabel}`);
   }
   // Reconstruct a minimal source descriptor from whatever metadata the markdown carries.
@@ -142,12 +157,11 @@ async function runTemplate(mdPath, { outDir, stdout }) {
   };
   const digest = {
     ...metadata,
-    sections: [], // filled by render? No - need sections from body
+    sections: [], 
     body,
     raw,
   };
-  // We need to parse sections from body. digestSource does this, but here we
-  // only have raw markdown. Re-run the split locally.
+  // We need to parse sections from body. 
   const { splitSections, parseIcymi, parseJudge, parseCitations } = await import("./digest.js");
   const sections = splitSections(body);
   for (const s of sections) {
@@ -224,7 +238,7 @@ export async function run(argv) {
       process.stdout.write(html);
       return;
     }
-    console.log(`Wrote ${outPath}`);
+    console.log(`${outPath}`); // pipable
     return;
   }
 
