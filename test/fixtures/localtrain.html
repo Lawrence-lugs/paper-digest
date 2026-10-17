@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digest: LocalTrain: Integer-Only Local Learning for Energy-Efficient CNN Training on Edge FPGAs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<style>
+:root{--paper:#F2F5F3;--ink:#16252C;--mute:#5B6C73;--rule:#CBD6D3;--teal:#0E6B73;--gain:#2B7A4B;--risk:#A83A2C;--warn:#9A6A12;--card:#FBFCFB}
+body{background:var(--paper);color:var(--ink);font-family:Literata,Georgia,serif;line-height:1.65}
+.ui{font-family:'Instrument Sans',system-ui,sans-serif}
+h2.s{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;font-size:1.35rem;border-left:4px solid var(--teal);padding-left:.7rem;margin:2.6rem 0 .8rem}
+p,li{max-width:72ch}
+ul.b{list-style:disc;padding-left:1.2rem;margin:.4rem 0}
+.conf{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.75rem;font-weight:600;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:.05rem .5rem;margin-left:.5rem;white-space:nowrap;vertical-align:middle}
+.chip{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.72rem;font-weight:600;border-radius:4px;padding:.05rem .4rem;margin-right:.4rem;color:#fff}
+.neg{background:var(--risk)}.pos{background:var(--gain)}.neu{background:var(--warn)}
+.item{border-bottom:1px solid var(--rule);padding:.7rem 0;max-width:72ch}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--rule);padding:.45rem .5rem;text-align:left;vertical-align:top}
+th{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;color:var(--mute)}
+.wrap{overflow-x:auto}
+blockquote{border-left:3px solid var(--rule);padding-left:1rem;color:var(--mute)}
+code,.cite{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--mute)}
+figure{background:var(--card);border:1px solid var(--rule);padding:.6rem;width:100%;max-width:72ch}
+figure img{display:block;width:100%;max-width:100%;height:auto;margin:0}
+figcaption{font-size:.8rem;color:var(--mute);margin-top:.4rem}
+main p,main li,main .item,main blockquote{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+main .cite,main .conf{text-align:left;hyphens:none}
+main p{margin:.75rem 0}
+main blockquote{margin:1.25rem 0}
+main figure{margin:1.5rem 0}
+mjx-container[jax="SVG"]{display:inline-block!important;overflow:visible}
+mjx-container[jax="SVG"] svg{display:inline-block!important}
+mjx-container[jax="SVG"][display="true"]{display:flex!important;justify-content:safe center;overflow-x:auto;overflow-y:hidden;max-width:100%;margin:1rem 0}
+.rd.on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+body.rd-active .rd:hover:not(.on){background:rgba(22,37,44,.06)}
+#rd-hint{position:fixed;right:.8rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:var(--mute);background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
+@media print{.rd.on{background:none;box-shadow:none}#rd-hint{display:none}}
+</style>
+</head>
+<body class="antialiased">
+<div class="mx-auto max-w-6xl px-5 py-10 lg:flex lg:gap-12">
+<nav class="ui hidden lg:block w-44 shrink-0 text-sm sticky top-8 self-start" style="color:var(--mute)">
+<a class="block py-1" href="#mot">Motivation</a><a class="block py-1" href="#core">Core idea</a><a class="block py-1" href="#diff">Distinguishing factor</a><a class="block py-1" href="#eval">Evaluation and conclusions</a><a class="block py-1" href="#icymi">In case you missed it</a><a class="block py-1" href="#judge">Cautious judgement</a><a class="block py-1" href="#src">Sources and limits</a>
+</nav>
+<main class="min-w-0 flex-1">
+<header>
+<p class="ui text-sm" style="color:var(--mute)">arXiv:2610.17099v1 [cs.AR] &middot; 2610.17099 &middot; read: Full text via arXiv HTML (main body and references; no code,no supplementary material)</p>
+<h1 class="ui text-3xl font-semibold leading-tight mt-1">LocalTrain: Integer-Only Local Learning for Energy-Efficient CNN Training on Edge FPGAs</h1>
+<p class="ui text-sm mt-1" style="color:var(--mute)">Shiqi Ding, Xuanyu Liang, Xinyang Liu, Boyang Li, Zhiqiang Que, Guosheng Hu, Jiayang Li</p>
+<p class="mt-4"><b>Verdict.</b> The paper reports a working KV260 prototype that trains a four-layer CNN and its local classifiers from scratch with integer arithmetic on one shared matrix engine. The energy advantage over an integer-method Jetson run is measured under different power boundaries,and the mechanism claims (compact errors,tile folding,direct conversion) rest on logical-capacity accounting and isolated RTL tests rather than board-level ablations. My read is that it is credible as a feasibility demonstration and weak as attribution of gains to individual mechanisms. <span class="conf">76%</span></p>
+</header>
+
+<h2 class="s" id="mot">Motivation<span class="conf">80%</span></h2><div class="prose"><p>The paper argues that on-device training is bottlenecked by computation, retained forward activations, and data movement. Local learning (a per-layer objective, no cross-layer error propagation) and integer arithmetic each address part of this, and NITRO-D and FF-INT8 show integer local training works on GPUs. The authors say the open question is hardware: how convolution and local-classifier operations should share resources, and how saved operands, gradients, and quantization scales should be stored and reused. They add that local learning still needs operand retention, gradient accumulation, and scale selection.</p>
+<p>My read: the gap is real and specific. Earlier FPGA trainers share engines across forward, backward, and weight-gradient passes, but not across local-classifier work. The motivation is less convincing on the energy side, since the baseline is the authors&#39; own integer implementation on a GPU.</p>
+</div><h2 class="s" id="core">Core idea<span class="conf">85%</span></h2><div class="prose"><p>Each of four convolutional layers (alternating standard and grouped 3×3, bias-free) has a trainable local classifier on its quantized ReLU outputs. Each channel is averaged over four spatial regions, giving \(4C\) features per layer rather than \(HWC\). With regional features \(F\), pre-update classifier weights \(V_{\mathrm{pre}}\), and classifier errors \(E\), all three classifier computations are matrix products that run on the same engine as the convolutions:</p>
+<p>\[Z = F V_{\mathrm{pre}}^{T},\qquad G_V = E^{T}F,\qquad E_F = E V_{\mathrm{pre}}\]</p>
+<p>Regional errors \(E_F\) stay compact in DDR. They are broadcast over their region on chip only when the convolutional weight gradient needs spatial errors. The \(1/A\) averaging factor is folded into the exponent, and a ReLU mask is applied. Training finishes one layer before the next, so saved inputs can be reused afterward.</p>
+<p>Numerics are shared-exponent INT8 with INT32 accumulation. Conversion divides every code in a tensor by one power of two:</p>
+<p>\[q_i' = \operatorname{sat}_8\!\big(\operatorname{RN}(q_i 2^{-s})\big),\qquad e' = e + s,\quad s\ge 0\]</p>
+<p>Convolutional output scales come from history rather than the current batch. After eight warmup batches, a histogram of raw INT32 magnitudes gives the 99.9th-percentile bin bound \(U_t\), a candidate exponent \(h_t\), and a target that is the maximum over the previous four batches:</p>
+<p>\[h_t = e_{\mathrm{raw},t} + \min\{s\ge 0 : U_t \le 127\cdot 2^{s}\},\qquad e_{\mathrm{target},t}=\max_{i=1,\dots,4} h_{t-i}\]</p>
+<p>This lets INT32-to-INT8 conversion happen directly as outputs stream out, while the histogram observes the raw codes in parallel.</p>
+<p>Weight gradients are normalized per tensor by GB5, which targets a 5-bit magnitude, \(s_G=\max(0,\,b(\max|G|)-5)\). GB5 needs the complete batch gradient range before any update. The hardware therefore folds 32 partial gradient tensors (for \(B=256\), eight-sample groups) one 8×8 tile at a time through a 48-bit accumulator of 384 bytes of logical storage, with two 256-byte prefetch buffers.</p>
+<p>The engine has eight pods of 8×8 INT8 outer-product tiles, so 512 MAC/cycle and a 102.4 GMAC/s peak at 200 MHz. The final classifier uses an INT16 master weight state \(M=16W\) so updates smaller than one INT8 step are kept. Classification errors use an FPGA-friendly adaptation of NITI&#39;s TiLoss, with lookup tables, one shared 28-fractional-bit reciprocal per sample, and a fixed \(2^{15}\) polynomial scale for small exponents.</p>
+<figure data-n="1" data-a="S2.F1"><figcaption>Fig. 1: One CNN layer and its local supervision. Dashed paths retain operands; the local head also updates V. No convolutional input gradient is sent to earlier layers.</figcaption></figure><figure data-n="2" data-a="S3.F2"><figcaption>Fig. 2: Hardware organization. Convolution and classifier operations reuse the matrix engine. Regional errors expand in operand supply; numerical and output units share DDR access. Control is dashed; data connections are solid.</figcaption></figure></div><h2 class="s" id="diff">Distinguishing factor<span class="conf">70%</span></h2><div class="prose"><p>Against integer training algorithms (NITI, NITRO-D, FF-INT8): these are algorithm-level, mostly GPU results. The paper reuses NITI&#39;s TiLoss structure and its code-domain updates, and its new content is the hardware mapping and the FPGA-oriented rewrite of the loss (lookup tables, shared reciprocal, bounded polynomial). The training rules themselves are largely inherited.</p>
+<p>Against FPGA backpropagation accelerators (EF-Train, Venkataramanaiah et al., Shao et al.): these share compute across forward, backward, and weight-gradient passes. Here the shared engine also absorbs local-classifier score, feature-error, and classifier-gradient products (Table I), and local supervision removes the cross-layer input-gradient path. The comparison in Table IV mixes six-layer narrow backprop networks with a four-layer wider, partly grouped local-learning network, so accuracy and energy are not like-for-like, and the paper says so.</p>
+<p>Against historical-scaling work (Flexpoint, Yamaguchi et al.): the idea of using earlier batches to pick scales is adopted. The paper&#39;s specific choices are histogram percentiles, a four-batch window, and an eight-batch warmup, plus the hardware that makes direct conversion possible. Saturation is allowed and no clipping rate is guaranteed.</p>
+<p>vs. their earlier version: the paper does not describe an earlier version in the text I read, and none was fetched.</p>
+</div><h2 class="s" id="eval">Evaluation and conclusions<span class="conf">78%</span></h2><div class="prose"><p>Complete training on the KV260 at 200 MHz reaches 76.57% on CIFAR-10 (50 epochs) and 91.85% on SVHN (60 epochs), at about 4.20 W mean VCC_SOM power. Against the same integer method on a Jetson Orin Nano (25 W mode), measured energy is 40.4% and 42.1% lower, with 1.86× and 1.82× longer runtime. My read: this is the headline claim, and the boundaries differ. The FPGA measures VCC_SOM and the Jetson measures VDD_IN, with no idle subtraction, and the Jetson integer path is custom numerics in PyTorch, not an optimized kernel. The paper&#39;s own Jetson table shows Local FP32 on the Jetson at lower energy than the FPGA&#39;s CIFAR-10 figure, again under different boundaries. The FPGA&#39;s energy advantage therefore holds against the integer-on-GPU implementation specifically, not against a good GPU local-learning baseline. Functional agreement is supported by matched cumulative training predictions and final test counts between FPGA and Jetson integer runs, plus selected first-batch and checkpoint-restore state checks. The authors correctly say this is not every intermediate value.</p>
+<p>Effective throughput is 31.22 and 31.57 GMAC/s, about 30% of the 102.4 peak. It is computed as nominal algorithmic MACs divided by measured PL time, and PL time is about 97% of wall time. The first two convolutions have short reductions (36 and 72 steps) against 128 result transfers for eight tiles, so result bandwidth is flagged as a constraint. My read: the number is honest about low utilization, but the stall attribution is a hypothesis, since the counters do not separate memory stalls from result backpressure.</p>
+<p>Storage and conversion results are the mechanism evidence. Compact regional errors take 64 to 256 KiB per layer against 8 to 16 MiB for expanded INT8 spatial errors, and tile folding replaces a 432 KiB resident accumulator (conv 3) with 384 bytes plus 512 bytes of prefetch. Direct conversion avoids 448 MiB of raw-output write/read payload per full batch after warmup. In an isolated RTL test (262,144 INT32 values), direct conversion takes 50.0% fewer cycles with always-ready interfaces and 63.8% fewer under a fixed throttling model. My read: these are logical capacities and payload counts, not measured DDR traffic or peak live storage, and the reserved DDR workspace stays at 161.22 MiB. The module test excludes convolution and external scratch control. These mechanisms are plausible but not demonstrated on the board.</p>
+<p>Software accuracy on the Jetson is somewhat surprising. Integer local (76.57% on CIFAR-10) beats Local FP32 (74.43%) but trails FP32 backprop (79.87%). Scheduled freezing cuts training time 28.4% and 32.3% while raising accuracy 6.38 and 2.03 points in a within-study comparison. My read: the integer-over-FP32 result mostly reflects differing training recipes (Adam and cross-entropy versus integer rules and scaling), which the authors partly acknowledge. The freezing gain means the schedule is part of the reported result, not a free speedup.</p>
+<p>The paper&#39;s conclusion is that complete integer local CNN training works with shared arithmetic, that compact errors, folding, and historical scales reduce buffering, and that energy is lower though runtime is longer. It also states the evidence covers one FPGA seed, logical storage savings, and isolated conversion tests. My read: the evidence supports the feasibility and the energy-versus-Jetson-integer claim under stated caveats, and does not yet support attributing the gains to specific mechanisms.</p>
+</div><h2 class="s" id="icymi">In case you missed it<span class="conf">75%</span></h2><div class="item"><span class="chip pos">+</span>The TiLoss rewrite is concrete: lookup tables for score exponents above -7, one reciprocal with 28 fractional bits shared across all classes per sample, a fixed \(2^{15}\) scale for exponents at or below -10, and stochastic division by 16 to reach INT8 errors.</div><div class="item"><span class="chip neu">·</span>Convolutional and local-classifier weights are updated in the code domain without aligning the gradient exponent to the fixed weight exponent; only the final classifier gets an INT16 master state (\(M=16W\), clipped to ±2032) that preserves sub-step updates.</div><div class="item"><span class="chip neg">−</span>The 64 MiB DDR buffer for raw outputs during warmup stays reserved afterward, so direct conversion removes traffic but not reserved capacity; total reserved DDR workspace stays at 161.22 MiB.</div><div class="item"><span class="chip neu">·</span>The histogram unit is 8 banks of 33 counters of 25 bits in LUTRAM with HLS initiation interval of one; the PS merges bank counts, checks the output count, and keeps the scale history. At evaluation, each layer's target is fixed to the maximum of its last four training candidates.</div><div class="item"><span class="chip neu">·</span>The deployed configuration bakes in layer freezing after 20/20/30/40 epochs, gradients with max magnitude at or below 1 are suppressed, and the final classifier's learning-rate shift changes from 24 to 25 after epoch 40.</div><div class="item"><span class="chip neg">−</span>The PS supplies all random values (dropout, stochastic rounding) through DDR and maintains scale history, so training is not fully self-contained on the PL; the SVHN run also drops one training image to fit eight-sample grouping.</div><h2 class="s" id="judge">Cautious judgement<span class="conf">65%</span></h2><div class="wrap"><table><thead><tr><th>Question</th><th>Answer</th><th>Conf.</th></tr></thead><tbody><tr><td>Fair comparison to external baselines?</td><td>Partly. The same integer method on Jetson is a controlled comparison, but power boundaries differ (VCC_SOM vs VDD_IN, no idle subtraction) and the Jetson integer path is unoptimized custom code. The FPGA literature table mixes different networks, precisions, and tool-estimated power, and the authors disclaim an energy ranking.</td><td>72%</td></tr><tr><td>Invents its own FoM?</td><td>No new headline metric. Effective GMAC/s is derived from nominal algorithmic MACs over PL time (excluding padding and non-matrix work), and logical storage reductions are capacity counts, not measured traffic.</td><td>78%</td></tr><tr><td>Rewrite of an existing idea?</td><td>Largely a hardware mapping of existing ideas: NITI-style integer training and TiLoss, local classifiers after Belilovsky et al., historical scaling after Flexpoint and Yamaguchi. The novelty is the shared-engine mapping, regional-error expansion, tile folding, and direct conversion.</td><td>68%</td></tr><tr><td>Reliable enough to reuse?</td><td>As a reference design for reimplementation, plausibly, given detailed numerics and state-matching checks. As evidence that each mechanism produces the stated gain, no: single FPGA seed, no board ablations, no stall breakdown, no code read.</td><td>60%</td></tr></tbody></table></div><h2 class="s" id="src">Sources and limits<span class="conf">90%</span></h2><div class="prose"><p>I read the full arXiv HTML text of v1 (main body, tables, and reference list). The two figures were identified by caption only and I did not view them. I did not read an appendix, supplementary material, or released code, and none of the cited papers were opened. I did not check derivations or arithmetic. I did not verify the isolated RTL results, the Table IV derived energies, or the claimed functional-agreement checks beyond what the paper reports. The extracted text contained some encoding noise in symbols; I relied on the clean LaTeX forms where present.</p>
+</div>
+
+<p class="cite">I read the full arXiv HTML text of v1 (main body, tables, and reference list). The two figures were identified by caption only and I did not view them. I did not read an appendix, supplementary material, or released code, and none of the cited papers were opened. I did not check derivations or arithmetic. I did not verify the isolated RTL results, the Table IV derived energies, or the claimed functional-agreement checks beyond what the paper reports. The extracted text contained some encoding noise in symbols; I relied on the clean LaTeX forms where present.</p>
+</main>
+</div>
+<script>
+const BASE = "";
+const MAP = {};
+document.querySelectorAll('figure[data-n]').forEach((f)=>{
+  if (f.querySelector('img')) return;
+  const n=f.dataset.n,img=new Image();img.loading='lazy';img.alt='Figure '+n;
+  img.onerror=()=>{const a=document.createElement('a');a.href=BASE.replace(/\/$/,'')+'#'+f.dataset.a;a.textContent='Open Fig. '+n+' on arXiv';a.className='ui text-sm underline';a.style.color='var(--teal)';img.replaceWith(a);};
+  img.src=MAP[n] ? new URL(MAP[n], BASE || window.location.origin).href : "";
+  f.prepend(img);
+});
+</script>
+<script>
+/* Reading marker. R or a click on a sentence starts it; Up/Down (or k/j) move it; Esc or R stops it.
+   Arrow keys scroll the page normally unless the marker is active. Runs after MathJax has typeset. */
+(function(){
+const BLK='main p:not(.cite),main li:not(.cite),main .item,main blockquote,main figcaption,main td';
+const ALL=BLK+',main mjx-container[display="true"]';
+const ABBR=/(?:\b(?:e\.g|i\.e|et al|etc|vs|cf|Figs?|Eqs?|Secs?|Tab|Refs?|Algs?|approx|resp|No)|\b[A-Z])\.$/;
+const OBJ='\uFFFC';
+let units=[],idx=-1,on=false,ready=false,hintEl;
+
+function tokens(block){
+  const items=[];let run=[];
+  const flush=()=>{if(run.length)items.push({run});run=[];};
+  const walk=n=>{
+    for(let c=n.firstChild;c;c=c.nextSibling){
+      if(c.nodeType===3){run.push({t:c});}
+      else if(c.nodeType===1){
+        const tag=c.tagName;
+        if(tag==='MJX-CONTAINER'){
+          if(c.getAttribute('display')==='true'){flush();items.push({disp:c});}
+          else run.push({a:c});
+        }else if(tag==='SCRIPT'||tag==='STYLE'||tag==='MJX-ASSISTIVE-MML'||tag==='IMG'){}
+        else walk(c);
+      }
+    }
+  };
+  walk(block);flush();return items;
+}
+
+function sentences(run){
+  let s='';const map=[];
+  for(const p of run){
+    if(p.t){const v=p.t.nodeValue;for(let i=0;i<v.length;i++)map.push({n:p.t,o:i,L:v.length});s+=v;}
+    else{map.push({a:p.a});s+=OBJ;}
+  }
+  const cuts=[0];
+  const re=/[.!?]+["'’”)\]]*(?=\s+[A-Z0-9"'‘(\[\uFFFC])/g;
+  let m;
+  while((m=re.exec(s))){const end=m.index+m[0].length;if(!ABBR.test(s.slice(Math.max(0,end-10),end)))cuts.push(end);}
+  cuts.push(s.length);
+  const out=[];
+  for(let i=0;i<cuts.length-1;i++){
+    let a=cuts[i],b=cuts[i+1];
+    while(a<b&&/\s/.test(s[a]))a++;
+    while(b>a&&/\s/.test(s[b-1]))b--;
+    if(b>a)out.push([a,b]);
+  }
+  return {out,map};
+}
+
+function rangeFor(block,map,a,b){
+  const r=document.createRange(),f=map[a],l=map[b-1];
+  if(f.a)r.setStartBefore(f.a);
+  else if(f.o===0){let n=f.n;while(n.parentNode!==block&&n===n.parentNode.firstChild)n=n.parentNode;r.setStartBefore(n);}
+  else r.setStart(f.n,f.o);
+  if(l.a)r.setEndAfter(l.a);
+  else if(l.o===l.L-1){let n=l.n;while(n.parentNode!==block&&n===n.parentNode.lastChild)n=n.parentNode;r.setEndAfter(n);}
+  else r.setEnd(l.n,l.o+1);
+  return r;
+}
+
+function build(block){
+  const out=[];
+  for(const it of tokens(block)){
+    if(it.disp){it.disp.classList.add('rd');out.push(it.disp);continue;}
+    const {out:ss,map}=sentences(it.run),spans=[];
+    for(let i=ss.length-1;i>=0;i--){
+      const r=rangeFor(block,map,ss[i][0],ss[i][1]);
+      const sp=document.createElement('span');sp.className='rd';
+      sp.appendChild(r.extractContents());r.insertNode(sp);spans.push(sp);
+    }
+    out.push(...spans.reverse());
+  }
+  return out;
+}
+
+function hint(){
+  if(!hintEl){hintEl=document.createElement('div');hintEl.id='rd-hint';document.body.appendChild(hintEl);}
+  hintEl.textContent=on?'\u2191 \u2193 move \u00b7 Esc exit':'R: reading marker';
+}
+function inView(i){const r=units[i].getBoundingClientRect();return r.bottom>0&&r.top<innerHeight;}
+function firstVisible(){for(let i=0;i<units.length;i++)if(units[i].getBoundingClientRect().top>=48)return i;return units.length-1;}
+function ensure(u,fast){
+  const r=u.getBoundingClientRect(),h=innerHeight;
+  if(r.top<h*.18||r.bottom>h*.78)scrollBy({top:r.top-h*.38,behavior:fast?'auto':'smooth'});
+}
+function set(i,scroll,fast){
+  if(units[idx])units[idx].classList.remove('on');
+  idx=Math.max(0,Math.min(units.length-1,i));
+  units[idx].classList.add('on');
+  if(scroll)ensure(units[idx],fast);
+}
+function activate(i){
+  on=true;document.body.classList.add('rd-active');
+  set(i!==undefined?i:(idx>=0&&inView(idx)?idx:firstVisible()),i===undefined);hint();
+}
+function deactivate(){
+  on=false;document.body.classList.remove('rd-active');
+  if(units[idx])units[idx].classList.remove('on');hint();
+}
+
+document.addEventListener('keydown',e=>{
+  if(!units.length||e.ctrlKey||e.metaKey||e.altKey)return;
+  const t=e.target;if(t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable))return;
+  if(e.key==='r'||e.key==='R'){e.preventDefault();on?deactivate():activate();return;}
+  if(!on)return;
+  if(e.key==='ArrowDown'||e.key==='j'){e.preventDefault();set(idx+1,true,e.repeat);}
+  else if(e.key==='ArrowUp'||e.key==='k'){e.preventDefault();set(idx-1,true,e.repeat);}
+  else if(e.key==='Escape')deactivate();
+});
+document.addEventListener('click',e=>{
+  const sel=getSelection();if(sel&&!sel.isCollapsed)return;
+  if(!units.length||e.target.closest('a,button,nav'))return;
+  const u=e.target.closest('.rd');if(!u)return;
+  const i=units.indexOf(u);if(i<0)return;
+  if(on){set(i,false);}else activate(i);
+});
+
+function init(){
+  if(ready)return;ready=true;
+  for(const el of Array.from(document.querySelectorAll(ALL))){
+    if(el.tagName==='MJX-CONTAINER'){if(!el.parentElement.closest(BLK)){el.classList.add('rd');units.push(el);}continue;}
+    if(el.querySelector(BLK))continue;
+    units.push(...build(el));
+  }
+  hint();
+}
+addEventListener('load',()=>{
+  const p=window.MathJax&&window.MathJax.startup&&window.MathJax.startup.promise;
+  Promise.resolve(p).then(init,init);
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>arXiv: Sample Paper</title></head>
+<body>
+<header>
+  <div class="arxiv-chrome">Report GitHub Issue</div>
+  <div class="arxiv-chrome">arXiv is now an independent nonprofit</div>
+  <div class="funder-list">Funder: National Science Foundation, Funder: DOE</div>
+</header>
+<article class="ltx_document">
+  <h1 class="title mathjax">Title: Sample Paper on Local Learning</h1>
+  <div class="authors">Jane Doe, John Smith</div>
+  <div class="abstract">This is the abstract.</div>
+
+  <section>
+    <h2>1 Introduction</h2>
+    <p>The energy gain is $1.86 \times 1.86\times$ under load.</p>
+    <p>Mojibake check: \u00d7, \u2248, \u00b1 should survive.</p>
+    <p>Inline math here: \(E_F = E V_\mathrm{pre}\) and a subscript \(x_i\) with inequality \(s \ge 0\).</p>
+  </section>
+
+  <figure class="ltx_figure" id="S2.F1">
+    <svg width="400" height="200" style="--ltx-fill-color: #0E6B73; --ltx-stroke-color: #16252C;">
+      <rect width="400" height="200" fill="var(--ltx-fill-color)" stroke="var(--ltx-stroke-color)"/>
+      <text x="50" y="100" fill="white">Figure 1 diagram</text>
+    </svg>
+    <figcaption>Fig. 1: One CNN layer and its local supervision.</figcaption>
+  </figure>
+
+  <figure class="ltx_figure" id="S3.F2">
+    <object data="fig2.pdf"></object>
+    <figcaption>Fig. 2: Hardware organization.</figcaption>
+  </figure>
+
+  <figure class="ltx_figure" id="S4.F3">
+    <img src="fig3.png" alt="raster fig"/>
+    <figcaption>Fig. 3: A raster figure.</figcaption>
+  </figure>
+
+  <table class="ltx_table" id="S3.T1">
+    <caption>Table I: Comparison of methods.</caption>
+    <tr><td>Method</td><td>Accuracy</td></tr>
+    <tr><td>Ours</td><td>76.57%</td></tr>
+  </table>
+
+  <table class="ltx_table" id="S3.T2">
+    <caption>Table II: Ablation results.</caption>
+    <tr><td>Setting</td><td>CIFAR-10</td><td>SVHN</td></tr>
+    <tr><td>Full</td><td>76.57</td><td>91.85</td></tr>
+    <tr><td>No folding</td><td>74.00</td><td>90.00</td></tr>
+  </table>
+
+  <section>
+    <h2>5 References</h2>
+    <p>[1] Author, Title, Venue.</p>
+  </section>
+</article>
+<footer>
+  <div class="arxiv-chrome">Instructions for reporting errors</div>
+  <div class="arxiv-chrome">Report GitHub Issue</div>
+</footer>
+</body>
+</html>

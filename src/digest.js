@@ -22,7 +22,7 @@ const SECTION_IDS = {
   "sources and limits": "src",
 };
 
-export { splitSections, parseIcymi, parseJudge, parseCitations, loadConfig };
+export { splitSections, parseIcymi, parseJudge, loadConfig };
 
 /**
  * Build a pre-configured OpenRouter LLM client.
@@ -133,20 +133,6 @@ function parseJudge(content) {
 }
 
 /**
- * Parse citations from the src section content.
- * One citation per line, formatted as: "exact title" author year
- * @param {string} content - markdown content of the src section
- * @returns {string[]}
- */
-function parseCitations(content) {
-  return content
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0 && !l.startsWith("#"))
-    .filter((l) => !l.startsWith("- [") && !l.startsWith("|"));
-}
-
-/**
  * Run the agent on a resolved source. Returns the parsed digest object.
  *
  * @param {object} source - output of fetch.resolve()
@@ -166,11 +152,21 @@ export async function digestSource(source, { client, cfg } = {}) {
   const response = await llm.chat(SYSTEM, user);
   let finalMd = extractFinal(response);
   if (finalMd === null) {
+    // The check asked for fixes but no <final> was emitted: warn and render
+    // the draft unchanged. Never block or re-prompt (single request rule).
+    const fixM = /Fixes to apply:\s*(\d+)/.exec(response);
+    if (fixM && Number(fixM[1]) > 0) {
+      console.warn(
+        `[paper-digest] Fixes to apply: ${fixM[1]} reported in <check> but no <final> block was returned; rendering the draft unchanged (single request rule: no re-prompt)`,
+      );
+    }
     // A clean check ("Fixes to apply: 0") means the agent correctly omitted
     // <final>; the draft IS the document. Fall back to it before failing.
     finalMd = extractDraft(response);
     if (finalMd === null) {
-      throw new Error("agent response contains no <final> or <draft> block");
+      throw new Error(
+        "agent response contains no <final> or <draft> block (the response may have been truncated)",
+      );
     }
   }
   const parsed = extractMarkdown(finalMd);
@@ -185,16 +181,16 @@ export async function digestSource(source, { client, cfg } = {}) {
     if (s.id === "judge") {
       s.rows = parseJudge(s.content);
     }
-    if (s.id === "src") {
-      s.citations = parseCitations(s.content);
-    }
   }
 
   const digest = {
     ...parsed.metadata,
     sections,
     _salvaged: parsed._salvaged,
-    raw: parsed.raw,
+    // The full raw agent response (all blocks: <notes>, <draft>, <check>
+    // and possibly <final>), kept alongside the rendered digest so failures
+    // can be diagnosed without re-running the model (I7).
+    raw: response,
   };
 
   // Carry figure metadata through so standalone template rendering can

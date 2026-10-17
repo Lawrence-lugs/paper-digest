@@ -16,6 +16,8 @@
  * URLs.
  */
 
+import { parseHTML } from "linkedom";
+
 const USER_AGENT = "paper-digest/0.1 (https://github.com/lafqu/paper-digest)";
 
 class FetchError extends Error {
@@ -43,7 +45,15 @@ async function _fetch(url, { timeout = 30000 } = {}) {
     if (!resp.ok) {
       throw new FetchError(`failed to fetch ${url}: ${resp.status} ${resp.statusText}`);
     }
-    return await resp.text();
+    // Decode explicitly at the single place bytes become a string: honor the
+    // declared charset, falling back to UTF-8 (never rely on the default).
+    const buf = await resp.arrayBuffer();
+    const charset = /charset=\s*([\w-]+)/i.exec(resp.headers.get("content-type") ?? "")?.[1];
+    try {
+      return new TextDecoder(charset ?? "utf-8").decode(buf);
+    } catch (_) {
+      return new TextDecoder("utf-8", { fatal: false }).decode(buf);
+    }
   } finally {
     clearTimeout(timer);
   }
@@ -67,45 +77,105 @@ function parseTitle(html) {
   return m ? stripTags(m.groups.t) : null;
 }
 
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
- * Extract <figure> entries.
+ * Serialise an inline <svg> element to markup that stands on its own.
+ *
+ * LaTeXML SVGs paint with CSS custom properties (e.g. --ltx-fill-color)
+ * defined in the element's inline style and in arXiv's stylesheet. Without
+ * that stylesheet `var(--ltx-fill-color)` is undefined, so resolve the
+ * custom properties declared on the element itself to literal colours and
+ * drop the now-resolved declarations.
+ */
+function serialiseSvg(el) {
+  let markup = el.outerHTML;
+  const styleM = /style="([^"]*)"/.exec(markup);
+  const vars = {};
+  if (styleM) {
+    for (const part of styleM[1].split(";")) {
+      const kv = part.split(":");
+      if (kv.length === 2 && kv[0].trim().startsWith("--")) {
+        vars[kv[0].trim()] = kv[1].trim();
+      }
+    }
+  }
+  if (Object.keys(vars).length > 0) {
+    for (const [name, value] of Object.entries(vars)) {
+      markup = markup.replace(
+        new RegExp("\\bvar\\(" + escapeRegExp(name) + "\\)", "g"),
+        value,
+      );
+    }
+    markup = markup.replace(
+      /style="([^"]*)"/,
+      (_, style) => {
+        const rest = style
+          .split(";")
+          .filter((p) => !p.trim().startsWith("--"))
+          .join(";")
+          .trim();
+        return rest ? `style="${rest}"` : "";
+      },
+    );
+  }
+  return markup;
+}
+
+/**
+ * Extract <figure> entries (real figures only, never tables).
  *
  * Supports two shapes:
- *  - arXiv/LaTeXML: <figure id="S3.F1" class="ltx_figure"><object data="...svg">...</object><figcaption>...</figcaption></figure>
- *  - legacy:       <figure data-n=".." data-a=".."><img src="..">...</figure>
+ *  - arXiv/LaTeXML: <figure class="ltx_figure" id="S2.F1"><svg ...>...</svg><figcaption>...</figcaption></figure>
+ *  - legacy/digest: <figure data-n="1" data-a="S2.F1"><figcaption>...</figcaption></figure>
+ *
+ * Each entry records the sequential index, the data-a id (or id attribute),
+ * the caption, and either an image URL resolved against baseUrl (for ``
+ * or `<object data>`) or the serialised inline `<svg>` markup. `ltx_table`
+ * elements (and figures wrapping tables) are excluded.
  */
 function parseFigures(html, baseUrl) {
+  const { document } = parseHTML(html);
+
   const figures = [];
-  const figureRe = /<figure\b([^>]*)>([\s\S]*?)<\/figure>/gi;
-  let m;
-  while ((m = figureRe.exec(html)) !== null) {
-    const attrs = m[1];
-    const inner = m[2];
+  let index = 0;
 
-    const idM = /id="([^"]+)"/.exec(attrs);
-    const nM = /data-n="([^"]+)"/.exec(attrs);
-    const aM = /data-a="([^"]+)"/.exec(attrs);
+  for (const fig of document.querySelectorAll(
+    "figure.ltx_figure, figure[data-n], figure[data-a]",
+  )) {
+    if (fig.classList.contains("ltx_table")) continue;
 
-    const id = idM ? idM[1] : "";
-    const n = nM ? nM[1] : id;
-    const dataA = aM ? aM[1] : id;
+    const dataA = fig.getAttribute("data-a") || fig.getAttribute("id") || "";
+    const nAttr = fig.getAttribute("data-n");
+    if (!dataA && !nAttr) continue;
 
-    if (!n && !dataA) continue;
+    index += 1;
+    const n = nAttr || dataA || String(index);
 
-    const objM = /<object\b[^>]*data="([^"]+)"/i.exec(inner);
-    const imgM = /<img\b[^>]*src="([^"]+)"/i.exec(inner);
-    const src = objM ? objM[1] : (imgM ? imgM[1] : "");
+    const captionEl = fig.querySelector("figcaption");
+    const caption = captionEl
+      ? captionEl.textContent.replace(/\s+/g, " ").trim()
+      : "";
 
-    const capM = /<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i.exec(inner);
-    const caption = capM ? stripTags(capM[1]) : "";
+    let url = "";
+    let svg = "";
 
-    figures.push({
-      n,
-      dataA: dataA || n,
-      caption,
-      src,
-      url: src ? new URL(src, baseUrl).href : "",
-    });
+    const img = fig.querySelector("img");
+    if (img) {
+      const src = img.getAttribute("src");
+      if (src) url = new URL(src, baseUrl).href;
+    } else {
+      const svgEl = fig.querySelector("svg");
+      if (svgEl) {
+        svg = serialiseSvg(svgEl);
+      } else {
+        const obj = fig.querySelector("object");
+        const data = obj ? obj.getAttribute("data") : null;
+        if (data) url = new URL(data, baseUrl).href;
+      }
+    }
+
+    figures.push({ n, dataA, caption, url, svg });
   }
   return figures;
 }
@@ -198,4 +268,4 @@ export async function resolve(source, { assetFolder } = {}) {
   };
 }
 
-export { FetchError };
+export { FetchError, parseFigures };

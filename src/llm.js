@@ -25,7 +25,9 @@ const DEFAULT_CFG = {
   models: [],
   model: undefined,
   temperature: 0.2,
-  max_tokens: 2048,
+  // One response must hold notes, draft, check and possibly final. Keep
+  // the cap comfortably above a single digest's size (~2-3k tokens).
+  max_tokens: 6144,
   retries: 2,
   max_requests_per_run: 50,
   timeout_s: 30,
@@ -326,7 +328,9 @@ export function extractMarkdown(content) {
     // Try JSON.parse for values that look like JSON (arrays/objects).
     if ((val.startsWith("[") || val.startsWith("{")) && (val.endsWith("]") || val.endsWith("}"))) {
       try { val = JSON.parse(val); } catch (_) { /* keep as string */ }
-    } else if (val.includes(",") && !val.includes("[")) {
+    } else if (key === "authors" && val.includes(",")) {
+      // Only authors is a list. All other scalar fields (verdict, whatRead,
+      // ...) round-trip verbatim so commas inside prose keep their spaces.
       val = val.split(",").map((s) => s.trim()).filter(Boolean);
     }
     metadata[key] = val;

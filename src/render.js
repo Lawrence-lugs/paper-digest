@@ -58,10 +58,12 @@ function renderContent(content) {
 
   const html = marked.parse(p);
 
-  // Restore math placeholders raw.
+  // Restore math placeholders. Escape < and & (and quotes) inside the
+  // restored math so an equation can never break the surrounding HTML;
+  // MathJax reads the unescaped text from the DOM afterwards.
   let out = html;
   for (let i = 0; i < mathBlocks.length; i++) {
-    out = out.replace(`\x00MATH${i}\x00`, mathBlocks[i]);
+    out = out.replace(`\x00MATH${i}\x00`, () => esc(mathBlocks[i]));
   }
   return out;
 }
@@ -83,8 +85,17 @@ function renderSection(s) {
     case "mot":
     case "diff":
     case "core":
-    case "eval":
       body = `<div class="prose">${renderContent(s.content || "")}</div>`;
+      break;
+    case "eval":
+      // Evaluation and conclusions: one .item per top-level paragraph (each
+      // starts with a bold label), flat blocks with no block children.
+      body = (s.content || "")
+        .split(/\n\n+/)
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .map((p) => `<div class="item">${renderParagraph(p)}</div>`)
+        .join("");
       break;
     case "icymi":
       body =
@@ -106,13 +117,20 @@ function renderSection(s) {
         ).join("") +
         `</tbody></table></div>`;
       break;
-    case "src":
-      body = `<div class="prose">${renderContent(s.content || "")}</div>`;
-      break;
     default:
       body = `<div class="prose">${renderContent(s.content || "")}</div>`;
   }
   return `<h2 class="s" id="${esc(s.id)}">${esc(s.title)}${conf}</h2>${body}`;
+}
+
+/**
+ * Render one paragraph of markdown without a wrapping <p>, so the result
+ * stays a flat block (safe as the sole content of .item, li or td).
+ */
+function renderParagraph(content) {
+  const html = renderContent(content).trim();
+  const m = /^<p>([\s\S]*)<\/p>$/.exec(html);
+  return m ? m[1] : html;
 }
 
 /**
@@ -126,10 +144,15 @@ export function render(digest, source = {}) {
   const figures = Array.isArray(source.figures) ? source.figures : [];
   const base = source.baseUrl || "";
 
-  const map = {};
+  const map = {};   // n -> image URL (for  or <object data> figures)
+  const svgByN = {}; // n -> serialised inline <svg> markup (inlined server-side)
   figures.forEach((f, i) => {
     const key = String(i + 1);
-    map[key] = f.url || f.src || f.dataA || "";
+    if (f.svg) {
+      svgByN[key] = f.svg;
+    } else if (f.url) {
+      map[key] = f.url;
+    }
   });
   const mapJson = JSON.stringify(map);
 
@@ -139,24 +162,50 @@ export function render(digest, source = {}) {
 
   const sectionsHtml = (digest.sections || []).map((s) => renderSection(s)).join("");
 
-  // Inject  tags into <figure data-n="..."> elements server-side so the
-  // static HTML already contains images (lazyloaded, with link fallback).
+  // Scale an inlined SVG to the column width: give it a viewBox derived
+  // from its width/height (so the content scales) and let it fill the
+  // figure container.
+  function scaleSvg(svg) {
+    return String(svg).replace(/<svg\b([^>]*)>/, (m, attrs) => {
+      let a = attrs;
+      if (!/viewBox\b/.test(a)) {
+        const wM = /width\s*=\s*"(\d+)"/.exec(a);
+        const hM = /height\s*=\s*"(\d+)"/.exec(a);
+        if (wM && hM) a += ` viewBox="0 0 ${wM[1]} ${hM[1]}"`;
+      }
+      a = a.replace(/\bwidth\s*=\s*"[^"]*"/, 'width="100%"');
+      a = a.replace(/\bheight\s*=\s*"[^"]*"/, 'height="auto"');
+      if (!/style\s*=/i.test(a)) {
+        a += ' style="display:block"';
+      } else {
+        a = a.replace(/style="([^"]*)"/, 'style="$1;display:block"');
+      }
+      return `<svg${a}>`;
+    });
+  }
+
+  // Figures: inline server-side SVG or raster images; everything else gets
+  // the client-side link fallback via BASE/MAP.
   let sectionsWithImages = sectionsHtml;
   const figureRe = /<figure\b[^>]*>([\s\S]*?)<\/figure>/g;
   sectionsWithImages = sectionsWithImages.replace(figureRe, (match, inner) => {
     const nMatch = /data-n="([^"]+)"/.exec(match);
     if (!nMatch) return match;
     const n = nMatch[1];
+
+    const svg = svgByN[n];
+    if (svg) {
+      // Inline SVG figure (from the paper's HTML); the client-side script
+      // must not clobber it, so it skips figures that already have content.
+      return match.replace(">", `>${scaleSvg(svg)}`);
+    }
+
     if (/<img\b/.test(inner)) return match; // already has an image
     const url = map[n] || "";
-    if (!url) return match;
+    if (!url) return match; // no image and no SVG: client script adds the link fallback
     const img = `<img loading="lazy" alt="Figure ${n}" src="${esc(url)}">`;
     return match.replace(">", `>${img}`);
   });
-
-  const citationsHtml = ((digest.sections || []).find((s) => s.id === "src") || {})
-    .citations || [];
-  const citations = citationsHtml.map((c) => `<p class="cite">${esc(c)}</p>`).join("");
 
   const mapJs = Object.entries(map)
     .map(([k, v]) => `    ${JSON.stringify(k)}: ${JSON.stringify(v)},`)
@@ -172,7 +221,6 @@ export function render(digest, source = {}) {
     "{{VERDICT}}": esc(digest.verdict || ""),
     "{{OVERALL_CONF}}": esc(digest.overallConfidence || 0),
     "{{SECTIONS}}": sectionsWithImages,
-    "{{CITATIONS}}": citations,
     "{{NAV_LINKS}}": navLinks,
     "{{BASE}}": esc(base),
     "{{MAP}}": mapJson,

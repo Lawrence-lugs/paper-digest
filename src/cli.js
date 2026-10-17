@@ -21,13 +21,14 @@
  */
 
 import { resolve } from "./fetch.js";
-import { buildMasterPrompt } from "./prompt.js";
+import { buildMasterPrompt, extractFinal, extractDraft } from "./prompt.js";
 import { digestSource, loadConfig, createClient } from "./digest.js";
 import { renderString, renderFile, outputFilenameBase, sanitize, shortenedTitle, extractYear, venueAbbv } from "./template.js";
 import { extractMarkdown } from "./llm.js";
 import { readFile, mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { existsSync, readFileSync } from "fs";
+import { parseHTML, Node } from "linkedom";
 
 const DEFAULT_OUT = "outputs";
 
@@ -82,7 +83,7 @@ async function runPrompt(source) {
   return { prompt, source: resolved };
 }
 
-async function runDigest(source, { outDir, cfg }) {
+export async function runDigest(source, { outDir, cfg, client } = {}) {
   const resolved = await resolve(readLocalIfFile(source));
   if (resolved.kind === "pdf") {
     throw new Error("PDF text extraction is not implemented; supply HTML or a URL.");
@@ -95,12 +96,15 @@ async function runDigest(source, { outDir, cfg }) {
         ? "arXiv HTML full text"
         : "provided HTML";
 
-  const llm = createClient(cfg);
+  const llm = client || createClient(cfg);
   const md = await digestSource(resolved, { client: llm });
+
+  // md.raw is the full raw agent response (all blocks); unwrap the clean
+  // document (<final> else <draft>) to persist as the digest Markdown.
+  let mdText = extractFinal(md.raw) ?? extractDraft(md.raw) ?? md.raw;
 
   // Inject figures and baseUrl into frontmatter so standalone template
   // rendering can resolve image URLs (figures are parsed at fetch time).
-  let mdText = md.raw;
   const fmEnd = mdText.indexOf("\n---\n", 4);
   if (fmEnd !== -1) {
     const injection = `figures: ${JSON.stringify(md.figures || [])}\nbaseUrl: ${JSON.stringify(md.baseUrl || "")}\n`;
@@ -112,6 +116,10 @@ async function runDigest(source, { outDir, cfg }) {
   const baseName = outputFilenameBase(md, resolved);
   const mdPath = join(outDir, baseName + ".md");
   await writeFile(mdPath, mdText, "utf8");
+
+  // Persist the full raw agent response (all blocks) beside the digest so
+  // failures can be diagnosed without re-running the model.
+  await writeFile(join(outDir, baseName + ".response.txt"), md.raw, "utf8");
 
   const html = await renderString(md, resolved);
   const htmlPath = join(outDir, baseName + ".html");
@@ -162,12 +170,11 @@ async function runTemplate(mdPath, { outDir, stdout }) {
     raw,
   };
   // We need to parse sections from body. 
-  const { splitSections, parseIcymi, parseJudge, parseCitations } = await import("./digest.js");
+  const { splitSections, parseIcymi, parseJudge } = await import("./digest.js");
   const sections = splitSections(body);
   for (const s of sections) {
     if (s.id === "icymi") s.entries = parseIcymi(s.content);
     if (s.id === "judge") s.rows = parseJudge(s.content);
-    if (s.id === "src") s.citations = parseCitations(s.content);
   }
   digest.sections = sections;
   const html = await renderString(digest, source);
@@ -178,19 +185,161 @@ async function runTemplate(mdPath, { outDir, stdout }) {
   return { html, digest, outPath };
 }
 
-function extractTextFromHtml(html) {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
+const HEADING_TAGS = new Set(["h1", "h2", "h3", "h4", "h5", "h6"]);
+
+/**
+ * Extract the paper's body text from HTML for the agent's source text.
+ *
+ * Chrome is dropped by scoping to the article body (LaTeXML:
+ * article.ltx_document or .ltx_page_content; anything else falls back to
+ * <body>), not by blacklisting strings. Each <math> contributes its
+ * alttext once as inline math; headings get a markdown heading marker;
+ * tables are serialised as caption plus pipe-separated rows. Figures are
+ * not extracted here — they are carried through the figure list.
+ */
+// Block-level elements: their children are separated by blank lines.
+// Inline elements: their children are joined with spaces.
+const BLOCK_TAGS = new Set([
+  "p",
+  "div",
+  "section",
+  "article",
+  "aside",
+  "header",
+  "footer",
+  "nav",
+  "main",
+  "body",
+  "html",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "blockquote",
+  "pre",
+  "table",
+  "caption",
+  "tr",
+  "td",
+  "th",
+  "li",
+  "dd",
+  "dt",
+  "figcaption",
+]);
+
+// Elements that carry no extractable text for the source dump.
+const DROP_TAGS = new Set(["figure", "script", "style", "img", "object", "svg"]);
+
+export function extractTextFromHtml(html) {
+  const { document } = parseHTML(html);
+
+  const textOf = (el) => {
+    let t = "";
+    const collect = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        t += node.textContent;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        if (node.tagName.toLowerCase() === "math") {
+          const alt = node.getAttribute("alttext");
+          if (alt) t += alt;
+          return;
+        }
+        for (const c of node.childNodes) collect(c);
+      }
+    };
+    collect(el);
+    return t.replace(/\s+/g, " ").trim();
+  };
+
+  const walk = (node) => {
+    switch (node.nodeType) {
+      case Node.TEXT_NODE:
+        return node.textContent.replace(/\s+/g, " ").trim();
+      case Node.DOCUMENT_NODE:
+      case Node.DOCUMENT_FRAGMENT_NODE:
+        return [...node.childNodes]
+          .map(walk)
+          .filter(Boolean)
+          .join("\n\n");
+      case Node.ELEMENT_NODE: {
+        const tag = node.tagName.toLowerCase();
+
+        // Math: emit the alttext once as inline math; drop the rendered form.
+        if (tag === "math") {
+          const alt = node.getAttribute("alttext");
+          return alt ? `\\(${alt}\\)` : "";
+        }
+        // Figures are carried through the figure list, not the source text.
+        if (DROP_TAGS.has(tag)) return "";
+
+        if (HEADING_TAGS.has(tag)) {
+          return (
+            "#".repeat(Math.min(Number(tag[1]) || 1, 2)) + " " + textOf(node)
+          );
+        }
+
+        if (tag === "table") {
+          const parts = [];
+          const caption = node.querySelector("caption");
+          if (caption) {
+            const cap = textOf(caption);
+            if (cap) parts.push(cap);
+          }
+          for (const tr of node.querySelectorAll("tr")) {
+            const cells = [...tr.querySelectorAll("th, td")].map(textOf);
+            if (cells.length) parts.push("| " + cells.join(" | ") + " |");
+          }
+          return parts.join("\n");
+        }
+
+        const kids = [...node.childNodes]
+          .map((c) => [c, walk(c)])
+          .filter(([, t]) => t);
+        const parts = [];
+        let pending = null;
+        const flush = () => {
+          if (pending) {
+            parts.push(pending);
+            pending = null;
+          }
+        };
+        for (const [c, t] of kids) {
+          const isBlock = c.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has(c.tagName.toLowerCase());
+          if (isBlock) {
+            flush();
+            parts.push(t);
+          } else {
+            pending = pending ? pending + " " + t : t;
+          }
+        }
+        flush();
+        return BLOCK_TAGS.has(tag) ? parts.join("\n\n") : parts.join(" ");
+      }
+      default:
+        return "";
+    }
+  };
+
+  // Scope to the paper body (LaTeXML: article.ltx_document or
+  // .ltx_page_content); fall back to <body>, then the document element.
+  // Pick the first candidate that yields actual text so fragment inputs
+  // (e.g. a bare <p>) still produce output.
+  const candidates = [
+    document.querySelector("article.ltx_document, .ltx_page_content"),
+    document.body,
+    document.documentElement,
+    document,
+  ];
+  let result = "";
+  for (const c of candidates) {
+    if (!c) continue;
+    result = walk(c).trim();
+    if (result) break;
+  }
+  return result;
 }
 
 export async function run(argv) {
