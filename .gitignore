@@ -3,3 +3,4 @@ reference/
 node_modules/
 outputs/
 tmp.txt
+test/.tmp/

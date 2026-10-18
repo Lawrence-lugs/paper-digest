@@ -413,7 +413,7 @@ export function openInTab(html) {
   if (!tab) return { blocked: true };
   tab.opener = null;
   const blob = new Blob([html], { type: "text/html" });
-  const blobUrl = URL.createObjectURL(tab);
+  const blobUrl = URL.createObjectURL(blob);
   // NOTE: revoking after navigation would break the page; the Blob URL is
   // owned by the new tab until it navigates away. For tab-based delivery we
   // keep it alive (the tab holds a reference via its location).

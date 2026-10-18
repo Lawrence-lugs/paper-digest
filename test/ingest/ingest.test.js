@@ -224,3 +224,142 @@ describe("ingest — FetchBlockedError", (t) => {
     assert.ok(/Failed to fetch/.test(e.message));
   });
 });
+
+describe("ingest — end-to-end (mocked fetch, CSR parsers loaded)", async (t) => {
+  /**
+   * Run ingest() against a fixture document with the real CSR parsers loaded
+   * into window.CSR (so ingest()'s loadCsr() short-circuits instead of trying
+   * to inject <script> tags) and DOMParser stubbed to return the fixture
+   * document, keeping the global document the CSR util functions rely on
+   * consistent with the document ingest() parses.
+   */
+  async function ingestFixture(html, input, { fetchBody } = {}) {
+    const { document: fixDoc } = parseHTML(html);
+    const saved = {
+      document: globalThis.document,
+      window: globalThis.window,
+      DOMParser: globalThis.DOMParser,
+      fetch: globalThis.fetch,
+    };
+    globalThis.document = fixDoc;
+    globalThis.URL = URL;
+    globalThis.Node = Node;
+    globalThis.getComputedStyle = () => ({ getPropertyValue: () => "" });
+    globalThis.window = { CSR: {} };
+    await loadCsr(fixDoc, null);
+    globalThis.DOMParser = class {
+      parseFromString() {
+        return fixDoc;
+      }
+    };
+    if (fetchBody !== undefined) {
+      globalThis.fetch = async () => new Response(fetchBody);
+    }
+    try {
+      const source = await ingest(input);
+      return { source, doc: fixDoc, CSR: globalThis.window.CSR };
+    } finally {
+      globalThis.document = saved.document;
+      globalThis.window = saved.window;
+      globalThis.DOMParser = saved.DOMParser;
+      globalThis.fetch = saved.fetch;
+    }
+  }
+
+  test("ingest() kind:url end-to-end on the arXiv fixture (mocked fetch)", async () => {
+    const html = await read("csr/arxiv.html");
+    const { source } = await ingestFixture(html, {
+      kind: "url",
+      value: "https://arxiv.org/abs/2610.17099",
+    }, { fetchBody: html });
+    assert.strictEqual(source.site, "arxiv", "site: " + source.site);
+    assert.strictEqual(source.key, "arxiv:2610.17099", "key: " + source.key);
+    assert.ok(
+      source.paperText.includes("# Title: Sample Paper on Local Learning"),
+      "title in paperText: " + source.paperText,
+    );
+    assert.strictEqual(source.figures.length, 1, "figure count: " + JSON.stringify(source.figures));
+    assert.strictEqual(source.figures[0].dataA, "S2.F1", "dataA: " + JSON.stringify(source.figures[0]));
+    assert.strictEqual(source.figures[0].url, "", "inline SVG figure has no image URL");
+  });
+
+  test("ingest() kind:html paste with no URL keeps baseUrl null and drops relative figure URLs", async () => {
+    // arXiv fixture with the URL hint stripped: a paste supplies no URL at all.
+    const html = (await read("csr/arxiv.html")).replace(/<meta name="citation_arxiv_id"[^>]*>\s*/, "");
+    const { source } = await ingestFixture(html, { kind: "html", value: html });
+    assert.strictEqual(source.baseUrl, null, "baseUrl: " + source.baseUrl);
+    assert.strictEqual(source.figures.length, 1, "figure count: " + JSON.stringify(source.figures));
+    for (const fig of source.figures) {
+      assert.strictEqual(
+        fig.url,
+        "",
+        "relative figure URL dropped: " + fig.url + " (" + fig.dataA + ")",
+      );
+      assert.ok(
+        !fig.url.includes("github.io") && !fig.url.includes("localhost"),
+        "no app-origin mis-resolution: " + fig.url,
+      );
+    }
+    assert.strictEqual(source.figures[0].dataA, "S2.F1");
+  });
+
+  test("ingest() kind:csr-json converts an Article-shaped object to a Source", async () => {
+    const article = {
+      site: "arxiv",
+      title: "Sample Paper on Local Learning",
+      authors: ["Jane Doe", "John Smith"],
+      venueLine: "arXiv:2610.17099",
+      sourceUrl: "https://arxiv.org/html/2610.17099",
+      ids: { arxiv: "2610.17099v1", doi: null },
+      sections: [{ id: "s1", title: "Summary", content: { querySelectorAll: () => [] } }],
+      bibliography: {},
+    };
+    const source = await ingest({ kind: "csr-json", value: article });
+    assert.strictEqual(source.site, "arxiv", "site: " + source.site);
+    assert.strictEqual(source.key, "arxiv:2610.17099", "arXiv version stripped: " + source.key);
+    assert.strictEqual(source.title, "Sample Paper on Local Learning");
+    assert.ok(source.paperText.includes("# Sample Paper on Local Learning"));
+    assert.strictEqual(source.sourceUrl, "https://arxiv.org/html/2610.17099");
+  });
+
+  test("ingest() kind:url throws FetchBlockedError when fetch is blocked", async () => {
+    const savedFetch = globalThis.fetch;
+    globalThis.fetch = async () => {
+      throw new Error("Failed to fetch: network");
+    };
+    try {
+      let err = null;
+      try {
+        await ingest({ kind: "url", value: "https://example.com/x" });
+      } catch (e) {
+        err = e;
+      }
+      assert.ok(err instanceof FetchBlockedError, "expected FetchBlockedError, got: " + err);
+      assert.strictEqual(err.url, "https://example.com/x");
+      assert.ok(err.reason && typeof err.reason === "string", "reason set: " + err.reason);
+      assert.ok(/Failed to fetch/.test(err.message));
+    } finally {
+      globalThis.fetch = savedFetch;
+    }
+  });
+
+  test("ingest() kind:html infers https://arxiv.org/html/<id> from citation_arxiv_id meta (no caller URL)", async () => {
+    const html = await read("csr/arxiv.html");
+    const { source, doc, CSR } = await ingestFixture(html, { kind: "html", value: html });
+    assert.strictEqual(
+      source.baseUrl,
+      "https://arxiv.org/html/2610.17099",
+      "synthesized baseUrl: " + source.baseUrl,
+    );
+    assert.strictEqual(source.sourceUrl, "https://arxiv.org/html/2610.17099");
+    assert.strictEqual(source.site, "arxiv", "site: " + source.site);
+    assert.strictEqual(source.key, "arxiv:2610.17099", "key: " + source.key);
+    const arxivParser = CSR.parsers.find((p) => p.id === "arxiv");
+    assert.ok(arxivParser && typeof arxivParser.sniff === "function");
+    assert.strictEqual(
+      arxivParser.sniff(doc),
+      true,
+      "arxiv sniff recognizes the document without a URL",
+    );
+  });
+});

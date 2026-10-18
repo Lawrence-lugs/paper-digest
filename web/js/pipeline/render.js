@@ -261,8 +261,8 @@ export async function renderDigest(digest, ctx = {}) {
     .split("{{BASE}}").join(esc(base))
     .split("{{MAP}}").join(JSON.stringify({}));
 
-  // const MAP = {{MAP}};  ->  const MAP = { ... };
-  html = html.replace("const MAP = {{MAP}};", "const MAP = {};");
+  // {{MAP}} was replaced by the split/join above, so the template now has
+  // `const MAP = {};`. No second replace is needed.
   return html;
 }
 

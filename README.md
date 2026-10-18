@@ -1,103 +1,78 @@
+# paper-digest
 
-# Paper Digest Generator
+Static, client-side web app for reading scholarly papers and producing structured digests.
+No server process — runs entirely in the browser (GitHub Pages compatible). Covers three flows:
 
-Reduce token waste of paper digests by outsourcing the template to a JSON-into-HTML creation pipeline.
+- **Digest** — ingest a paper (arXiv ID/URL, any URL, pasted HTML, uploaded `.html`), run the LLM digest, open/save/copy the result.
+- **Prompt** — ingest a source, copy the master prompt, send it to any chat AI.
+- **Template** — paste an AI digest response back in; figures are resolved from the session store (never from the AI's Markdown), then open/save/copy.
 
-## Workflow
+## How it works
 
-1. **Input** — HTML, PDF, or a link (arXiv / Semantic Scholar / any URL).
-2. **Fetch** — links are resolved via the arXiv HTML version (`https://arxiv.org/html/<id>`) or fetched directly; raw HTML and local PDFs are accepted.
-3. **Digest** — the source text goes to an OpenRouter agent governed by the master prompt (`src/prompt.js`). The agent returns a **JSON** digest (not HTML): verdict, motivation, core idea, distinguishing factor, evaluation, ICYMI, cautious judgement, sources/limits.
-4. **Template** — the JSON digest is rendered into `assets/template.html` (self-contained Tailwind + MathJax + sentence-level reading marker) and written to `outputs/<Author-year-journalabbv-shortenedtitle.html>`.
+1. **Ingest.** Enter an arXiv ID/URL or any URL, paste raw HTML, or upload a saved `.html` page. The app fetches the page (arXiv IDs become `https://arxiv.org/html/<id>`), parses it with the [consistent-scholarly-reader](https://github.com/Lawrence-lugs/consistent-scholarly-reader) parsers (arXiv, Nature, IEEE, ACM, Science), and produces a `Source`: title, authors, sections, figures (inline SVG or image URLs), and a text summary (`paperText`). Figures and the base URL live in the app's session store, never in the AI's Markdown — this fixes the old template-flow bug where standalone digests had empty figures.
 
-## CLI
+2. **Digest / Prompt.** In Digest mode, the app builds the master prompt (`<notes>`/`<draft>`/`<check>`/`<final>` contract) and sends it to an LLM through an `LLMClient`: OpenRouter (direct from the browser), any OpenAI-compatible base URL (e.g. local Ollama), or an optional local backend. In Prompt mode, no LLM is needed — just copy the prompt and paste the AI's response into Template mode.
 
-The CLI has three modes. `source` may be an arXiv id/link, a URL, raw HTML text, or a local PDF path.
+3. **Output.** The rendered digest opens in a new tab (Blob URL). "Download .html" and "Copy HTML" are available as alternatives. The output page is self-contained (Tailwind + MathJax from CDN) and includes a sentence-level reading marker.
 
-### 1. `prompt` — emit the master prompt (no LLM)
+## Settings
 
-```
-paper-digest prompt <source> [--out <file>]
-```
+- **API key** is memory-only by default. It lives in a JavaScript variable, not in `localStorage`.
+- **"Remember on this device"** is opt-in with a warning: Blob-URL digest pages are same-origin with the app, and the template loads third-party scripts and renders untrusted content, so anything on the page could read `localStorage`. Only enable on a private device.
+- Default timeout is 180 s (free models can need a full minute for a 6k-token completion).
 
-Fetches the source and prints the **master prompt** (the agent instructions that demand JSON output). Copy/paste this into any chat AI; the AI returns the digest JSON, which you then feed to `template`. Use this when you want a chat AI to do the digesting.
+## Output filename
 
-### 2. `digest` — full pipeline (fetch → OpenRouter agent → HTML)
-
-```
-paper-digest digest <source> [--out <dir>]
-```
-
-Fetches the source, runs the OpenRouter agent (`src/llm.js` follows the reference Python `LLM` class), parses the JSON digest, saves the intermediate `<name>.json`, and renders `<name>.html` to `--out` (default `outputs/`).
-
-### 3. `template` — JSON already written, just render to HTML
-
-```
-paper-digest template [digest.json|-] [--out <dir>] [--stdout]
-```
-
-Takes an already-written digest JSON (e.g. produced by a chat AI from `prompt`) and renders it into the self-contained HTML template. No LLM call, no network fetch.
-
-The JSON can come from:
-- a file argument: `paper-digest template digest.json`
-- stdin: `Get-Clipboard | paper-digest template` (writes HTML to `outputs/`)
-- stdin with `--stdout`: `Get-Clipboard | paper-digest template --stdout | Set-Clipboard` (HTML straight to clipboard, no intermediate file)
-
-Use `-` explicitly to read from stdin: `paper-digest template - --stdout`.
-
-Output filename convention (all modes):
-
-`Author-year-journalabbv-shortenedtitle.html`
-
-(e.g. `Vaswani-2017-NeurIPS-attention_all_you_need.html`). Outputs are git-ignored.
-
-## UI / preview
-
-- `ui/index.html` — standalone browser UI. Paste a digest JSON (from `prompt` or a chat AI), tweak BASE URL / figures, and preview the rendered HTML. Copy or save the result.
-- `ui/obsidian-dataviewjs.js` — self-contained Obsidian DataviewJS snippet. Drop it into a dataviewjs code block to render a digest JSON file inline in a vault note:
-
-  ```dataviewjs
-  let digestPath = dv.current().file.folder + "/Vaswani-2017-Neurips-attention_all_you_need.json";
-  await renderPaperDigest(dv, container, digestPath);
-  ```
-
-  It embeds the same pure render logic as `src/render.js` (no Node, no network), so it works inside Obsidian.
-
-## Configuration (OpenRouter)
-
-The `digest` mode uses [OpenRouter](https://openrouter.ai). Provide an API key via one of:
-
-- `OPENROUTER_API_KEY` environment variable, or
-- `~/.paper_digest_key` file containing the key.
-
-Configure models and limits in `paper-digest.config.json` (copy `paper-digest.config.json.example`):
-
-```json
-{
-  "models": ["meta-llama/llama-3.2-3b-instruct"],
-  "temperature": 0.2,
-  "max_tokens": 2048,
-  "retries": 2,
-  "max_requests_per_run": 50,
-  "timeout_s": 30
-}
-```
-
-Env overrides: `PAPER_DIGEST_MODEL`. Models are tried in order; each is retried before falling back to the next. A 401 aborts immediately; 400/402/403/404 skip to the next model; 429 honors `Retry-After`.
-
-Example:
-
-```sh
-export OPENROUTER_API_KEY=sk-or-...
-paper-digest https://arxiv.org/abs/1706.03762 --out outputs
-```
+`Author-year-journalabbv-shortenedtitle.html` (e.g. `Vaswani-2017-NeurIPS-attention_all_you_need.html`).
 
 ## Project structure
 
-- `src/fetch.js` — source resolver (arXiv / URL / HTML / PDF) + figure map extraction
-- `src/prompt.js` — master prompt; agent emits JSON
-- `src/llm.js` — OpenRouter client (key loading, model fallbacks, retries, per-run cap)
-- `src/digest.js` — agent orchestration
-- `src/template.js` — JSON → HTML renderer
-- `src/cli.js` — CLI entry point
-- `assets/template.html` — self-contained digest template
+```
+web/                  app shell (served from /<repo>/web/)
+  index.html          HTML shell: loads CSR classic scripts, then the ES module entry
+  assets/template.html single source of truth for the digest HTML page
+  css/app.css         app styles
+  vendor/csr/         CSR parsers (pinned, read-only; synced from the CSR repo)
+  vendor/lib/         marked, DOMPurify (vendored, read-only)
+  js/ingest/          input resolution, CSR loader, article-to-Source adapter
+  js/pipeline/        prompt/digest/render, LLM clients, output helpers
+  js/app/             three-mode UI, settings, recent sessions
+  js/store/           IndexedDB session store (figures + baseUrl live here)
+scripts/
+  sync-csr.mjs        sync CSR parsers from the CSR repo (pinned commit in VERSION)
+  vendor-libs.mjs     vendor marked + DOMPurify from node_modules
+test/{ingest,pipeline,app}/   unit tests per area (node --test)
+e2e/                  Playwright end-to-end tests
+docs/CONTRACTS.md     frozen layer contracts
+docs/handoff/         cross-agent handoff notes
+consistent-scholarly-reader/  submodule with the CSR parsers
+```
+
+## Development
+
+```bash
+# Run all unit tests
+npm test            # node --test test/ingest/ test/pipeline/ test/app/
+
+# Per-area
+npm run test:ingest
+npm run test:pipeline
+npm run test:app
+
+# Syntax check
+npm run lint        # node --check web/js/**/*.js
+
+# Re-vendor CSR parsers (lead only; requires the CSR repo path)
+node scripts/sync-csr.mjs <CSR_REPO_PATH>
+
+# Re-vendor third-party libs (lead only; requires npm install first)
+node scripts/vendor-libs.mjs
+```
+
+## Deployment
+
+Push to `main` or `web-frontend` — GitHub Actions deploys the `web/` folder to GitHub Pages. The app is served from `/<repo>/`.
+
+## Acceptance criteria (e2e)
+
+See `e2e/` for Playwright tests covering: figure rendering from pasted arXiv HTML, prompt→paste flow with session persistence after IndexedDB clear, fetch-failure fallback UX, Nature/IEEE parsing, no URL-mis-resolution on paste, XSS neutralization (script/onerror/foreignObject/onload), memory-only API key, and `$&` survival in inlined SVG figures.

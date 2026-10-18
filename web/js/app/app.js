@@ -16,12 +16,12 @@ import {
   buildPrompt,
   runDigest,
   parseDigest,
-  renderDigest,
   filenameFor,
   openInTab,
   downloadHtml,
   copyHtml,
 } from "../pipeline/pipeline.js";
+import { renderDigest } from "../pipeline/render.js";
 import {
   OpenRouterClient,
   OpenAICompatibleClient,
@@ -73,7 +73,7 @@ function setStatus(t) {
 
 /* ---------------------------------------------------------------- settings */
 
-function loadSettings() {
+export function loadSettings() {
   try {
     const raw = localStorage.getItem("paper-digest-settings");
     if (raw) {
@@ -104,7 +104,7 @@ function applySettingsUI() {
   toggleProviderFields();
 }
 
-function saveSettings() {
+export function saveSettings() {
   settings.provider = ELS.providerSelect.value;
   settings.models = ELS.modelsInput.value.trim();
   settings.baseUrl = ELS.baseUrlInput.value.trim();
@@ -321,7 +321,7 @@ function renderTemplateControls() {
   ELS.btnAttach.onclick = () => { showView("view-digest"); };
 }
 
-async function resolveSourceFromDigest(digest) {
+export async function resolveSourceFromDigest(digest) {
   if (currentSource) return currentSource;
   const found = await sessions.findByDigest(digest);
   if (found) {
@@ -385,7 +385,7 @@ function wireResultActions() {
 
 /* ---------------------------------------------------------------- recent sessions */
 
-async function refreshRecent() {
+export async function refreshRecent() {
   const list = ELS.recentList;
   const none = ELS.noRecent;
   try {
@@ -461,10 +461,10 @@ async function init() {
     setStatus("Warning: CSR parsers not loaded.");
   }
 
-  // Mode tabs
-  ELS.modeDigest.onclick = () => { showView("view-digest"); };
-  ELS.modePrompt.onclick = () => { showView("view-prompt"); };
-  ELS.modeTemplate.onclick = () => { showView("view-template"); };
+  // Mode tabs (bind() keys the elements by their HTML id attribute)
+  ELS["mode-digest"].onclick = () => { showView("view-digest"); };
+  ELS["mode-prompt"].onclick = () => { showView("view-prompt"); };
+  ELS["mode-template"].onclick = () => { showView("view-template"); };
   ELS.btnSettings.onclick = () => { saveSettings(); showView("view-settings"); };
   ELS.btnBack.onclick = () => { saveSettings(); showView("view-digest"); };
 
