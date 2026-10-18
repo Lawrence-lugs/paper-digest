@@ -79,9 +79,11 @@
       (doc && doc.location && doc.location.href) ? String(doc.location.href) :
       null;
     const host = url ? (new URL(url).hostname) : null;
-    const base = url
-      ? url
-      : (doc && doc.baseURI != null ? String(doc.baseURI) : "about:blank");
+    // When there is no URL (paste / upload of a detached document) resolve
+    // relative references against about:blank so they are dropped rather than
+    // silently mis-resolved against the app's own origin (doc.baseURI of a
+    // DOMParser document is the app URL -- a correctness trap).
+    const base = url ? url : "about:blank";
     return { url, host, base };
   }
   CSR.util.ctx = ctx;

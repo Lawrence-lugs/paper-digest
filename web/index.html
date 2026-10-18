@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paper Digest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<!-- CSR parsers (classic scripts, load order matters) -> window.CSR -->
+<script src="vendor/csr/common.js"></script>
+<script src="vendor/csr/parsers/arxiv.js"></script>
+<script src="vendor/csr/parsers/nature.js"></script>
+<script src="vendor/csr/parsers/ieee.js"></script>
+<script src="vendor/csr/parsers/acm.js"></script>
+<script src="vendor/csr/parsers/science.js"></script>
+<script src="vendor/csr/parsers/index.js"></script>
+<!-- ES module entry -->
+<script type="module" src="js/app/app.js"></script>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Paper Digest</div>
+    <nav class="modebar">
+      <button id="mode-digest" class="active">Digest</button>
+      <button id="mode-prompt">Prompt</button>
+      <button id="mode-template">Template</button>
+      <button id="btnSettings">Settings</button>
+    </nav>
+  </div>
+</div>
+<div id="status" class="hint small" style="padding:0.3rem 1rem;">Ready</div>
+
+<div class="container">
+
+  <!-- Source panel (always visible) -->
+  <div class="section tight">
+    <h2>1. Source</h2>
+    <p class="small hint">Enter an arXiv id/URL, any URL, paste raw HTML, or upload an .html page. Base URL helps resolve relative figure URLs on paste/upload.</p>
+    <div style="display:grid;gap:0.5rem;">
+      <input id="inputUrl" type="text" class="key-input" placeholder="https://arxiv.org/html/2405.12345  or  2405.12345">
+      <label>Base URL</label>
+      <input id="inputBaseUrl" type="text" placeholder="https://arxiv.org/html/...">
+      <div style="display:flex;gap:0.5rem;align-items:end;">
+        <label style="margin:0;min-width:0;">Paste HTML</label>
+        <textarea id="inputPaste" rows="4" class="key-input" placeholder="Paste raw HTML here…" style="min-width:0;"></textarea>
+      </div>
+      <label style="min-width:0;">Upload .html</label>
+      <input id="fileUpload" type="file" accept=".html" style="min-width:0;">
+      <button id="btnIngest" class="primary">Ingest source</button>
+    </div>
+    <div id="ingestError" class="hidden"></div>
+    <div id="ingestedCard" class="card" style="margin-top:0.75rem;"></div>
+  </div>
+
+  <!-- Mode-specific controls -->
+  <div id="view-digest">
+    <div id="digestControls"></div>
+  </div>
+  <div id="view-prompt" class="hidden">
+    <div id="promptControls"></div>
+  </div>
+  <div id="view-template" class="hidden">
+    <div class="section tight">
+      <h2>2. Paste AI response</h2>
+      <p class="small hint">Paste the AI's digest response (<notes>/<draft>/<check>[/<final>]). Bound to the current session so figures resolve.</p>
+      <textarea id="inputResponse" rows="14" class="key-input mono" placeholder="Paste the AI digest response…"></textarea>
+      <div style="display:flex;gap:0.5rem;align-items:end;margin-top:0.5rem;">
+        <button id="btnPasteResponse" class="primary">Render digest</button>
+        <button id="btnAttach" class="danger">Attach source</button>
+      </div>
+      <div class="warn small">No source ingested yet? Ingest above (Digest mode), then paste here so figures resolve.</div>
+    </div>
+  </div>
+
+  <!-- Result view -->
+  <div id="view-result" class="hidden">
+    <div class="section tight">
+      <h2>Digest ready</h2>
+      <div id="resultCard" class="card hidden">
+        <div id="resultMeta"></div>
+        <div id="resultFigures"></div>
+      </div>
+      <div class="btns">
+        <button id="btnOpenTab" class="primary">Open in new tab</button>
+        <button id="btnDownload">Download .html</button>
+        <button id="btnCopy">Copy HTML</button>
+      </div>
+      <div id="openFallback" class="hidden err">
+        Popup blocked. Use "Download .html" or "Copy HTML", or open the downloaded file directly.
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings (hidden by default) -->
+  <div id="view-settings" class="section hidden">
+    <h2>Settings</h2>
+    <div class="tight">
+      <label>API key (OpenRouter)</label>
+      <div class="key-row">
+        <input id="keyInput" type="password" class="key-input" placeholder="sk-or-…">
+        <label class="remember"><input type="checkbox" id="remember"> Remember on this device</label>
+      </div>
+      <p class="hint warn">The key is memory-only by default. "Remember" stores it in localStorage — warning: Blob-URL digest pages are same-origin with this app, and the template loads third-party scripts and renders untrusted content, so anything on the page could read localStorage. Only enable this on a private device.</p>
+    </div>
+    <div class="tight" id="providerFields">
+      <label>Provider</label>
+      <select id="providerSelect" class="key-input">
+        <option value="openrouter">OpenRouter (direct)</option>
+        <option value="openai">OpenAI-compatible (e.g. local Ollama)</option>
+        <option value="local">Local backend</option>
+      </select>
+      <label>Models (comma-separated)</label>
+      <input id="modelsInput" class="key-input" placeholder="meta-llama/llama-3.2-3b-instruct">
+      <label>Base URL (OpenAI-compatible / local)</label>
+      <input id="baseUrlInput" class="key-input" placeholder="http://localhost:11434/v1">
+      <label>Timeout (seconds)</label>
+      <input id="timeoutInput" class="key-input" type="number" placeholder="180">
+    </div>
+    <div class="btns" style="margin-top:0.75rem;">
+      <button id="btnBack" class="primary">Back</button>
+    </div>
+  </div>
+
+  <!-- Recent sessions -->
+  <div class="section">
+    <h2>Recent sessions</h2>
+    <p id="noRecent" class="small hint">No saved sessions yet.</p>
+    <ul id="recentList" class="recent hidden"></ul>
+  </div>
+
+</div>
+</body>
+</html>

@@ -121,7 +121,7 @@
       authors,
       venueLine: venueParts.join(" \u00b7 "),
       sourceUrl: url,
-      ids: { arxiv: m.arxivId || null, doi: m.doi || null },
+      ids: { arxiv: arxivId || null, doi: m.doi || null },
       sections: sectionsFrom(doc, article, base),
       bibliography: buildBibliography(doc, base),
     };
