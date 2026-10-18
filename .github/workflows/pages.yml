@@ -26,10 +26,6 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          # The app lives under web/; GitHub Pages serves from the repo root.
-          # The static files are in web/ — we deploy that folder.
-          static_site_generator: custom
 
       - name: Upload web artifact
         uses: actions/upload-pages-artifact@v3
