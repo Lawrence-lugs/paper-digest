@@ -21,6 +21,7 @@ const SYSTEM =
   "You are a careful, skeptical research-paper reader. Output only valid Markdown with YAML frontmatter.";
 
 const SECTION_IDS = {
+  "specific background": "bg",
   motivation: "mot",
   "core idea": "core",
   "distinguishing factor": "diff",
@@ -104,7 +105,7 @@ Part 2, content: each as one line or a short list.
 (C2) For each "In case you missed it" entry, state which of the four tests in the SECTION GUIDE it passes and in a few words why it is not already covered elsewhere. Remove any that fail.
 (C3) List every judging word from the TRACEABILITY paragraph that appears in the draft, with the paper's own wording that supports it, and list every place the draft attributes a result difference to a cause, with the paper's statement or "not stated". Remove or soften any without support.
 (C4) State whether any statement in "My read" depends on a number or fact outside the source text; if so, mark it "not verified" or delete it.
-(C5) List the seven section confidences and say why the spread is justified.
+(C5) List the eight section confidences and say why the spread is justified.
 End with "Fixes to apply: N". Content fixes count as fixes.
 </check>
 <final>  (conditional -- write only when the check found fixes)
@@ -115,9 +116,11 @@ Write <final> ONLY when the check found fixes ("Fixes to apply: N" with N > 0). 
 
 Each of <notes>, <draft> and <check> appears exactly once as an opening tag and once as a closing tag; <final> appears the same way only when the check found fixes, otherwise it is omitted entirely. Never write the strings <notes>, <draft>, <check>, or <final> inside any block's content. Write the notes first, then the draft, then the check, then the final (when written): do not claim a rule passes without citing evidence from the draft.
 
-SECTION GUIDE (the seven sections, in this order)
+SECTION GUIDE (the eight sections, in this order)
 
 Verdict (frontmatter). Two or three sentences: what the paper actually delivers, how far the evidence supports it, and where it is weakest. Specific enough that it could not describe a different paper.
+
+Specific background. The concepts the paper itself stops to explain in its introduction (or in a preliminaries/background section, if it has one) because the reader needs them to follow the method or results. The paper's decision to explain a concept is what puts it here, so a concept qualifies if the paper defines it, motivates it, or illustrates it with an example. Explain each one using only what the paper says, in the order the reader needs them. One short paragraph or a few sentences per concept, starting with a bold term. Exclude: the problem statement and why it matters (Motivation), the proposed method (Core idea), and anything the paper assumes without explaining, even if you think a reader might not know it. If a later section of the digest would not need the concept, leave it out.
 
 Motivation. The problem and why the authors say it matters. End with one sentence on whether the motivation is itself convincing.
 
@@ -146,6 +149,8 @@ verdict: 2-3 sentence verdict
 overallConfidence: NN
 ---
 
+## Specific background (Confidence: NN%)
+...
 ## Motivation (Confidence: NN%)
 ...
 ## Core idea (Confidence: NN%)
@@ -165,7 +170,7 @@ HARD FORMAT RULES
 1. Exactly one <notes>, one <draft> and one <check> block, in that order, plus one <final> only when the check found fixes.
 2. Inside <final>, the first characters are "---" and the frontmatter closes with a second "---" line.
 3. The frontmatter has exactly these keys in this order: title, authors, venue, id, whatRead, verdict, overallConfidence.
-4. The body has exactly seven "## " headings, once each, in this order: Motivation, Core idea, Distinguishing factor, Evaluation and conclusions, In case you missed it, Cautious judgement, Sources and limits.
+4. The body has exactly eight "## " headings, once each, in this order: Specific background, Motivation, Core idea, Distinguishing factor, Evaluation and conclusions, In case you missed it, Cautious judgement, Sources and limits.
 5. Every heading ends with " (Confidence: NN%)".
 6. The judgement table has a header, separator, and exactly four data rows with the four questions worded exactly as given.
 7. Every "In case you missed it" entry starts with "- [pos] ", "- [neg] ", or "- [neu] ".
@@ -175,7 +180,7 @@ HARD FORMAT RULES
 11. No JSON, no text before the frontmatter or after the last section; the block strings do not appear inside contents.
 12. Evaluation and conclusions contains no table; 3 to 7 paragraphs, each begins with a bold label, every paragraph except the last contains "My read:", the last begins with "**Conclusion.**".
 13. Sources and limits contains exactly one prose paragraph.
-14. The seven section confidences contain at least three distinct values, none exceeds 90.
+14. The eight section confidences contain at least three distinct values, none exceeds 90.
 15. Every number cited in Evaluation and conclusions appears in the ledger.`;
 }
 
@@ -208,7 +213,7 @@ function extractMarkdown(content) {
   let m = fmRe.exec(text);
   if (!m && text.startsWith("---\n")) {
     const sectionTitles = new Set([
-      "motivation", "core idea", "distinguishing factor",
+      "specific background", "motivation", "core idea", "distinguishing factor",
       "evaluation and conclusions", "in case you missed it",
       "cautious judgement", "sources and limits",
     ]);

@@ -9,6 +9,10 @@ verdict: The paper reports a working KV260 prototype that trains a four-layer CN
 overallConfidence: 76
 ---
 
+## Specific background (Confidence: 90%)
+
+Local learning means per-layer objectives with no cross-layer error propagation; the paper defines this concept in its introduction so the reader can follow the method. Integer arithmetic means shared-exponent INT8 numerics with INT32 accumulation, illustrated by the conversion equation. Both concepts are needed to follow the Core idea section.
+
 ## Motivation (Confidence: 80%)
 The paper argues that on-device training is bottlenecked by computation, retained forward activations, and data movement. Local learning (a per-layer objective, no cross-layer error propagation) and integer arithmetic each address part of this, and NITRO-D and FF-INT8 show integer local training works on GPUs. The authors say the open question is hardware: how convolution and local-classifier operations should share resources, and how saved operands, gradients, and quantization scales should be stored and reused. They add that local learning still needs operand retention, gradient accumulation, and scale selection.
 
@@ -83,8 +87,8 @@ I read the full arXiv HTML text of v1 (main body, tables, and reference list). T
 1. PASS. One draft block, then this check, then one final block, in that order, nothing outside them.
 2. PASS. The final block starts with "---" and the frontmatter closes with a second "---" line.
 3. PASS. Keys in order: title, authors, venue, id, whatRead, verdict, overallConfidence; overallConfidence is the bare integer 76.
-4. PASS. Seven "## " headings found once each, in the required order: Motivation, Core idea, Distinguishing factor, Evaluation and conclusions, In case you missed it, Cautious judgement, Sources and limits.
-5. PASS. Every heading ends with " (Confidence: NN%)" with real values 80, 85, 70, 78, 75, 65, 90.
+4. PASS. Eight "## " headings found once each, in the required order: Specific background, Motivation, Core idea, Distinguishing factor, Evaluation and conclusions, In case you missed it, Cautious judgement, Sources and limits.
+5. PASS. Every heading ends with " (Confidence: NN%)" with real values 90, 80, 85, 70, 78, 75, 65, 90.
 6. PASS. The table has a header row, a separator row, and four data rows with the questions worded exactly as given; the Confidence cells are 72%, 78%, 68%, 60%.
 7. PASS. All six entries start with "- [pos] ", "- [neg] ", or "- [neu] " on their own lines.
 8. PASS. No triple backticks anywhere.
@@ -106,6 +110,10 @@ whatRead: Full text via arXiv HTML (main body and references; no code, no supple
 verdict: The paper reports a working KV260 prototype that trains a four-layer CNN and its local classifiers from scratch with integer arithmetic on one shared matrix engine. The energy advantage over an integer-method Jetson run is measured under different power boundaries, and the mechanism claims (compact errors, tile folding, direct conversion) rest on logical-capacity accounting and isolated RTL tests rather than board-level ablations. My read is that it is credible as a feasibility demonstration and weak as attribution of gains to individual mechanisms.
 overallConfidence: 76
 ---
+
+## Specific background (Confidence: 90%)
+
+Local learning means per-layer objectives with no cross-layer error propagation; the paper defines this concept in its introduction so the reader can follow the method. Integer arithmetic means shared-exponent INT8 numerics with INT32 accumulation, illustrated by the conversion equation. Both concepts are needed to follow the Core idea section.
 
 ## Motivation (Confidence: 80%)
 The paper argues that on-device training is bottlenecked by computation, retained forward activations, and data movement. Local learning (a per-layer objective, no cross-layer error propagation) and integer arithmetic each address part of this, and NITRO-D and FF-INT8 show integer local training works on GPUs. The authors say the open question is hardware: how convolution and local-classifier operations should share resources, and how saved operands, gradients, and quantization scales should be stored and reused. They add that local learning still needs operand retention, gradient accumulation, and scale selection.

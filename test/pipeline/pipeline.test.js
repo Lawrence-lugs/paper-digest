@@ -20,7 +20,7 @@ import {
   extractDraft,
 } from "../../web/js/pipeline/pipeline.js";
 
-const FM = `---\ntitle: Sample Paper\nauthors: Jane Doe, John Smith\nvenue: arXiv:2610.17099 [cs.AR]\nid: 2610.17099\nwhatRead: arXiv HTML full text\nverdict: A fine paper.\noverallConfidence: 80\n---\n\n## Motivation (Confidence: 80%)\n\nmotivation text.\n\n## Core idea (Confidence: 85%)\n\ncore text.\n\n## Distinguishing factor (Confidence: 80%)\n\ndiff text.\n\n## Evaluation and conclusions (Confidence: 78%)\n\n**Result.** result text. My read: read.\n\n## In case you missed it (Confidence: 75%)\n\n- [pos] a positive entry.\n- [neg] a negative entry.\n\n## Cautious judgement (Confidence: 70%)\n\n| Question | Answer | Confidence |\n| --- | --- | --- |\n| Fair comparison to external baselines? | yes | 80% |\n| Invents its own FoM? | no | 90% |\n| Rewrite of an existing idea? | no | 80% |\n| Reliable enough to reuse? | yes | 85% |\n\n## Sources and limits (Confidence: 85%)\n\nread the source.\n`;
+const FM = `---\ntitle: Sample Paper\nauthors: Jane Doe, John Smith\nvenue: arXiv:2610.17099 [cs.AR]\nid: 2610.17099\nwhatRead: arXiv HTML full text\nverdict: A fine paper.\noverallConfidence: 80\n---\n\n## Specific background (Confidence: 90%)\n\nLocal learning means per-layer objectives without cross-layer error propagation; the paper defines this in its preliminaries.\n\n## Motivation (Confidence: 80%)\n\nmotivation text.\n\n## Core idea (Confidence: 85%)\n\ncore text.\n\n## Distinguishing factor (Confidence: 80%)\n\ndiff text.\n\n## Evaluation and conclusions (Confidence: 78%)\n\n**Result.** result text. My read: read.\n\n## In case you missed it (Confidence: 75%)\n\n- [pos] a positive entry.\n- [neg] a negative entry.\n\n## Cautious judgement (Confidence: 70%)\n\n| Question | Answer | Confidence |\n| --- | --- | --- |\n| Fair comparison to external baselines? | yes | 80% |\n| Invents its own FoM? | no | 90% |\n| Rewrite of an existing idea? | no | 80% |\n| Reliable enough to reuse? | yes | 85% |\n\n## Sources and limits (Confidence: 85%)\n\nread the source.\n`;
 
 const source = {
   site: "arxiv",
@@ -72,14 +72,16 @@ describe("pipeline — prompt / digest parsing", (t) => {
     assert.deepStrictEqual(digest.meta.authors, ["Jane Doe", "John Smith"]);
     assert.strictEqual(digest.meta.id, "2610.17099");
     assert.strictEqual(digest.meta.overallConfidence, 80);
-    assert.strictEqual(digest.sections.length, 7);
-    assert.strictEqual(digest.sections[0].id, "mot");
-    assert.strictEqual(digest.sections[0].confidence, 80);
-    assert.deepStrictEqual(digest.sections[4].entries, [
+    assert.strictEqual(digest.sections.length, 8);
+    assert.strictEqual(digest.sections[0].id, "bg");
+    assert.strictEqual(digest.sections[0].title, "Specific background");
+    assert.strictEqual(digest.sections[1].id, "mot");
+    assert.strictEqual(digest.sections[0].confidence, 90);
+    assert.deepStrictEqual(digest.sections[5].entries, [
       { text: "a positive entry.", tag: "pos" },
       { text: "a negative entry.", tag: "neg" },
     ]);
-    assert.strictEqual(digest.sections[5].rows.length, 4);
+    assert.strictEqual(digest.sections[6].rows.length, 4);
     assert.strictEqual(digest.raw, response);
   });
 

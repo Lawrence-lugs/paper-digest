@@ -14,7 +14,7 @@ const { test, expect } = require("playwright/test");
 // /assets/ and /mock/ too).
 const MOCK = "http://127.0.0.1:8910/mock";
 
-// A valid AI digest response: YAML frontmatter + the seven sections, with a
+// A valid AI digest response: YAML frontmatter + the eight sections, with a
 // <figure data-n="1"> that resolves against the ingested source's figures,
 // wrapped in a <final> block per the prompt contract.
 const DIGEST_MD = `<final>
@@ -27,6 +27,9 @@ whatRead: site=arxiv; 4 sections; 1 figure; references excluded
 verdict: The paper delivers a local-learning method; evidence supports the core claim where measured, and it is weakest on scaling claims.
 overallConfidence: 80
 ---
+## Specific background (Confidence: 90%)
+Local learning means per-layer objectives with no cross-layer error propagation, defined in the introduction so the reader can follow the method.
+
 ## Motivation (Confidence: 80%)
 Local learning addresses the problem of training on-device. The motivation is convincing.
 

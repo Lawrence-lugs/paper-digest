@@ -8,6 +8,10 @@ verdict: This paper proposes a new approach, and the results are promising under
 overallConfidence: 80
 ---
 
+## Specific background (Confidence: 90%)
+
+Local learning means per-layer objectives with no cross-layer error propagation; the paper defines this in its introduction. Self-supervised learning means training without large labeled datasets, illustrated by the seed-set approach. Both concepts are needed to follow the Core idea section.
+
 ## Motivation (Confidence: 85%)
 
 Existing methods require large labeled datasets, which are expensive to collect. This motivates a self-supervised approach that needs only a small seed set.

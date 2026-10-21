@@ -94,6 +94,7 @@ function renderSection(s) {
     case "mot":
     case "diff":
     case "core":
+    case "bg":
       body = `<div class="prose">${renderContent(s.content || "")}</div>`;
       break;
     case "eval":
