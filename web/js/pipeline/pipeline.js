@@ -80,6 +80,9 @@ Everything you write should be traceable to what the paper says or does on the p
 SOURCE HANDLING
 The source text below was machine-extracted from the paper's HTML. It may contain page chrome, garbled symbols, or math written twice. Ignore chrome. For math, use the clean LaTeX form and never copy garbled symbols. If garbling made part of the paper unreadable, say which part in "Sources and limits" and lower that section's confidence.
 
+ABBREVIATIONS
+Spell out an abbreviation the first time it appears, then never again. For example, TP (Tensor Parallelism).
+
 SOURCE TEXT (what was read: ${source.whatRead}):
 \`\`\`
 ${source.paperText}
