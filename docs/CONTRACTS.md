@@ -6,6 +6,7 @@ any agent who needs a change writes it in `docs/handoff/<agent>.md` for the
 lead to apply between phases.
 
 ```js
+{% raw %}
 /** @typedef {{n:string, dataA:string, caption:string, url:string, svg:string}} Figure */
 /** @typedef {{site:string, ids:{arxiv?:string|null, doi?:string|null}, key:string,
  *   title:string, authors:string[], venue:string, sourceUrl:string|null,
@@ -18,7 +19,6 @@ lead to apply between phases.
 /** @typedef {{key:string, site:string, ids:{arxiv?:string|null, doi?:string|null},
  *   title:string, sourceUrl:string|null, baseUrl:string|null,
  *   figures:Figure[], createdAt:number, digestMd?:string|null}} Session */
-
 /* ---------------------------------------------------------------- ingest (A) */
 
 /**
@@ -118,6 +118,7 @@ export function sessionKey(site, ids) { throw new Error("NotImplemented"); }
  * If all fail, the UI offers "Attach source" and renders figure links, never
  * blank figures.
  */
+{% endraw %}
 ```
 
 ### Notes
