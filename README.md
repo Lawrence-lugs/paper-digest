@@ -1,7 +1,7 @@
 # paper-digest
 
 Static, client-side web app for reading scholarly papers and producing structured digests.
-No server process — runs entirely in the browser (GitHub Pages compatible). Covers three flows:
+No server process — runs entirely in the browser. Covers three flows:
 
 - **Digest** — ingest a paper (arXiv ID/URL, any URL, pasted HTML, uploaded `.html`), run the LLM digest, open/save/copy the result.
 - **Prompt** — ingest a source, copy the master prompt, send it to any chat AI.
