@@ -248,6 +248,14 @@ export async function renderDigest(digest, ctx = {}) {
   const meta = digest.meta || {};
   const authors = Array.isArray(meta.authors) ? meta.authors.join(", ") : String(meta.authors || "");
 
+  // Link the muted venue/id/what-read line back to the original arXiv HTML when
+  // the id is an arXiv id (version stripped, e.g. 2610.17099).
+  const id = String(meta.id || "");
+  const isArxivId = /^\d{4}\.\d{4,5}(?:v\d+)?$/i.test(id);
+  const arxivUrl = isArxivId ? `https://arxiv.org/html/${id.replace(/v\d+$/i, "")}` : "";
+  const arxivOpen = arxivUrl ? `<a href="${esc(arxivUrl)}" style="color:inherit;text-decoration:underline;cursor:pointer">` : "";
+  const arxivClose = arxivUrl ? "</a>" : "";
+
   const tmpl = await loadTemplate();
   let html = tmpl
     .split("{{TITLE}}").join(esc(meta.title || ""))
@@ -257,6 +265,8 @@ export async function renderDigest(digest, ctx = {}) {
     .split("{{WHAT_READ}}").join(esc(meta.whatRead || ""))
     .split("{{VERDICT}}").join(esc(meta.verdict || ""))
     .split("{{OVERALL_CONF}}").join(esc(meta.overallConfidence || 0))
+    .split("{{ARXIV_OPEN}}").join(arxivOpen)
+    .split("{{ARXIV_CLOSE}}").join(arxivClose)
     .split("{{SECTIONS}}").join(safeSections)
     .split("{{NAV_LINKS}}").join(navLinks)
     .split("{{BASE}}").join(esc(base))
