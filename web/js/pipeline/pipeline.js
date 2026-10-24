@@ -184,7 +184,9 @@ HARD FORMAT RULES
 12. Evaluation and conclusions contains no table; 3 to 7 paragraphs, each begins with a bold label, every paragraph except the last contains "My read:", the last begins with "**Conclusion.**".
 13. Sources and limits contains exactly one prose paragraph.
 14. The eight section confidences contain at least three distinct values, none exceeds 90.
-15. Every number cited in Evaluation and conclusions appears in the ledger.`;
+15. Every number cited in Evaluation and conclusions appears in the ledger.
+16. Wrap the output as a markdown codeblock.
+`;
 }
 
 /* ---------------------------------------------------------------- response parsing */
