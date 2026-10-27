@@ -320,13 +320,24 @@ export async function renderDigest(digest, ctx = {}) {
   }
 
   // Serialize to HTML string (avoid XMLSerializer which escapes script content)
+  // Prepend DOCTYPE if present, since outerHTML/serializeDocument don't include it
+  function withDoctype(html) {
+    if (!doc.doctype) return html;
+    const dt = doc.doctype;
+    let doctypeStr = "<!DOCTYPE " + dt.name;
+    if (dt.publicId) doctypeStr += ' PUBLIC "' + dt.publicId + '"';
+    if (dt.systemId) doctypeStr += ' "' + dt.systemId + '"';
+    doctypeStr += ">";
+    return doctypeStr + html;
+  }
+
   if (hasNativeSerializer()) {
     // Browser environment or jsdom - use outerHTML for proper HTML serialization
-    return doc.documentElement.outerHTML;
+    return withDoctype(doc.documentElement.outerHTML);
   } else {
     // Node.js test environment (jsdom) - use static serializeDocument
     const { serializeDocument } = await import("jsdom");
-    return serializeDocument(doc);
+    return withDoctype(serializeDocument(doc));
   }
 }
 
