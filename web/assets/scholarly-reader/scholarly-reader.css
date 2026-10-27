@@ -108,8 +108,9 @@
 
 :root,
   :host {
-  --sr-paper: #F2F5F3;
-  --sr-ink: #16252C;
+  /* Default: Warm paper */
+  --sr-paper: #F7F3E9;
+  --sr-ink: #292821;
   --sr-mute: #5B6C73;
   --sr-rule: #CBD6D3;
   --sr-teal: #0E6B73;
@@ -117,6 +118,86 @@
   --sr-risk: #A83A2C;
   --sr-warn: #9A6A12;
   --sr-card: #FBFCFB;
+}
+
+/* --- Preset themes --- */
+
+[data-theme="warm-paper"] {
+  --sr-paper: #F7F3E9;
+  --sr-ink: #292821;
+}
+
+[data-theme="pure-white"] {
+  --sr-paper: #FFFFFF;
+  --sr-ink: #222222;
+}
+
+[data-theme="eink-gray"] {
+  --sr-paper: #F2F2F0;
+  --sr-ink: #242424;
+}
+
+[data-theme="parchment"] {
+  --sr-paper: #F1E3C6;
+  --sr-ink: #49351F;
+}
+
+[data-theme="cream-book"] {
+  --sr-paper: #F4EBDD;
+  --sr-ink: #302B26;
+}
+
+[data-theme="newsprint"] {
+  --sr-paper: #E8E0D2;
+  --sr-ink: #25231F;
+}
+
+[data-theme="vscode-dark"] {
+  --sr-paper: #1E1E1E;
+  --sr-ink: #D4D4D4;
+  --sr-mute: #9C9C9C;
+  --sr-rule: #3C3C3C;
+  --sr-card: #252526;
+}
+
+[data-theme="oled-black"] {
+  --sr-paper: #121212;
+  --sr-ink: #D0D0D0;
+  --sr-mute: #888888;
+  --sr-rule: #2A2A2A;
+  --sr-card: #1A1A1A;
+}
+
+[data-theme="charcoal"] {
+  --sr-paper: #282828;
+  --sr-ink: #D0CDC7;
+  --sr-mute: #928374;
+  --sr-rule: #3C3836;
+  --sr-card: #32302F;
+}
+
+[data-theme="midnight-blue"] {
+  --sr-paper: #1C2430;
+  --sr-ink: #D1DCE9;
+  --sr-mute: #7A8A9A;
+  --sr-rule: #2A3A4A;
+  --sr-card: #233040;
+}
+
+[data-theme="monokai"] {
+  --sr-paper: #272822;
+  --sr-ink: #E3E3D7;
+  --sr-mute: #75715E;
+  --sr-rule: #3E3D32;
+  --sr-card: #2E2E28;
+}
+
+[data-theme="solarized-dark"] {
+  --sr-paper: #002B36;
+  --sr-ink: #D5D0BD;
+  --sr-mute: #657B83;
+  --sr-rule: #073642;
+  --sr-card: #073642;
 }
 
 * {
@@ -487,8 +568,20 @@ html {
   color: var(--sr-teal);
 }
 
+.fixed {
+  position: fixed;
+}
+
 .block {
   display: block;
+}
+
+.inline {
+  display: inline;
+}
+
+.flex {
+  display: flex;
 }
 
 .table {
@@ -505,6 +598,14 @@ html {
 
 .hidden {
   display: none;
+}
+
+.flex-shrink {
+  flex-shrink: 1;
+}
+
+.border {
+  border-width: 1px;
 }
 
 .shadow {

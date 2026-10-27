@@ -5,6 +5,9 @@
 // and matched nothing, which is why "everything except the title disappeared".
 // Real structure:
 //  - Full text root: <div id="BodyWrapper"><div id="article"> ... </div></div>
+//  - Abstract: <div class="abstract-text"> in the page header, outside
+//    #article and not wrapped in a .section block -- sectionsFrom() never
+//    sees it, so parse() prepends it as its own reading-mode section.
 //  - Each section: <div class="section" id="sec1"><div class="header
 //    article-hdr"><div class="kicker">SECTION I.</div><h2>Introduction</h2>
 //    </div><p>...</p>...<div class="figure ...">...</div>...</div>
@@ -44,6 +47,54 @@
 
   function tagCitations(root) {
     CSR.util.tagCitationRefs(root, 'a[ref-type="bibr"][anchor]', (a) => a.getAttribute("anchor"));
+  }
+
+  // IEEE does not wrap the abstract in a .section block, and on current
+  // templates it sits outside #article entirely (in the page header), so
+  // sectionsFrom() never sees it.
+  //
+  // The abstract is built as a first reading-mode section through the same
+  // sanitization pipeline as body sections (clone -> strip heading ->
+  // cloneClean) so that equations and the reading mark behave identically to
+  // the rest of the article. cloneClean(root) surfaces root's *children* as
+  // the content fragment, so the abstract flow is wrapped in a <p> block:
+  // without that it would land as bare inline text under <main> and the
+  // reading mark (which only units .csr-page p / li / blockquote / figcaption
+  // / td and display math) could not reach it.
+  function abstractSection(doc, base) {
+    const src = doc.querySelector("div.abstract-text");
+    if (!src) return null;
+    const clone = src.cloneNode(true);
+    // Drop the publisher's own "Abstract:" heading; render.js prints the
+    // section title (<h2 id="abstract">) itself.
+    clone.querySelectorAll("h2, h3").forEach((h) => {
+      if (/^\s*abstract\s*:?\s*$/i.test(CSR.util.textContentOf(h))) h.remove();
+    });
+    groupLooseFigures(clone);
+    tagCitations(clone);
+    const block = doc.createElement("div");
+    const p = doc.createElement("p");
+    while (clone.firstChild) p.appendChild(clone.firstChild);
+    block.appendChild(p);
+    return {
+      id: "abstract",
+      title: "Abstract",
+      content: CSR.util.cloneClean(block, { baseURI: base }),
+    };
+  }
+
+  // Abstract text (string only) for the no-full-text fallback. Equations
+  // cannot be reconstructed from a meta tag, so plain text is the best
+  // available there -- still wrapped as a <p> block in parse() so the
+  // reading mark can reach it.
+  function abstractText(doc) {
+    for (const sel of ABSTRACT_SELECTORS) {
+      const el = doc.querySelector(sel);
+      if (!el) continue;
+      const text = el.tagName === "META" ? el.getAttribute("content") : CSR.util.textContentOf(el);
+      if (text) return text;
+    }
+    return null;
   }
 
   function groupLooseFigures(root) {
@@ -121,20 +172,20 @@
     let sections;
     if (body) {
       sections = sectionsFrom(doc, body, base);
+      // The abstract is not inside a .section block, so sectionsFrom()
+      // never sees it -- prepend it as its own reading-mode section.
+      const absSec = abstractSection(doc, base);
+      if (absSec) sections.unshift(absSec);
     } else {
       // Full text unavailable: fall back to just the abstract so the toggle
       // still produces something useful rather than silently doing nothing.
-      let abstractText = null;
-      for (const sel of ABSTRACT_SELECTORS) {
-        const el = doc.querySelector(sel);
-        if (!el) continue;
-        abstractText = el.tagName === "META" ? el.getAttribute("content") : CSR.util.textContentOf(el);
-        if (abstractText) break;
-      }
-      if (!abstractText) return null;
+      const abs = abstractText(doc);
+      if (!abs) return null;
+      const block = doc.createElement("div");
       const p = doc.createElement("p");
-      p.textContent = abstractText;
-      sections = [{ id: "abstract", title: "Abstract", content: CSR.util.cloneClean(p, { baseURI: base }) }];
+      p.textContent = abs;
+      block.appendChild(p);
+      sections = [{ id: "abstract", title: "Abstract", content: CSR.util.cloneClean(block, { baseURI: base }) }];
     }
 
     const venueParts = [];

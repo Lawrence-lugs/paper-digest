@@ -7,7 +7,7 @@
 // dist/ is generated from this file by scripts/build.mjs. Keep every export
 // a top-level `export function|const`; the classic build relies on that.
 
-export const CSS = "*, ::before, ::after {\n  --tw-border-spacing-x: 0;\n  --tw-border-spacing-y: 0;\n  --tw-translate-x: 0;\n  --tw-translate-y: 0;\n  --tw-rotate: 0;\n  --tw-skew-x: 0;\n  --tw-skew-y: 0;\n  --tw-scale-x: 1;\n  --tw-scale-y: 1;\n  --tw-pan-x:  ;\n  --tw-pan-y:  ;\n  --tw-pinch-zoom:  ;\n  --tw-scroll-snap-strictness: proximity;\n  --tw-gradient-from-position:  ;\n  --tw-gradient-via-position:  ;\n  --tw-gradient-to-position:  ;\n  --tw-ordinal:  ;\n  --tw-slashed-zero:  ;\n  --tw-numeric-figure:  ;\n  --tw-numeric-spacing:  ;\n  --tw-numeric-fraction:  ;\n  --tw-ring-inset:  ;\n  --tw-ring-offset-width: 0px;\n  --tw-ring-offset-color: #fff;\n  --tw-ring-color: rgb(59 130 246 / 0.5);\n  --tw-ring-offset-shadow: 0 0 #0000;\n  --tw-ring-shadow: 0 0 #0000;\n  --tw-shadow: 0 0 #0000;\n  --tw-shadow-colored: 0 0 #0000;\n  --tw-blur:  ;\n  --tw-brightness:  ;\n  --tw-contrast:  ;\n  --tw-grayscale:  ;\n  --tw-hue-rotate:  ;\n  --tw-invert:  ;\n  --tw-saturate:  ;\n  --tw-sepia:  ;\n  --tw-drop-shadow:  ;\n  --tw-backdrop-blur:  ;\n  --tw-backdrop-brightness:  ;\n  --tw-backdrop-contrast:  ;\n  --tw-backdrop-grayscale:  ;\n  --tw-backdrop-hue-rotate:  ;\n  --tw-backdrop-invert:  ;\n  --tw-backdrop-opacity:  ;\n  --tw-backdrop-saturate:  ;\n  --tw-backdrop-sepia:  ;\n  --tw-contain-size:  ;\n  --tw-contain-layout:  ;\n  --tw-contain-paint:  ;\n  --tw-contain-style:  ;\n}\n\n::backdrop {\n  --tw-border-spacing-x: 0;\n  --tw-border-spacing-y: 0;\n  --tw-translate-x: 0;\n  --tw-translate-y: 0;\n  --tw-rotate: 0;\n  --tw-skew-x: 0;\n  --tw-skew-y: 0;\n  --tw-scale-x: 1;\n  --tw-scale-y: 1;\n  --tw-pan-x:  ;\n  --tw-pan-y:  ;\n  --tw-pinch-zoom:  ;\n  --tw-scroll-snap-strictness: proximity;\n  --tw-gradient-from-position:  ;\n  --tw-gradient-via-position:  ;\n  --tw-gradient-to-position:  ;\n  --tw-ordinal:  ;\n  --tw-slashed-zero:  ;\n  --tw-numeric-figure:  ;\n  --tw-numeric-spacing:  ;\n  --tw-numeric-fraction:  ;\n  --tw-ring-inset:  ;\n  --tw-ring-offset-width: 0px;\n  --tw-ring-offset-color: #fff;\n  --tw-ring-color: rgb(59 130 246 / 0.5);\n  --tw-ring-offset-shadow: 0 0 #0000;\n  --tw-ring-shadow: 0 0 #0000;\n  --tw-shadow: 0 0 #0000;\n  --tw-shadow-colored: 0 0 #0000;\n  --tw-blur:  ;\n  --tw-brightness:  ;\n  --tw-contrast:  ;\n  --tw-grayscale:  ;\n  --tw-hue-rotate:  ;\n  --tw-invert:  ;\n  --tw-saturate:  ;\n  --tw-sepia:  ;\n  --tw-drop-shadow:  ;\n  --tw-backdrop-blur:  ;\n  --tw-backdrop-brightness:  ;\n  --tw-backdrop-contrast:  ;\n  --tw-backdrop-grayscale:  ;\n  --tw-backdrop-hue-rotate:  ;\n  --tw-backdrop-invert:  ;\n  --tw-backdrop-opacity:  ;\n  --tw-backdrop-saturate:  ;\n  --tw-backdrop-sepia:  ;\n  --tw-contain-size:  ;\n  --tw-contain-layout:  ;\n  --tw-contain-paint:  ;\n  --tw-contain-style:  ;\n}\n\n:root,\n  :host {\n  --sr-paper: #F2F5F3;\n  --sr-ink: #16252C;\n  --sr-mute: #5B6C73;\n  --sr-rule: #CBD6D3;\n  --sr-teal: #0E6B73;\n  --sr-gain: #2B7A4B;\n  --sr-risk: #A83A2C;\n  --sr-warn: #9A6A12;\n  --sr-card: #FBFCFB;\n}\n\n* {\n  box-sizing: border-box;\n}\n\nhtml {\n  font-family: var(--font-serif);\n  line-height: 1.65;\n  background: var(--sr-paper);\n  color: var(--sr-ink);\n}\n\n:host {\n  all: initial;\n  display: block;\n}\n\n.\\!container {\n  width: 100% !important;\n}\n\n.container {\n  width: 100%;\n}\n\n@media (min-width: 640px) {\n  .\\!container {\n    max-width: 640px !important;\n  }\n\n  .container {\n    max-width: 640px;\n  }\n}\n\n@media (min-width: 768px) {\n  .\\!container {\n    max-width: 768px !important;\n  }\n\n  .container {\n    max-width: 768px;\n  }\n}\n\n@media (min-width: 1024px) {\n  .\\!container {\n    max-width: 1024px !important;\n  }\n\n  .container {\n    max-width: 1024px;\n  }\n}\n\n@media (min-width: 1280px) {\n  .\\!container {\n    max-width: 1280px !important;\n  }\n\n  .container {\n    max-width: 1280px;\n  }\n}\n\n@media (min-width: 1536px) {\n  .\\!container {\n    max-width: 1536px !important;\n  }\n\n  .container {\n    max-width: 1536px;\n  }\n}\n\n.sr-grid {\n  display: block;\n  position: relative;\n  min-height: 100%;\n}\n\n.sr-page {\n  min-width: 0;\n}\n\n.sr-toc-wide .sr-grid {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);\n  gap: 1.5rem;\n}\n\n.sr-toc-wide .sr-page {\n  grid-column: 2;\n}\n\n.sr-main {\n  max-width: 72ch;\n  margin: 0 auto;\n  padding: 2.5rem 1.25rem;\n}\n\n.sr-header {\n  margin-bottom: 1.5rem;\n}\n\n.sr-title {\n  font-family: var(--font-sans);\n  font-weight: 600;\n  font-size: 1.8rem;\n  line-height: 1.25;\n  margin: 0.3rem 0;\n}\n\n.sr-authors {\n  font-family: var(--font-sans);\n  font-size: 0.95rem;\n  color: var(--sr-mute);\n  margin: 0 0 1rem;\n}\n\n.sr-kicker {\n  font-family: var(--font-sans);\n  font-size: 0.85rem;\n  color: var(--sr-mute);\n  margin: 0;\n}\n\n.sr-kicker-link {\n  color: inherit;\n  text-decoration: underline;\n  cursor: pointer;\n}\n\n.sr-verdict {\n  margin-top: 1rem;\n}\n\n.sr-verdict b {\n  font-weight: 600;\n}\n\n.sr-h2 {\n  font-family: var(--font-sans);\n  font-weight: 600;\n  font-size: 1.3rem;\n  border-left: 4px solid var(--sr-teal);\n  padding-left: 0.7rem;\n  margin: 2.2rem 0 0.8rem;\n  scroll-margin-top: 1rem;\n}\n\n.sr-item {\n  border-bottom: 1px solid var(--sr-rule);\n  padding: 0.7rem 0;\n  max-width: 72ch;\n}\n\n.sr-table-wrap {\n  overflow-x: auto;\n  margin: 1rem 0;\n}\n\n.sr-table-wrap table {\n  border-collapse: collapse;\n  width: 100%;\n  font-size: 0.88rem;\n}\n\n.sr-table-wrap th,\n  .sr-table-wrap td {\n  border-bottom: 1px solid var(--sr-rule);\n  padding: 0.45rem 0.5rem;\n  text-align: left;\n  vertical-align: top;\n}\n\n.sr-table-wrap th {\n  font-family: var(--font-sans);\n  font-weight: 600;\n  color: var(--sr-mute);\n}\n\n.sr-figure {\n  background: var(--sr-card);\n  border: 1px solid var(--sr-rule);\n  padding: 0.6rem;\n  margin: 1.4rem 0;\n  max-width: 100%;\n  overflow-x: auto;\n}\n\n.sr-figure img,\n  .sr-figure svg {\n  display: block;\n  width: 100%;\n  height: auto;\n  margin: 0;\n}\n\n.sr-figure figcaption {\n  font-size: 0.8rem;\n  color: var(--sr-mute);\n  margin-top: 0.4rem;\n}\n\n.sr-toc {\n  position: absolute;\n  top: 4.25rem;\n  left: 1rem;\n  width: 14rem;\n  max-height: calc(100% - 5.75rem);\n  overflow-y: auto;\n  font-family: var(--font-sans);\n  font-size: 0.82rem;\n  line-height: 1.35;\n  display: none;\n}\n\n.sr-toc-title {\n  font-size: 0.7rem;\n  font-weight: 600;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  color: var(--sr-mute);\n  margin: 0 0 0.6rem 0.6rem;\n}\n\n.sr-toc ul {\n  list-style: none;\n  margin: 0;\n  padding: 0;\n}\n\n.sr-toc-link {\n  display: block;\n  padding: 0.28rem 0.6rem;\n  color: var(--sr-mute);\n  text-decoration: none;\n  border-left: 2px solid var(--sr-rule);\n}\n\n.sr-toc-link:hover {\n  color: var(--sr-ink);\n  background: rgba(22, 37, 44, 0.04);\n}\n\n.sr-toc-sub {\n  padding-left: 1.3rem;\n  font-size: 0.78rem;\n}\n\n.sr-toc-link.active,\n  .sr-toc-link[aria-current] {\n  color: var(--sr-teal);\n  border-left-color: var(--sr-teal);\n  font-weight: 600;\n}\n\n.sr-toc-btn {\n  display: none;\n  -webkit-appearance: none;\n     -moz-appearance: none;\n          appearance: none;\n  border: 1px solid var(--sr-rule);\n  background: var(--sr-card);\n  border-radius: 6px;\n  height: 1.8rem;\n  padding: 0 0.6rem;\n  cursor: pointer;\n  font: inherit;\n  color: var(--sr-ink);\n}\n\n.sr-toc-wide .sr-toc {\n  display: block;\n}\n\n.sr-root:not(.sr-toc-wide) .sr-toc-btn {\n  display: inline-block;\n}\n\n.sr-root:not(.sr-toc-wide).sr-toc-open .sr-toc {\n  display: block;\n  top: 3.1rem;\n  left: 0;\n  bottom: 0;\n  width: 17rem;\n  max-height: none;\n  background: var(--sr-card);\n  border-right: 1px solid var(--sr-rule);\n  padding: 1rem;\n  z-index: 2;\n  box-shadow: 4px 0 14px rgba(22, 37, 44, 0.12);\n}\n\n.sr-badge {\n  font-family: var(--font-sans);\n  font-size: 0.75rem;\n  font-weight: 600;\n  border-radius: 999px;\n  padding: 0.05rem 0.5rem;\n  margin-left: 0.5rem;\n  white-space: nowrap;\n  vertical-align: middle;\n  border: 1px solid;\n}\n\n.sr-unit {\n  box-decoration-break: clone;\n  -webkit-box-decoration-break: clone;\n  border-radius: 3px;\n}\n\n.sr-on {\n  background: rgba(22, 37, 44, 0.15);\n  box-shadow: 0 0 0 2px rgba(22, 37, 44, 0.15);\n}\n\n.sr-active .sr-unit:hover:not(.sr-on) {\n  background: rgba(22, 37, 44, 0.06);\n}\n\n.sr-hint {\n  position: fixed;\n  right: 0.8rem;\n  bottom: 0.7rem;\n  font: 600 0.7rem var(--font-sans);\n  color: var(--sr-mute);\n  background: var(--sr-card);\n  border: 1px solid var(--sr-rule);\n  border-radius: 6px;\n  padding: 0.2rem 0.55rem;\n  opacity: 0.9;\n  pointer-events: none;\n}\n\n@media print {\n  .sr-on {\n    background: none;\n    box-shadow: none;\n  }\n\n  .sr-hint {\n    display: none;\n  }\n}\n\n.sr-page p,\n  .sr-page li,\n  .sr-page .sr-item,\n  .sr-page blockquote {\n  text-align: justify;\n  text-justify: inter-word;\n  hyphens: auto;\n  -webkit-hyphens: auto;\n  overflow-wrap: break-word;\n}\n\n.sr-page blockquote {\n  border-left: 3px solid var(--sr-rule);\n  padding-left: 1rem;\n  color: var(--sr-mute);\n  margin: 1.1rem 0;\n}\n\n.sr-page a {\n  color: var(--sr-teal);\n}\n\n.block {\n  display: block;\n}\n\n.table {\n  display: table;\n}\n\n.grid {\n  display: grid;\n}\n\n.contents {\n  display: contents;\n}\n\n.hidden {\n  display: none;\n}\n\n.shadow {\n  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);\n  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);\n  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);\n}\n";
+export const CSS = "*, ::before, ::after {\n  --tw-border-spacing-x: 0;\n  --tw-border-spacing-y: 0;\n  --tw-translate-x: 0;\n  --tw-translate-y: 0;\n  --tw-rotate: 0;\n  --tw-skew-x: 0;\n  --tw-skew-y: 0;\n  --tw-scale-x: 1;\n  --tw-scale-y: 1;\n  --tw-pan-x:  ;\n  --tw-pan-y:  ;\n  --tw-pinch-zoom:  ;\n  --tw-scroll-snap-strictness: proximity;\n  --tw-gradient-from-position:  ;\n  --tw-gradient-via-position:  ;\n  --tw-gradient-to-position:  ;\n  --tw-ordinal:  ;\n  --tw-slashed-zero:  ;\n  --tw-numeric-figure:  ;\n  --tw-numeric-spacing:  ;\n  --tw-numeric-fraction:  ;\n  --tw-ring-inset:  ;\n  --tw-ring-offset-width: 0px;\n  --tw-ring-offset-color: #fff;\n  --tw-ring-color: rgb(59 130 246 / 0.5);\n  --tw-ring-offset-shadow: 0 0 #0000;\n  --tw-ring-shadow: 0 0 #0000;\n  --tw-shadow: 0 0 #0000;\n  --tw-shadow-colored: 0 0 #0000;\n  --tw-blur:  ;\n  --tw-brightness:  ;\n  --tw-contrast:  ;\n  --tw-grayscale:  ;\n  --tw-hue-rotate:  ;\n  --tw-invert:  ;\n  --tw-saturate:  ;\n  --tw-sepia:  ;\n  --tw-drop-shadow:  ;\n  --tw-backdrop-blur:  ;\n  --tw-backdrop-brightness:  ;\n  --tw-backdrop-contrast:  ;\n  --tw-backdrop-grayscale:  ;\n  --tw-backdrop-hue-rotate:  ;\n  --tw-backdrop-invert:  ;\n  --tw-backdrop-opacity:  ;\n  --tw-backdrop-saturate:  ;\n  --tw-backdrop-sepia:  ;\n  --tw-contain-size:  ;\n  --tw-contain-layout:  ;\n  --tw-contain-paint:  ;\n  --tw-contain-style:  ;\n}\n\n::backdrop {\n  --tw-border-spacing-x: 0;\n  --tw-border-spacing-y: 0;\n  --tw-translate-x: 0;\n  --tw-translate-y: 0;\n  --tw-rotate: 0;\n  --tw-skew-x: 0;\n  --tw-skew-y: 0;\n  --tw-scale-x: 1;\n  --tw-scale-y: 1;\n  --tw-pan-x:  ;\n  --tw-pan-y:  ;\n  --tw-pinch-zoom:  ;\n  --tw-scroll-snap-strictness: proximity;\n  --tw-gradient-from-position:  ;\n  --tw-gradient-via-position:  ;\n  --tw-gradient-to-position:  ;\n  --tw-ordinal:  ;\n  --tw-slashed-zero:  ;\n  --tw-numeric-figure:  ;\n  --tw-numeric-spacing:  ;\n  --tw-numeric-fraction:  ;\n  --tw-ring-inset:  ;\n  --tw-ring-offset-width: 0px;\n  --tw-ring-offset-color: #fff;\n  --tw-ring-color: rgb(59 130 246 / 0.5);\n  --tw-ring-offset-shadow: 0 0 #0000;\n  --tw-ring-shadow: 0 0 #0000;\n  --tw-shadow: 0 0 #0000;\n  --tw-shadow-colored: 0 0 #0000;\n  --tw-blur:  ;\n  --tw-brightness:  ;\n  --tw-contrast:  ;\n  --tw-grayscale:  ;\n  --tw-hue-rotate:  ;\n  --tw-invert:  ;\n  --tw-saturate:  ;\n  --tw-sepia:  ;\n  --tw-drop-shadow:  ;\n  --tw-backdrop-blur:  ;\n  --tw-backdrop-brightness:  ;\n  --tw-backdrop-contrast:  ;\n  --tw-backdrop-grayscale:  ;\n  --tw-backdrop-hue-rotate:  ;\n  --tw-backdrop-invert:  ;\n  --tw-backdrop-opacity:  ;\n  --tw-backdrop-saturate:  ;\n  --tw-backdrop-sepia:  ;\n  --tw-contain-size:  ;\n  --tw-contain-layout:  ;\n  --tw-contain-paint:  ;\n  --tw-contain-style:  ;\n}\n\n:root,\n  :host {\n  /* Default: Warm paper */\n  --sr-paper: #F7F3E9;\n  --sr-ink: #292821;\n  --sr-mute: #5B6C73;\n  --sr-rule: #CBD6D3;\n  --sr-teal: #0E6B73;\n  --sr-gain: #2B7A4B;\n  --sr-risk: #A83A2C;\n  --sr-warn: #9A6A12;\n  --sr-card: #FBFCFB;\n}\n\n/* --- Preset themes --- */\n\n[data-theme=\"warm-paper\"] {\n  --sr-paper: #F7F3E9;\n  --sr-ink: #292821;\n}\n\n[data-theme=\"pure-white\"] {\n  --sr-paper: #FFFFFF;\n  --sr-ink: #222222;\n}\n\n[data-theme=\"eink-gray\"] {\n  --sr-paper: #F2F2F0;\n  --sr-ink: #242424;\n}\n\n[data-theme=\"parchment\"] {\n  --sr-paper: #F1E3C6;\n  --sr-ink: #49351F;\n}\n\n[data-theme=\"cream-book\"] {\n  --sr-paper: #F4EBDD;\n  --sr-ink: #302B26;\n}\n\n[data-theme=\"newsprint\"] {\n  --sr-paper: #E8E0D2;\n  --sr-ink: #25231F;\n}\n\n[data-theme=\"vscode-dark\"] {\n  --sr-paper: #1E1E1E;\n  --sr-ink: #D4D4D4;\n  --sr-mute: #9C9C9C;\n  --sr-rule: #3C3C3C;\n  --sr-card: #252526;\n}\n\n[data-theme=\"oled-black\"] {\n  --sr-paper: #121212;\n  --sr-ink: #D0D0D0;\n  --sr-mute: #888888;\n  --sr-rule: #2A2A2A;\n  --sr-card: #1A1A1A;\n}\n\n[data-theme=\"charcoal\"] {\n  --sr-paper: #282828;\n  --sr-ink: #D0CDC7;\n  --sr-mute: #928374;\n  --sr-rule: #3C3836;\n  --sr-card: #32302F;\n}\n\n[data-theme=\"midnight-blue\"] {\n  --sr-paper: #1C2430;\n  --sr-ink: #D1DCE9;\n  --sr-mute: #7A8A9A;\n  --sr-rule: #2A3A4A;\n  --sr-card: #233040;\n}\n\n[data-theme=\"monokai\"] {\n  --sr-paper: #272822;\n  --sr-ink: #E3E3D7;\n  --sr-mute: #75715E;\n  --sr-rule: #3E3D32;\n  --sr-card: #2E2E28;\n}\n\n[data-theme=\"solarized-dark\"] {\n  --sr-paper: #002B36;\n  --sr-ink: #D5D0BD;\n  --sr-mute: #657B83;\n  --sr-rule: #073642;\n  --sr-card: #073642;\n}\n\n* {\n  box-sizing: border-box;\n}\n\nhtml {\n  font-family: var(--font-serif);\n  line-height: 1.65;\n  background: var(--sr-paper);\n  color: var(--sr-ink);\n}\n\n:host {\n  all: initial;\n  display: block;\n}\n\n.\\!container {\n  width: 100% !important;\n}\n\n.container {\n  width: 100%;\n}\n\n@media (min-width: 640px) {\n  .\\!container {\n    max-width: 640px !important;\n  }\n\n  .container {\n    max-width: 640px;\n  }\n}\n\n@media (min-width: 768px) {\n  .\\!container {\n    max-width: 768px !important;\n  }\n\n  .container {\n    max-width: 768px;\n  }\n}\n\n@media (min-width: 1024px) {\n  .\\!container {\n    max-width: 1024px !important;\n  }\n\n  .container {\n    max-width: 1024px;\n  }\n}\n\n@media (min-width: 1280px) {\n  .\\!container {\n    max-width: 1280px !important;\n  }\n\n  .container {\n    max-width: 1280px;\n  }\n}\n\n@media (min-width: 1536px) {\n  .\\!container {\n    max-width: 1536px !important;\n  }\n\n  .container {\n    max-width: 1536px;\n  }\n}\n\n.sr-grid {\n  display: block;\n  position: relative;\n  min-height: 100%;\n}\n\n.sr-page {\n  min-width: 0;\n}\n\n.sr-toc-wide .sr-grid {\n  display: grid;\n  grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);\n  gap: 1.5rem;\n}\n\n.sr-toc-wide .sr-page {\n  grid-column: 2;\n}\n\n.sr-main {\n  max-width: 72ch;\n  margin: 0 auto;\n  padding: 2.5rem 1.25rem;\n}\n\n.sr-header {\n  margin-bottom: 1.5rem;\n}\n\n.sr-title {\n  font-family: var(--font-sans);\n  font-weight: 600;\n  font-size: 1.8rem;\n  line-height: 1.25;\n  margin: 0.3rem 0;\n}\n\n.sr-authors {\n  font-family: var(--font-sans);\n  font-size: 0.95rem;\n  color: var(--sr-mute);\n  margin: 0 0 1rem;\n}\n\n.sr-kicker {\n  font-family: var(--font-sans);\n  font-size: 0.85rem;\n  color: var(--sr-mute);\n  margin: 0;\n}\n\n.sr-kicker-link {\n  color: inherit;\n  text-decoration: underline;\n  cursor: pointer;\n}\n\n.sr-verdict {\n  margin-top: 1rem;\n}\n\n.sr-verdict b {\n  font-weight: 600;\n}\n\n.sr-h2 {\n  font-family: var(--font-sans);\n  font-weight: 600;\n  font-size: 1.3rem;\n  border-left: 4px solid var(--sr-teal);\n  padding-left: 0.7rem;\n  margin: 2.2rem 0 0.8rem;\n  scroll-margin-top: 1rem;\n}\n\n.sr-item {\n  border-bottom: 1px solid var(--sr-rule);\n  padding: 0.7rem 0;\n  max-width: 72ch;\n}\n\n.sr-table-wrap {\n  overflow-x: auto;\n  margin: 1rem 0;\n}\n\n.sr-table-wrap table {\n  border-collapse: collapse;\n  width: 100%;\n  font-size: 0.88rem;\n}\n\n.sr-table-wrap th,\n  .sr-table-wrap td {\n  border-bottom: 1px solid var(--sr-rule);\n  padding: 0.45rem 0.5rem;\n  text-align: left;\n  vertical-align: top;\n}\n\n.sr-table-wrap th {\n  font-family: var(--font-sans);\n  font-weight: 600;\n  color: var(--sr-mute);\n}\n\n.sr-figure {\n  background: var(--sr-card);\n  border: 1px solid var(--sr-rule);\n  padding: 0.6rem;\n  margin: 1.4rem 0;\n  max-width: 100%;\n  overflow-x: auto;\n}\n\n.sr-figure img,\n  .sr-figure svg {\n  display: block;\n  width: 100%;\n  height: auto;\n  margin: 0;\n}\n\n.sr-figure figcaption {\n  font-size: 0.8rem;\n  color: var(--sr-mute);\n  margin-top: 0.4rem;\n}\n\n.sr-toc {\n  position: absolute;\n  top: 4.25rem;\n  left: 1rem;\n  width: 14rem;\n  max-height: calc(100% - 5.75rem);\n  overflow-y: auto;\n  font-family: var(--font-sans);\n  font-size: 0.82rem;\n  line-height: 1.35;\n  display: none;\n}\n\n.sr-toc-title {\n  font-size: 0.7rem;\n  font-weight: 600;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  color: var(--sr-mute);\n  margin: 0 0 0.6rem 0.6rem;\n}\n\n.sr-toc ul {\n  list-style: none;\n  margin: 0;\n  padding: 0;\n}\n\n.sr-toc-link {\n  display: block;\n  padding: 0.28rem 0.6rem;\n  color: var(--sr-mute);\n  text-decoration: none;\n  border-left: 2px solid var(--sr-rule);\n}\n\n.sr-toc-link:hover {\n  color: var(--sr-ink);\n  background: rgba(22, 37, 44, 0.04);\n}\n\n.sr-toc-sub {\n  padding-left: 1.3rem;\n  font-size: 0.78rem;\n}\n\n.sr-toc-link.active,\n  .sr-toc-link[aria-current] {\n  color: var(--sr-teal);\n  border-left-color: var(--sr-teal);\n  font-weight: 600;\n}\n\n.sr-toc-btn {\n  display: none;\n  -webkit-appearance: none;\n     -moz-appearance: none;\n          appearance: none;\n  border: 1px solid var(--sr-rule);\n  background: var(--sr-card);\n  border-radius: 6px;\n  height: 1.8rem;\n  padding: 0 0.6rem;\n  cursor: pointer;\n  font: inherit;\n  color: var(--sr-ink);\n}\n\n.sr-toc-wide .sr-toc {\n  display: block;\n}\n\n.sr-root:not(.sr-toc-wide) .sr-toc-btn {\n  display: inline-block;\n}\n\n.sr-root:not(.sr-toc-wide).sr-toc-open .sr-toc {\n  display: block;\n  top: 3.1rem;\n  left: 0;\n  bottom: 0;\n  width: 17rem;\n  max-height: none;\n  background: var(--sr-card);\n  border-right: 1px solid var(--sr-rule);\n  padding: 1rem;\n  z-index: 2;\n  box-shadow: 4px 0 14px rgba(22, 37, 44, 0.12);\n}\n\n.sr-badge {\n  font-family: var(--font-sans);\n  font-size: 0.75rem;\n  font-weight: 600;\n  border-radius: 999px;\n  padding: 0.05rem 0.5rem;\n  margin-left: 0.5rem;\n  white-space: nowrap;\n  vertical-align: middle;\n  border: 1px solid;\n}\n\n.sr-unit {\n  box-decoration-break: clone;\n  -webkit-box-decoration-break: clone;\n  border-radius: 3px;\n}\n\n.sr-on {\n  background: rgba(22, 37, 44, 0.15);\n  box-shadow: 0 0 0 2px rgba(22, 37, 44, 0.15);\n}\n\n.sr-active .sr-unit:hover:not(.sr-on) {\n  background: rgba(22, 37, 44, 0.06);\n}\n\n.sr-hint {\n  position: fixed;\n  right: 0.8rem;\n  bottom: 0.7rem;\n  font: 600 0.7rem var(--font-sans);\n  color: var(--sr-mute);\n  background: var(--sr-card);\n  border: 1px solid var(--sr-rule);\n  border-radius: 6px;\n  padding: 0.2rem 0.55rem;\n  opacity: 0.9;\n  pointer-events: none;\n}\n\n@media print {\n  .sr-on {\n    background: none;\n    box-shadow: none;\n  }\n\n  .sr-hint {\n    display: none;\n  }\n}\n\n.sr-page p,\n  .sr-page li,\n  .sr-page .sr-item,\n  .sr-page blockquote {\n  text-align: justify;\n  text-justify: inter-word;\n  hyphens: auto;\n  -webkit-hyphens: auto;\n  overflow-wrap: break-word;\n}\n\n.sr-page blockquote {\n  border-left: 3px solid var(--sr-rule);\n  padding-left: 1rem;\n  color: var(--sr-mute);\n  margin: 1.1rem 0;\n}\n\n.sr-page a {\n  color: var(--sr-teal);\n}\n\n.fixed {\n  position: fixed;\n}\n\n.block {\n  display: block;\n}\n\n.inline {\n  display: inline;\n}\n\n.flex {\n  display: flex;\n}\n\n.table {\n  display: table;\n}\n\n.grid {\n  display: grid;\n}\n\n.contents {\n  display: contents;\n}\n\n.hidden {\n  display: none;\n}\n\n.flex-shrink {\n  flex-shrink: 1;\n}\n\n.border {\n  border-width: 1px;\n}\n\n.shadow {\n  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);\n  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);\n  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);\n}\n";
 
 export const DEFAULT_UNIT_SELECTOR = "p, li, blockquote, figcaption, td";
 
@@ -802,4 +802,397 @@ export function removeFonts(doc) {
     const node = doc.getElementById(id);
     if (node) node.parentNode.removeChild(node);
   }
+}
+
+/* ------------------------------------------------- theme manager */
+
+export const THEME_PRESETS = {
+  "warm-paper": { name: "Warm paper", paper: "#F7F3E9", ink: "#292821", isDark: false },
+  "pure-white": { name: "Pure white", paper: "#FFFFFF", ink: "#222222", isDark: false },
+  "eink-gray": { name: "E-ink gray", paper: "#F2F2F0", ink: "#242424", isDark: false },
+  "parchment": { name: "Parchment", paper: "#F1E3C6", ink: "#49351F", isDark: false },
+  "cream-book": { name: "Cream book", paper: "#F4EBDD", ink: "#302B26", isDark: false },
+  "newsprint": { name: "Newsprint", paper: "#E8E0D2", ink: "#25231F", isDark: false },
+  "vscode-dark": { name: "VS Code Dark", paper: "#1E1E1E", ink: "#D4D4D4", isDark: true, mute: "#9C9C9C", rule: "#3C3C3C", card: "#252526" },
+  "oled-black": { name: "OLED black", paper: "#121212", ink: "#D0D0D0", isDark: true, mute: "#888888", rule: "#2A2A2A", card: "#1A1A1A" },
+  "charcoal": { name: "Charcoal", paper: "#282828", ink: "#D0CDC7", isDark: true, mute: "#928374", rule: "#3C3836", card: "#32302F" },
+  "midnight-blue": { name: "Midnight blue", paper: "#1C2430", ink: "#D1DCE9", isDark: true, mute: "#7A8A9A", rule: "#2A3A4A", card: "#233040" },
+  "monokai": { name: "Monokai", paper: "#272822", ink: "#E3E3D7", isDark: true, mute: "#75715E", rule: "#3E3D32", card: "#2E2E28" },
+  "solarized-dark": { name: "Solarized Dark", paper: "#002B36", ink: "#D5D0BD", isDark: true, mute: "#657B83", rule: "#073642", card: "#073642" },
+};
+
+const THEME_STORAGE_KEY = "sr-theme";
+
+function getRoot(doc) {
+  return doc.documentElement || doc;
+}
+
+function applyTheme(root, themeId, customColors) {
+  const preset = THEME_PRESETS[themeId];
+  if (!preset && !customColors) return false;
+
+  if (preset) {
+    root.dataset.theme = themeId;
+    // Clear any inline custom properties
+    root.style.removeProperty("--sr-paper");
+    root.style.removeProperty("--sr-ink");
+    root.style.removeProperty("--sr-mute");
+    root.style.removeProperty("--sr-rule");
+    root.style.removeProperty("--sr-card");
+  }
+
+  if (customColors) {
+    delete root.dataset.theme;
+    if (customColors.paper) root.style.setProperty("--sr-paper", customColors.paper);
+    if (customColors.ink) root.style.setProperty("--sr-ink", customColors.ink);
+    if (customColors.mute) root.style.setProperty("--sr-mute", customColors.mute);
+    if (customColors.rule) root.style.setProperty("--sr-rule", customColors.rule);
+    if (customColors.card) root.style.setProperty("--sr-card", customColors.card);
+  }
+
+  return true;
+}
+
+function getCurrentTheme(doc) {
+  const root = getRoot(doc);
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+  }
+  // Default to warm-paper preset
+  return { preset: "warm-paper" };
+}
+
+function saveTheme(doc, theme) {
+  localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+}
+
+/**
+ * Apply a theme by preset name, or with custom colors.
+ * @param {Document} doc
+ * @param {Object} opts - { preset?: string, custom?: {paper, ink, mute?, rule?, card?} }
+ */
+export function setTheme(doc, opts = {}) {
+  const root = getRoot(doc);
+  const { preset, custom } = opts;
+
+  let theme;
+  if (preset && THEME_PRESETS[preset]) {
+    applyTheme(root, preset);
+    theme = { preset };
+  } else if (custom) {
+    applyTheme(root, null, custom);
+    theme = { custom };
+  } else {
+    return false;
+  }
+
+  saveTheme(doc, theme);
+  return true;
+}
+
+/**
+ * Get the current theme configuration.
+ * @returns {{preset?: string, custom?: Object}}
+ */
+export function getTheme(doc) {
+  const root = getRoot(doc);
+  const saved = getCurrentTheme(doc);
+
+  if (root.dataset.theme && THEME_PRESETS[root.dataset.theme]) {
+    return { preset: root.dataset.theme };
+  }
+
+  // Check for inline custom properties
+  const paper = root.style.getPropertyValue("--sr-paper").trim();
+  const ink = root.style.getPropertyValue("--sr-ink").trim();
+  if (paper || ink) {
+    return {
+      custom: {
+        paper: paper || undefined,
+        ink: ink || undefined,
+        mute: root.style.getPropertyValue("--sr-mute").trim() || undefined,
+        rule: root.style.getPropertyValue("--sr-rule").trim() || undefined,
+        card: root.style.getPropertyValue("--sr-card").trim() || undefined,
+      },
+    };
+  }
+
+  return saved;
+}
+
+/**
+ * Get all available preset themes.
+ * @returns {Object<string, {name: string, paper: string, ink: string, isDark: boolean}>}
+ */
+export function getThemePresets() {
+  return THEME_PRESETS;
+}
+
+/**
+ * Initialize theme from localStorage on page load.
+ * Call this early, before building the document.
+ */
+export function initTheme(doc) {
+  const saved = getCurrentTheme(doc);
+  const root = getRoot(doc);
+
+  if (saved.preset && THEME_PRESETS[saved.preset]) {
+    applyTheme(root, saved.preset);
+  } else if (saved.custom) {
+    applyTheme(root, null, saved.custom);
+  }
+  // else: keep CSS defaults (warm-paper)
+}
+
+/**
+ * Create and attach the theme selector UI (floating button + dropdown panel).
+ * @param {Document} doc
+ * @param {Object} opts - { parent?: HTMLElement, position?: 'top-right'|'bottom-right'|'top-left'|'bottom-left' }
+ * @returns {{ dispose(): void }}
+ */
+export function createThemeSelector(doc, opts = {}) {
+  const parent = opts.parent || doc.body;
+  const position = opts.position || "bottom-right";
+
+  const root = getRoot(doc);
+  const isDark = root.dataset.theme && THEME_PRESETS[root.dataset.theme]?.isDark;
+
+  // Button
+  const btn = doc.createElement("button");
+  btn.type = "button";
+  btn.className = "sr-theme-btn";
+  btn.setAttribute("aria-label", "Theme selector");
+  btn.setAttribute("aria-expanded", "false");
+  btn.setAttribute("aria-haspopup", "listbox");
+  btn.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="5"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+  `;
+
+  // Panel
+  const panel = doc.createElement("div");
+  panel.className = "sr-theme-panel";
+  panel.setAttribute("role", "listbox");
+  panel.setAttribute("aria-label", "Choose theme");
+  panel.hidden = true;
+
+  // Build panel content
+  let html = '<div class="sr-theme-presets" role="group" aria-label="Preset themes">';
+  for (const [id, preset] of Object.entries(THEME_PRESETS)) {
+    const active = root.dataset.theme === id ? ' aria-selected="true"' : "";
+    html += `
+      <button type="button" class="sr-theme-preset" data-theme="${id}" role="option"${active} style="--sr-preset-paper: ${preset.paper}; --sr-preset-ink: ${preset.ink};">
+        <span class="sr-theme-swatch" aria-hidden="true"></span>
+        <span class="sr-theme-name">${preset.name}</span>
+      </button>
+    `;
+  }
+  html += '</div>';
+
+  // Custom color pickers
+  html += `
+    <div class="sr-theme-custom" role="group" aria-label="Custom colors">
+      <label class="sr-theme-custom-row">
+        <span class="sr-theme-custom-label">Background</span>
+        <input type="color" class="sr-theme-color-input" data-prop="paper" aria-label="Background color">
+      </label>
+      <label class="sr-theme-custom-row">
+        <span class="sr-theme-custom-label">Text</span>
+        <input type="color" class="sr-theme-color-input" data-prop="ink" aria-label="Text color">
+      </label>
+      <details class="sr-theme-advanced">
+        <summary>Advanced</summary>
+        <label class="sr-theme-custom-row">
+          <span class="sr-theme-custom-label">Muted</span>
+          <input type="color" class="sr-theme-color-input" data-prop="mute" aria-label="Muted text color">
+        </label>
+        <label class="sr-theme-custom-row">
+          <span class="sr-theme-custom-label">Rule</span>
+          <input type="color" class="sr-theme-color-input" data-prop="rule" aria-label="Rule/border color">
+        </label>
+        <label class="sr-theme-custom-row">
+          <span class="sr-theme-custom-label">Card</span>
+          <input type="color" class="sr-theme-color-input" data-prop="card" aria-label="Card background color">
+        </label>
+      </details>
+      <button type="button" class="sr-theme-apply-custom">Apply custom</button>
+      <button type="button" class="sr-theme-reset">Reset to default</button>
+    </div>
+  `;
+
+  panel.innerHTML = html;
+
+  // Positioning styles
+  const posStyles = {
+    "top-right": "top: 1rem; right: 1rem;",
+    "bottom-right": "bottom: 1rem; right: 1rem;",
+    "top-left": "top: 1rem; left: 1rem;",
+    "bottom-left": "bottom: 1rem; left: 1rem;",
+  };
+  btn.style.cssText = `
+    position: fixed;
+    z-index: 1000;
+    ${posStyles[position]}
+    background: var(--sr-card);
+    border: 1px solid var(--sr-rule);
+    border-radius: 6px;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--sr-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  `;
+  panel.style.cssText = `
+    position: fixed;
+    z-index: 1001;
+    ${position.startsWith("top") ? "top: calc(1rem + 44px);" : "bottom: calc(1rem + 44px);"}
+    ${position.endsWith("right") ? "right: 1rem;" : "left: 1rem;"}
+    background: var(--sr-card);
+    border: 1px solid var(--sr-rule);
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    min-width: 220px;
+    max-width: 280px;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--sr-ink);
+  `;
+
+  // Panel internal styles (injected once)
+  if (!doc.getElementById("sr-theme-styles")) {
+    const style = doc.createElement("style");
+    style.id = "sr-theme-styles";
+    style.textContent = `
+      .sr-theme-presets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; margin-bottom: 0.75rem; }
+      .sr-theme-preset { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; border: 2px solid transparent; border-radius: 6px; background: var(--sr-paper); color: var(--sr-ink); cursor: pointer; text-align: left; font: inherit; width: 100%; }
+      .sr-theme-preset:hover { border-color: var(--sr-teal); }
+      .sr-theme-preset[aria-selected="true"] { border-color: var(--sr-teal); background: var(--sr-teal); color: white; }
+      .sr-theme-swatch { width: 1rem; height: 1rem; border-radius: 3px; background: var(--sr-preset-paper); border: 1px solid var(--sr-preset-ink); flex-shrink: 0; }
+      .sr-theme-preset[aria-selected="true"] .sr-theme-swatch { border-color: white; }
+      .sr-theme-custom { border-top: 1px solid var(--sr-rule); padding-top: 0.75rem; }
+      .sr-theme-custom-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.8rem; }
+      .sr-theme-custom-label { width: 55px; color: var(--sr-mute); }
+      .sr-theme-color-input { width: 1.5rem; height: 1.5rem; border: 1px solid var(--sr-rule); border-radius: 4px; padding: 0; cursor: pointer; background: none; }
+      .sr-theme-advanced { margin-top: 0.5rem; font-size: 0.8rem; }
+      .sr-theme-advanced summary { cursor: pointer; color: var(--sr-mute); margin-bottom: 0.3rem; }
+      .sr-theme-apply-custom, .sr-theme-reset { width: 100%; margin-top: 0.5rem; padding: 0.4rem; border: 1px solid var(--sr-rule); border-radius: 4px; background: var(--sr-paper); color: var(--sr-ink); cursor: pointer; font: inherit; }
+      .sr-theme-apply-custom:hover, .sr-theme-reset:hover { background: var(--sr-mute); color: var(--sr-paper); }
+      .sr-theme-btn:hover { border-color: var(--sr-teal); }
+    `;
+    doc.head.appendChild(style);
+  }
+
+  // Sync color inputs with current theme
+  function syncInputs() {
+    const current = getTheme(doc);
+    const paperInput = panel.querySelector('[data-prop="paper"]');
+    const inkInput = panel.querySelector('[data-prop="ink"]');
+    if (current.custom) {
+      if (current.custom.paper) paperInput.value = current.custom.paper;
+      if (current.custom.ink) inkInput.value = current.custom.ink;
+      if (current.custom.mute) panel.querySelector('[data-prop="mute"]').value = current.custom.mute;
+      if (current.custom.rule) panel.querySelector('[data-prop="rule"]').value = current.custom.rule;
+      if (current.custom.card) panel.querySelector('[data-prop="card"]').value = current.custom.card;
+    } else if (current.preset) {
+      const preset = THEME_PRESETS[current.preset];
+      paperInput.value = preset.paper;
+      inkInput.value = preset.ink;
+      if (preset.mute) panel.querySelector('[data-prop="mute"]').value = preset.mute;
+      if (preset.rule) panel.querySelector('[data-prop="rule"]').value = preset.rule;
+      if (preset.card) panel.querySelector('[data-prop="card"]').value = preset.card;
+    }
+  }
+
+  // Event handlers
+  let open = false;
+
+  function closePanel() {
+    panel.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+    open = false;
+  }
+
+  function openPanel() {
+    panel.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+    syncInputs();
+    open = true;
+  }
+
+  function togglePanel() {
+    if (open) closePanel(); else openPanel();
+  }
+
+  function onPresetClick(e) {
+    const btnEl = e.target.closest(".sr-theme-preset");
+    if (!btnEl) return;
+    const themeId = btnEl.dataset.theme;
+    setTheme(doc, { preset: themeId });
+    // Update UI
+    panel.querySelectorAll(".sr-theme-preset").forEach(b => b.removeAttribute("aria-selected"));
+    btnEl.setAttribute("aria-selected", "true");
+    closePanel();
+  }
+
+  function onApplyCustom() {
+    const custom = {};
+    for (const input of panel.querySelectorAll(".sr-theme-color-input")) {
+      const val = input.value;
+      if (val) custom[input.dataset.prop] = val;
+    }
+    setTheme(doc, { custom });
+    closePanel();
+  }
+
+  function onReset() {
+    localStorage.removeItem(THEME_STORAGE_KEY);
+    applyTheme(root, "warm-paper");
+    closePanel();
+  }
+
+  function onClickOutside(e) {
+    if (open && !panel.contains(e.target) && !btn.contains(e.target)) {
+      closePanel();
+    }
+  }
+
+  function onKeydown(e) {
+    if (e.key === "Escape" && open) {
+      closePanel();
+      btn.focus();
+    }
+  }
+
+  btn.addEventListener("click", togglePanel);
+  panel.addEventListener("click", onPresetClick);
+  panel.querySelector(".sr-theme-apply-custom").addEventListener("click", onApplyCustom);
+  panel.querySelector(".sr-theme-reset").addEventListener("click", onReset);
+  doc.addEventListener("click", onClickOutside);
+  doc.addEventListener("keydown", onKeydown);
+
+  parent.appendChild(btn);
+  parent.appendChild(panel);
+
+  return {
+    dispose() {
+      btn.removeEventListener("click", togglePanel);
+      panel.removeEventListener("click", onPresetClick);
+      panel.querySelector(".sr-theme-apply-custom").removeEventListener("click", onApplyCustom);
+      panel.querySelector(".sr-theme-reset").removeEventListener("click", onReset);
+      doc.removeEventListener("click", onClickOutside);
+      doc.removeEventListener("keydown", onKeydown);
+      btn.remove();
+      panel.remove();
+    },
+  };
 }
