@@ -29,9 +29,20 @@ import {
   createReadingMark,
 } from "../../assets/scholarly-reader/scholarly-reader.js";
 
-const ESC = { "&": "&", "<": "<", ">": ">", '"': "&", "'": "'" };
+const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ESC[c] || c);
+}
+
+/** Escape for JavaScript string literal (used for template script placeholders). */
+function escJs(s) {
+  return String(s == null ? "" : s)
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t")
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'");
 }
 
 /* ---------------------------------------------------------------- environment detection */
@@ -291,7 +302,7 @@ export async function renderDigest(digest, ctx = {}) {
   for (const script of templateScripts) {
     if (script.textContent.includes("{{BASE}}") || script.textContent.includes("{{MAP}}")) {
       script.textContent = script.textContent
-        .split("{{BASE}}").join(esc(base))
+        .split("{{BASE}}").join(escJs(base))
         .split("{{MAP}}").join(JSON.stringify(figureMap));
     }
     body.appendChild(script);
