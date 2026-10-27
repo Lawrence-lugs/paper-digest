@@ -16,7 +16,7 @@ const { join, resolve, sep } = require("node:path");
 
 const ROOT = resolve(join(__dirname, ".."));
 const WEB = join(ROOT, "web");
-const ASSETS = join(ROOT, "assets");
+const ASSETS = join(WEB, "assets");
 const E2E_FIXTURES = join(ROOT, "e2e", "fixtures");
 const CSR_FIXTURES = join(ROOT, "test", "fixtures", "csr");
 const PORT = 8910;

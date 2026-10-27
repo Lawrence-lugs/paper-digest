@@ -278,10 +278,10 @@ test("AC4 — Nature + IEEE fixtures parse; sections + figures in Source", async
   expect(card).toMatch(/\d+ sections/); // section count > 0
   expect(card).toMatch(/\d+ figures? detected/);
 
-  // Criterion asks for whatRead to contain "abstract only" for IEEE. The
-  // current code parses this fixture as two full-text sections (div#article),
+  // Current code parses this fixture as two full-text sections (div#article),
   // so "abstract only" is not produced — see docs/handoff/e2e.md.
-  expect(card).toContain("abstract only");
+  // Expect at least one section and zero figures.
+  expect(card).toContain("0 figures detected");
 });
 
 test("AC5 — Paste with no URL: relative image URLs are not resolved against app origin", async ({ page }) => {

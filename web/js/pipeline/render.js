@@ -17,7 +17,6 @@
 
 import { marked } from "../../vendor/lib/marked.esm.js";
 import createDOMPurify from "../../vendor/lib/dompurify.es.mjs";
-import { JSDOM } from "jsdom";
 
 // Import scholarly-reader exports (copied to web/assets/scholarly-reader/ by build)
 import {
@@ -35,22 +34,48 @@ function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ESC[c] || c);
 }
 
-// DOMPurify instance for sanitizeHtml (uses global window from shim)
-const DOMPurify = createDOMPurify(globalThis.window);
+/* ---------------------------------------------------------------- environment detection */
 
-const TEMPLATE_URL = new URL("assets/template.html", window.location.href).href;
-let templateCache = null;
+// Detect whether we have browser-native DOMParser/XMLSerializer (browser or jsdom).
+// In pure Node without jsdom, both are undefined.
+function hasNativeParser() {
+  return (
+    typeof DOMParser !== "undefined" ||
+    (typeof window !== "undefined" && window.DOMParser)
+  );
+}
 
-async function loadTemplate() {
-  if (!templateCache) {
-    const resp = await fetch(TEMPLATE_URL);
-    if (!resp.ok) throw new Error(`Failed to load template: ${resp.status} ${resp.statusText}`);
-    templateCache = await resp.text();
-  }
-  return templateCache;
+function hasNativeSerializer() {
+  return (
+    typeof XMLSerializer !== "undefined" ||
+    (typeof window !== "undefined" && window.XMLSerializer)
+  );
+}
+
+function getParser() {
+  return new (typeof DOMParser !== "undefined" ? DOMParser : window.DOMParser)();
+}
+
+function getSerializer() {
+  return new (typeof XMLSerializer !== "undefined" ? XMLSerializer : window.XMLSerializer)();
+}
+
+// Lazy template URL — avoids module-level access to window.location (fails in Node).
+function getTemplateUrl() {
+  return new URL("assets/template.html", window.location.href).href;
 }
 
 /* ---------------------------------------------------------------- sanitize */
+
+// DOMPurify instance for sanitizeHtml (uses global window from shim or browser).
+// Created lazily on first use so window is available.
+let DOMPurify = null;
+function getDOMPurify() {
+  if (!DOMPurify) {
+    DOMPurify = createDOMPurify(globalThis.window);
+  }
+  return DOMPurify;
+}
 
 /** DOMPurify with html + svg profiles; allow figure anchors and math tags. */
 function sanitizeHtml(html, { svg = false } = {}) {
@@ -60,7 +85,7 @@ function sanitizeHtml(html, { svg = false } = {}) {
     ADD_ATTR: ["data-n", "data-a"],
     FORCE_BODY: false,
   };
-  return DOMPurify.sanitize(String(html || ""), config);
+  return getDOMPurify().sanitize(String(html || ""), config);
 }
 
 /**
@@ -199,13 +224,23 @@ export async function renderDigest(digest, ctx = {}) {
   // Load template
   const tmpl = await loadTemplate();
 
-  // Parse template to DOM
-  const dom = new JSDOM(tmpl, {
-    contentType: "text/html",
-    url: "http://localhost/",
-    pretendToBeVisual: true,
-  });
-  const doc = dom.window.document;
+  // Parse template to DOM (browser-native DOMParser or jsdom in tests)
+  let doc;
+  let docWindow;
+  if (hasNativeParser()) {
+    // Browser environment or jsdom
+    const parser = getParser();
+    doc = parser.parseFromString(tmpl, "text/html");
+    docWindow = doc.defaultView || window;
+  } else {
+    // Node.js test environment without jsdom DOMParser
+    const { JSDOM } = await import("jsdom");
+    const dom = new JSDOM(tmpl, { contentType: "text/html", url: "http://localhost/" });
+    doc = dom.window.document;
+    docWindow = dom.window;
+    // Shim globalThis.window for DOMPurify and scholarly-reader in pure Node tests
+    globalThis.window = docWindow;
+  }
 
   // Save the script tags from the template body (they contain BASE/MAP and client-side logic)
   const templateScripts = Array.from(doc.body.querySelectorAll("script")).map(s => s.cloneNode(true));
@@ -220,7 +255,7 @@ export async function renderDigest(digest, ctx = {}) {
   ensureFonts(doc);
 
   // Create DOMPurify for this document's window
-  const DOMPurify = createDOMPurify(dom.window);
+  const DOMPurifyLocal = createDOMPurify(docWindow);
 
   // Sanitizer function for scholarly-reader
   const sanitize = (html, { svg = false } = {}) => {
@@ -230,7 +265,7 @@ export async function renderDigest(digest, ctx = {}) {
       ADD_ATTR: ["data-n", "data-a"],
       FORCE_BODY: false,
     };
-    return DOMPurify.sanitize(String(html || ""), config);
+    return DOMPurifyLocal.sanitize(String(html || ""), config);
   };
 
   // Markdown converter for scholarly-reader
@@ -273,8 +308,27 @@ export async function renderDigest(digest, ctx = {}) {
     kickerLink.style.cssText = "color:inherit;text-decoration:underline;cursor:pointer";
   }
 
-  // Serialize to string
-  return dom.serialize();
+  // Serialize to string (browser-native XMLSerializer or jsdom in tests)
+  if (hasNativeSerializer()) {
+    // Browser environment or jsdom
+    const serializer = getSerializer();
+    return serializer.serializeToString(doc);
+  } else {
+    // Node.js test environment (jsdom) - use static serializeDocument
+    const { serializeDocument } = await import("jsdom");
+    return serializeDocument(doc);
+  }
 }
+
+async function loadTemplate() {
+  if (!templateCache) {
+    const resp = await fetch(getTemplateUrl());
+    if (!resp.ok) throw new Error(`Failed to load template: ${resp.status} ${resp.statusText}`);
+    templateCache = await resp.text();
+  }
+  return templateCache;
+}
+
+let templateCache = null;
 
 export { esc, sanitizeHtml, renderContent };
