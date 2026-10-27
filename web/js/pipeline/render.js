@@ -1,7 +1,9 @@
 /**
  * Agent B — render.
  *
- * Renders a `Digest` into the self-contained `assets/template.html` page.
+ * Renders a `Digest` into the self-contained `assets/template.html` page
+ * using the shared `scholarly-reader` module for document structure, layout,
+ * reading mark, and table of contents.
  *
  * - Markdown body -> HTML via `marked`, with math ($$...$$, \(...\)) protected
  *   so marked never touches it and MathJax sees the original delimiters.
@@ -15,12 +17,26 @@
 
 import { marked } from "../../vendor/lib/marked.esm.js";
 import createDOMPurify from "../../vendor/lib/dompurify.es.mjs";
-const DOMPurify = createDOMPurify(window);
+import { JSDOM } from "jsdom";
 
-const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+// Import scholarly-reader exports (copied to web/assets/scholarly-reader/ by build)
+import {
+  CSS,
+  protectMath,
+  restoreMath,
+  buildDocument,
+  mountLayout,
+  ensureFonts,
+  createReadingMark,
+} from "../../assets/scholarly-reader/scholarly-reader.js";
+
+const ESC = { "&": "&", "<": "<", ">": ">", '"': "&", "'": "'" };
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ESC[c] || c);
 }
+
+// DOMPurify instance for sanitizeHtml (uses global window from shim)
+const DOMPurify = createDOMPurify(globalThis.window);
 
 const TEMPLATE_URL = new URL("assets/template.html", window.location.href).href;
 let templateCache = null;
@@ -32,179 +48,6 @@ async function loadTemplate() {
     templateCache = await resp.text();
   }
   return templateCache;
-}
-
-/* ---------------------------------------------------------------- math */
-
-// Protect math so `marked` leaves it untouched; MathJax reads the original
-// delimiters from the DOM afterwards. Policy (decided): only $$...$$ and
-// \(...\) are math. A lone single `$` is literal text (currency-safe), per
-// the prompt contract which uses \( ... \) for inline math.
-function protectMath(text) {
-  const blocks = [];
-  let p = String(text || "");
-
-  p = p.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
-    const idx = blocks.length;
-    blocks.push(`\\[${math}\\]`);
-    return `\x00MATH${idx}\x00`;
-  });
-
-  const inlineRe = new RegExp("\\\\\\(([\\s\\S]*?)\\\\\\)", "g");
-  p = p.replace(inlineRe, (_, math) => {
-    const idx = blocks.length;
-    blocks.push(`\\(${math}\\)`);
-    return `\x00MATH${idx}\x00`;
-  });
-
-  return { p, blocks };
-}
-
-function restoreMath(html, blocks) {
-  let out = html;
-  for (let i = 0; i < blocks.length; i++) {
-    // Replace the placeholder with escaped math so it can never break the
-    // surrounding HTML; MathJax reads the unescaped text from the DOM.
-    out = out.replace(`\x00MATH${i}\x00`, () => esc(blocks[i]));
-  }
-  return out;
-}
-
-/* ---------------------------------------------------------------- section rendering */
-
-function confidenceChip(conf) {
-  const c = conf == null ? 0 : Number(conf);
-  return `<span class="conf">${c}%</span>`;
-}
-
-function chipSign(tag) {
-  return { pos: "+", neg: "−", neu: "·" }[tag] || "·";
-}
-
-function renderParagraph(content) {
-  const html = renderContent(content).trim();
-  const m = /^<p>([\s\S]*)<\/p>$/.exec(html);
-  return m ? m[1] : html;
-}
-
-function renderSection(s) {
-  const conf = confidenceChip(s.confidence);
-  let body = "";
-  switch (s.id) {
-    case "mot":
-    case "diff":
-    case "core":
-    case "bg":
-      body = `<div class="prose">${renderContent(s.content || "")}</div>`;
-      break;
-    case "eval":
-      body = (s.content || "")
-        .split(/\n\n+/)
-        .map((p) => p.trim())
-        .filter(Boolean)
-        .map((p) => `<div class="item">${renderParagraph(p)}</div>`)
-        .join("");
-      break;
-    case "icymi":
-      body = (s.entries || [])
-        .map(
-          (e) =>
-            `<div class="item"><span class="chip ${esc(
-              e.tag || "neu",
-            )}">${chipSign(e.tag)}</span>${esc(e.text)}</div>`
-        )
-        .join("");
-      break;
-    case "judge":
-      body =
-        `<div class="wrap"><table><thead><tr><th>Question</th><th>Answer</th><th>Conf.</th></tr></thead><tbody>` +
-        (s.rows || [])
-          .map(
-            (r) =>
-              `<tr><td>${esc(r.question)}</td><td>${esc(r.answer)}</td><td>${
-                r.conf == null ? "" : r.conf
-              }%</td></tr>`
-          )
-          .join("") +
-        `</tbody></table></div>`;
-      break;
-    case "src":
-    default:
-      body = `<div class="prose">${renderContent(s.content || "")}</div>`;
-  }
-  return `<h2 class="s" id="${esc(s.id)}">${esc(s.title)}${conf}</h2>${body}`;
-}
-
-/**
- * Render one section's markdown content to HTML. Math is protected before
- * `marked` and restored (escaped) afterwards.
- */
-function renderContent(content) {
-  const { p, blocks } = protectMath(content);
-  const html = marked.parse(p);
-  return restoreMath(html, blocks);
-}
-
-/* ---------------------------------------------------------------- figures */
-
-// Scale an inlined SVG to the column width.
-function scaleSvg(svg) {
-  return String(svg).replace(/<svg\b([^>]*)>/, (m, attrs) => {
-    let a = attrs;
-    if (!/viewBox\b/.test(a)) {
-      const wM = /width\s*=\s*"(\d+)"/.exec(a);
-      const hM = /height\s*=\s*"(\d+)"/.exec(a);
-      if (wM && hM) a += ` viewBox="0 0 ${wM[1]} ${hM[1]}"`;
-    }
-    a = a.replace(/\bwidth\s*=\s*"[^"]*"/, 'width="100%"');
-    a = a.replace(/\bheight\s*=\s*"[^"]*"/, 'height="auto"');
-    if (!/style\s*=/i.test(a)) {
-      a += ' style="display:block"';
-    } else {
-      a = a.replace(/style="([^"]*)"/, 'style="$1;display:block"');
-    }
-    return `<svg${a}>`;
-  });
-}
-
-/**
- * Inline figures into the sections HTML. For each <figure data-n="N">:
- *  - svg available -> inline scaled + sanitized SVG
- *  - url available -> inline lazy image
- *  - otherwise -> leave the (figcaption-only) figure for the template's own
- *    client script, which adds the image and the "Open Fig. N" fallback.
- *
- * Function replacers are used so `$` sequences in SVG text are never
- * mangled by String.replace replacement patterns.
- */
-function inlineFigures(sectionsHtml, figures) {
-  const byN = {};
-  figures.forEach((f, i) => {
-    const key = String(f.n != null ? f.n : i + 1);
-    byN[key] = f;
-  });
-
-  return sectionsHtml.replace(
-    /<figure\b[^>]*>([\s\S]*?)<\/figure>/g,
-    (match, inner) => {
-      const nMatch = /data-n="([^"]+)"/.exec(match);
-      if (!nMatch) return match;
-      const n = nMatch[1];
-      const f = byN[n];
-      if (!f) return match;
-
-      if (f.svg) {
-        const safeSvg = sanitizeHtml(scaleSvg(f.svg), { svg: true });
-        // Insert the SVG right after the opening <figure ...> tag.
-        return match.replace(">", (m) => m + safeSvg);
-      }
-      if (f.url) {
-        const img = `<img loading="lazy" alt="Figure ${n}" src="${esc(f.url)}">`;
-        return match.replace(">", (m) => m + img);
-      }
-      return match; // no image/SVG: client script adds the link fallback
-    },
-  );
 }
 
 /* ---------------------------------------------------------------- sanitize */
@@ -220,6 +63,114 @@ function sanitizeHtml(html, { svg = false } = {}) {
   return DOMPurify.sanitize(String(html || ""), config);
 }
 
+/**
+ * Render markdown with math protection (used by tests).
+ * protectMath -> marked.parse -> restoreMath
+ */
+function renderContent(src) {
+  const { text, blocks } = protectMath(src);
+  const html = marked.parse(text);
+  return restoreMath(html, blocks);
+}
+
+/* ---------------------------------------------------------------- model conversion */
+
+/**
+ * Convert paper-digest Digest model to scholarly-reader model.
+ */
+function toScholarlyModel(digest, ctx = {}) {
+  const figures = Array.isArray(ctx.figures) ? ctx.figures : [];
+  const meta = digest.meta || {};
+  const sections = digest.sections || [];
+
+  // Build header - map paper-digest meta to scholarly-reader header
+  // Include full "venue · id · what-read" in kicker for source link compatibility
+  // Use actual middot character (not entity) to avoid double-encoding via textContent
+  const headerLine = [meta.venue, meta.id, `read: ${meta.whatRead}`].filter(Boolean).join(" · ");
+  const header = {
+    title: meta.title || "",
+    authors: Array.isArray(meta.authors) ? meta.authors.join(", ") : String(meta.authors || ""),
+    kicker: headerLine || "",
+    kickerHref: ctx.baseUrl || null,
+    verdict: meta.verdict ? { text: meta.verdict, badge: { tone: "accent", label: `${meta.overallConfidence || 0}%` } } : null,
+  };
+
+  // Convert sections
+  const srSections = sections.map((s) => {
+    const blocks = [];
+
+    switch (s.id) {
+      case "mot":
+      case "diff":
+      case "core":
+      case "bg":
+      case "src":
+        if (s.content) {
+          blocks.push({ type: "markdown", text: s.content });
+        }
+        break;
+
+      case "eval":
+        if (s.content) {
+          const items = (s.content || "")
+            .split(/\n\n+/)
+            .map((p) => p.trim())
+            .filter(Boolean)
+            .map((p) => ({ markdown: p }));
+          blocks.push({ type: "items", items });
+        }
+        break;
+
+      case "icymi":
+        if (s.entries) {
+          const items = s.entries.map((e) => ({
+            markdown: esc(e.text),
+            badge: e.tag ? { tone: e.tag, label: { pos: "+", neg: "−", neu: "·" }[e.tag] || "·" } : null,
+          }));
+          blocks.push({ type: "items", items });
+        }
+        break;
+
+      case "judge":
+        if (s.rows) {
+          blocks.push({
+            type: "table",
+            head: [{ markdown: "Question" }, { markdown: "Answer" }, { markdown: "Conf." }],
+            rows: s.rows.map((r) => [
+              { markdown: esc(r.question) },
+              { markdown: esc(r.answer) },
+              { markdown: r.conf == null ? "" : String(r.conf) + "%" },
+            ]),
+          });
+        }
+        break;
+
+      default:
+        if (s.content) {
+          blocks.push({ type: "markdown", text: s.content });
+        }
+    }
+
+    return {
+      id: s.id,
+      title: s.title,
+      badge: s.confidence != null ? { tone: "accent", label: `${s.confidence}%` } : null,
+      blocks,
+    };
+  });
+
+  // Convert figures
+  const srFigures = figures.map((f, i) => ({
+    n: f.n != null ? f.n : i + 1,
+    dataA: f.dataA,
+    caption: f.caption,
+    url: f.url,
+    svg: f.svg,
+  }));
+
+  return { header, sections: srSections, figures: srFigures };
+}
+
 /* ---------------------------------------------------------------- public */
 
 /**
@@ -233,48 +184,97 @@ function sanitizeHtml(html, { svg = false } = {}) {
 export async function renderDigest(digest, ctx = {}) {
   const figures = Array.isArray(ctx.figures) ? ctx.figures : [];
   const base = ctx.baseUrl || "";
-
-  const sectionsHtml = (digest.sections || [])
-    .map((s) => renderSection(s))
-    .join("");
-  // svg: true so inlined paper SVG figures survive; scripts/foreignObject/on*
-  // are still stripped by DOMPurify's svg profile.
-  const safeSections = sanitizeHtml(inlineFigures(sectionsHtml, figures), { svg: true });
-
-  const navLinks = (digest.sections || [])
-    .map((s) => `<a class="block py-1" href="#${esc(s.id)}">${esc(s.title)}</a>`)
-    .join("");
-
   const meta = digest.meta || {};
-  const authors = Array.isArray(meta.authors) ? meta.authors.join(", ") : String(meta.authors || "");
 
-  // Link the muted venue/id/what-read line back to the original source URL
-  // (the URL given as input to the frontend). Works for any site - arXiv,
-  // IEEE, Nature, etc. - with no fragile id regex needed. Falls back to a
-  // plain paragraph when no source URL is available.
-  const sourceUrl = String(ctx.baseUrl || "");
-  const sourceOpen = sourceUrl ? `<a href="${esc(sourceUrl)}" style="color:inherit;text-decoration:underline;cursor:pointer">` : "";
-  const sourceClose = sourceUrl ? "</a>" : "";
+  // Figure map for template's client-side fallback
+  const figureMap = {};
+  figures.forEach((f, i) => {
+    const n = String(f.n != null ? f.n : i + 1);
+    if (f.url) figureMap[n] = f.url;
+  });
 
+  // Convert to scholarly-reader model
+  const model = toScholarlyModel(digest, ctx);
+
+  // Load template
   const tmpl = await loadTemplate();
-  let html = tmpl
-    .split("{{TITLE}}").join(esc(meta.title || ""))
-    .split("{{AUTHORS}}").join(esc(authors))
-    .split("{{VENUE}}").join(esc(meta.venue || ""))
-    .split("{{ID}}").join(esc(meta.id || ""))
-    .split("{{WHAT_READ}}").join(esc(meta.whatRead || ""))
-    .split("{{VERDICT}}").join(esc(meta.verdict || ""))
-    .split("{{OVERALL_CONF}}").join(esc(meta.overallConfidence || 0))
-    .split("{{SOURCE_OPEN}}").join(sourceOpen)
-    .split("{{SOURCE_CLOSE}}").join(sourceClose)
-    .split("{{SECTIONS}}").join(safeSections)
-    .split("{{NAV_LINKS}}").join(navLinks)
-    .split("{{BASE}}").join(esc(base))
-    .split("{{MAP}}").join(JSON.stringify({}));
 
-  // {{MAP}} was replaced by the split/join above, so the template now has
-  // `const MAP = {};`. No second replace is needed.
-  return html;
+  // Parse template to DOM
+  const dom = new JSDOM(tmpl, {
+    contentType: "text/html",
+    url: "http://localhost/",
+    pretendToBeVisual: true,
+  });
+  const doc = dom.window.document;
+
+  // Save the script tags from the template body (they contain BASE/MAP and client-side logic)
+  const templateScripts = Array.from(doc.body.querySelectorAll("script")).map(s => s.cloneNode(true));
+
+  // Inject scholarly-reader CSS into the document head
+  const styleEl = doc.createElement("style");
+  styleEl.id = "sr-styles";
+  styleEl.textContent = CSS;
+  doc.head.insertBefore(styleEl, doc.head.firstChild);
+
+  // Ensure fonts are loaded
+  ensureFonts(doc);
+
+  // Create DOMPurify for this document's window
+  const DOMPurify = createDOMPurify(dom.window);
+
+  // Sanitizer function for scholarly-reader
+  const sanitize = (html, { svg = false } = {}) => {
+    const config = {
+      USE_PROFILES: { html: true, ...(svg ? { svg: true } : {}) },
+      ADD_TAGS: ["figure", "figcaption", "mjx-container", "math"],
+      ADD_ATTR: ["data-n", "data-a"],
+      FORCE_BODY: false,
+    };
+    return DOMPurify.sanitize(String(html || ""), config);
+  };
+
+  // Markdown converter for scholarly-reader
+  const markdown = (src) => {
+    const { text, blocks } = protectMath(src);
+    const html = marked.parse(text);
+    return restoreMath(html, blocks);
+  };
+
+  // Build the document structure using scholarly-reader
+  const { root, page, main, toc, tocButton } = buildDocument(model, {
+    document: doc,
+    markdown,
+    sanitize,
+  });
+
+  // Replace the template's body content with the scholarly-reader structure
+  const body = doc.body;
+  body.innerHTML = "";
+  body.appendChild(root);
+
+  // Re-append the template scripts (with BASE/MAP placeholders replaced)
+  for (const script of templateScripts) {
+    if (script.textContent.includes("{{BASE}}") || script.textContent.includes("{{MAP}}")) {
+      script.textContent = script.textContent
+        .split("{{BASE}}").join(esc(base))
+        .split("{{MAP}}").join(JSON.stringify(figureMap));
+    }
+    body.appendChild(script);
+  }
+
+  // Update title
+  const titleEl = doc.querySelector("title");
+  if (titleEl) titleEl.textContent = `Digest: ${esc(meta.title || "")}`;
+
+  // Update the kicker link (source URL) in the scholarly-reader header
+  const kickerLink = doc.querySelector(".sr-kicker-link");
+  if (kickerLink && ctx.baseUrl) {
+    kickerLink.setAttribute("href", ctx.baseUrl);
+    kickerLink.style.cssText = "color:inherit;text-decoration:underline;cursor:pointer";
+  }
+
+  // Serialize to string
+  return dom.serialize();
 }
 
 export { esc, sanitizeHtml, renderContent };

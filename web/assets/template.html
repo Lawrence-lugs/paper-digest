@@ -6,58 +6,39 @@
 <title>Digest: {{TITLE}}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
 <style>
-:root{--paper:#F2F5F3;--ink:#16252C;--mute:#5B6C73;--rule:#CBD6D3;--teal:#0E6B73;--gain:#2B7A4B;--risk:#A83A2C;--warn:#9A6A12;--card:#FBFCFB}
-body{background:var(--paper);color:var(--ink);font-family:Literata,Georgia,serif;line-height:1.65}
-.ui{font-family:'Instrument Sans',system-ui,sans-serif}
-h2.s{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;font-size:1.35rem;border-left:4px solid var(--teal);padding-left:.7rem;margin:2.6rem 0 .8rem}
-p,li{max-width:72ch}
-ul.b{list-style:disc;padding-left:1.2rem;margin:.4rem 0}
-.conf{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.75rem;font-weight:600;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:.05rem .5rem;margin-left:.5rem;white-space:nowrap;vertical-align:middle}
-.chip{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.72rem;font-weight:600;border-radius:4px;padding:.05rem .4rem;margin-right:.4rem;color:#fff}
-.neg{background:var(--risk)}.pos{background:var(--gain)}.neu{background:var(--warn)}
-.item{border-bottom:1px solid var(--rule);padding:.7rem 0;max-width:72ch}
-table{border-collapse:collapse;width:100%;font-size:.88rem}
-th,td{border-bottom:1px solid var(--rule);padding:.45rem .5rem;text-align:left;vertical-align:top}
-th{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;color:var(--mute)}
-.wrap{overflow-x:auto}
-blockquote{border-left:3px solid var(--rule);padding-left:1rem;color:var(--mute)}
-code,.cite{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--mute)}
-figure{background:var(--card);border:1px solid var(--rule);padding:.6rem;width:100%;max-width:72ch}
-figure img{display:block;width:100%;max-width:100%;height:auto;margin:0}
-figcaption{font-size:.8rem;color:var(--mute);margin-top:.4rem}
-main p,main li,main .item,main blockquote{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
-main .cite,main .conf{text-align:left;hyphens:none}
-main p{margin:.75rem 0}
-main blockquote{margin:1.25rem 0}
-main figure{margin:1.5rem 0}
-mjx-container[jax="SVG"]{display:inline-block!important;overflow:visible}
-mjx-container[jax="SVG"] svg{display:inline-block!important}
-mjx-container[jax="SVG"][display="true"]{display:flex!important;justify-content:safe center;overflow-x:auto;overflow-y:hidden;max-width:100%;margin:1rem 0}
-.rd.on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-body.rd-active .rd:hover:not(.on){background:rgba(22,37,44,.06)}
-#rd-hint{position:fixed;right:.8rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:var(--mute);background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
-@media print{.rd.on{background:none;box-shadow:none}#rd-hint{display:none}}
+:root{
+  --sr-paper:#F2F5F3;
+  --sr-ink:#16252C;
+  --sr-mute:#5B6C73;
+  --sr-rule:#CBD6D3;
+  --sr-teal:#0E6B73;
+  --sr-gain:#2B7A4B;
+  --sr-risk:#A83A2C;
+  --sr-warn:#9A6A12;
+  --sr-card:#FBFCFB;
+}
 </style>
 </head>
-<body class="antialiased">
-<div class="mx-auto max-w-6xl px-5 py-10 lg:flex lg:gap-12">
-<nav class="ui hidden lg:block w-44 shrink-0 text-sm sticky top-8 self-start" style="color:var(--mute)">
+<body class="sr-root">
+<div class="sr-grid">
+<nav class="sr-toc" aria-label="Table of contents">
 {{NAV_LINKS}}
 </nav>
-<main class="min-w-0 flex-1">
-<header>
-{{SOURCE_OPEN}}<p class="ui text-sm" style="color:var(--mute)">{{VENUE}} &middot; {{ID}} &middot; read: {{WHAT_READ}}</p>{{SOURCE_CLOSE}}
-<h1 class="ui text-3xl font-semibold leading-tight mt-1">{{TITLE}}</h1>
-<p class="ui text-sm mt-1" style="color:var(--mute)">{{AUTHORS}}</p>
-<p class="mt-4"><b>Verdict.</b> {{VERDICT}} <span class="conf">{{OVERALL_CONF}}%</span></p>
+<main class="sr-page">
+<div class="sr-main">
+<header class="sr-header">
+{{SOURCE_OPEN}}<p class="sr-kicker" style="color:var(--sr-mute)">{{VENUE}} &middot; {{ID}} &middot; read: {{WHAT_READ}}</p>{{SOURCE_CLOSE}}
+<h1 class="sr-title">{{TITLE}}</h1>
+<p class="sr-authors">{{AUTHORS}}</p>
+<p class="sr-verdict"><b>Verdict.</b> {{VERDICT}} <span class="sr-badge sr-tone-accent">{{OVERALL_CONF}}%</span></p>
 </header>
 
 {{SECTIONS}}
 
+</div>
 </main>
 </div>
 <script>
@@ -66,7 +47,7 @@ const MAP = {{MAP}};
 document.querySelectorAll('figure[data-n]').forEach((f)=>{
   if (f.querySelector('img, svg')) return;
   const n=f.dataset.n,img=new Image();img.loading='lazy';img.alt='Figure '+n;
-  img.onerror=()=>{const a=document.createElement('a');a.href=BASE.replace(/\/$/,'')+'#'+f.dataset.a;a.textContent='Open Fig. '+n+' on arXiv';a.className='ui text-sm underline';a.style.color='var(--teal)';img.replaceWith(a);};
+  img.onerror=()=>{const a=document.createElement('a');a.href=BASE.replace(/\/$/,'')+'#'+f.dataset.a;a.textContent='Open Fig. '+n+' on arXiv';a.className='sr-toc-link';a.style.color='var(--sr-teal)';img.replaceWith(a);};
   img.src=MAP[n] ? new URL(MAP[n], BASE || window.location.origin).href : "";
   f.prepend(img);
 });
@@ -75,7 +56,7 @@ document.querySelectorAll('figure[data-n]').forEach((f)=>{
 /* Reading marker. R or a click on a sentence starts it; Up/Down (or k/j) move it; Esc or R stops it.
    Arrow keys scroll the page normally unless the marker is active. Runs after MathJax has typeset. */
 (function(){
-const BLK='main p:not(.cite),main li:not(.cite),main .item,main blockquote,main figcaption,main td';
+const BLK='main p:not(.cite),main li:not(.cite),main .sr-item,main blockquote,main figcaption,main td';
 const ALL=BLK+',main mjx-container[display="true"]';
 const ABBR=/(?:\b(?:e\.g|i\.e|et al|etc|vs|cf|Figs?|Eqs?|Secs?|Tab|Refs?|Algs?|approx|resp|No)|\b[A-Z])\.$/;
 const OBJ='\uFFFC';
@@ -135,11 +116,11 @@ function rangeFor(block,map,a,b){
 function build(block){
   const out=[];
   for(const it of tokens(block)){
-    if(it.disp){it.disp.classList.add('rd');out.push(it.disp);continue;}
+    if(it.disp){it.disp.classList.add('sr-unit');out.push(it.disp);continue;}
     const {out:ss,map}=sentences(it.run),spans=[];
     for(let i=ss.length-1;i>=0;i--){
       const r=rangeFor(block,map,ss[i][0],ss[i][1]);
-      const sp=document.createElement('span');sp.className='rd';
+      const sp=document.createElement('span');sp.className='sr-unit';
       sp.appendChild(r.extractContents());r.insertNode(sp);spans.push(sp);
     }
     out.push(...spans.reverse());
@@ -148,7 +129,7 @@ function build(block){
 }
 
 function hint(){
-  if(!hintEl){hintEl=document.createElement('div');hintEl.id='rd-hint';document.body.appendChild(hintEl);}
+  if(!hintEl){hintEl=document.createElement('div');hintEl.className='sr-hint';document.body.appendChild(hintEl);}
   hintEl.textContent=on?'\u2191 \u2193 move \u00b7 Esc exit':'R: reading marker';
 }
 function inView(i){const r=units[i].getBoundingClientRect();return r.bottom>0&&r.top<innerHeight;}
@@ -158,18 +139,18 @@ function ensure(u,fast){
   if(r.top<h*.18||r.bottom>h*.78)scrollBy({top:r.top-h*.38,behavior:fast?'auto':'smooth'});
 }
 function set(i,scroll,fast){
-  if(units[idx])units[idx].classList.remove('on');
+  if(units[idx])units[idx].classList.remove('sr-on');
   idx=Math.max(0,Math.min(units.length-1,i));
-  units[idx].classList.add('on');
+  units[idx].classList.add('sr-on');
   if(scroll)ensure(units[idx],fast);
 }
 function activate(i){
-  on=true;document.body.classList.add('rd-active');
+  on=true;document.body.classList.add('sr-active');
   set(i!==undefined?i:(idx>=0&&inView(idx)?idx:firstVisible()),i===undefined);hint();
 }
 function deactivate(){
-  on=false;document.body.classList.remove('rd-active');
-  if(units[idx])units[idx].classList.remove('on');hint();
+  on=false;document.body.classList.remove('sr-active');
+  if(units[idx])units[idx].classList.remove('sr-on');hint();
 }
 
 document.addEventListener('keydown',e=>{
@@ -184,7 +165,7 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('click',e=>{
   const sel=getSelection();if(sel&&!sel.isCollapsed)return;
   if(!units.length||e.target.closest('a,button,nav'))return;
-  const u=e.target.closest('.rd');if(!u)return;
+  const u=e.target.closest('.sr-unit');if(!u)return;
   const i=units.indexOf(u);if(i<0)return;
   if(on){set(i,false);}else activate(i);
 });
@@ -192,7 +173,7 @@ document.addEventListener('click',e=>{
 function init(){
   if(ready)return;ready=true;
   for(const el of Array.from(document.querySelectorAll(ALL))){
-    if(el.tagName==='MJX-CONTAINER'){if(!el.parentElement.closest(BLK)){el.classList.add('rd');units.push(el);}continue;}
+    if(el.tagName==='MJX-CONTAINER'){if(!el.parentElement.closest(BLK)){el.classList.add('sr-unit');units.push(el);}continue;}
     if(el.querySelector(BLK))continue;
     units.push(...build(el));
   }
