@@ -319,11 +319,10 @@ export async function renderDigest(digest, ctx = {}) {
     kickerLink.style.cssText = "color:inherit;text-decoration:underline;cursor:pointer";
   }
 
-  // Serialize to string (browser-native XMLSerializer or jsdom in tests)
+  // Serialize to HTML string (avoid XMLSerializer which escapes script content)
   if (hasNativeSerializer()) {
-    // Browser environment or jsdom
-    const serializer = getSerializer();
-    return serializer.serializeToString(doc);
+    // Browser environment or jsdom - use outerHTML for proper HTML serialization
+    return doc.documentElement.outerHTML;
   } else {
     // Node.js test environment (jsdom) - use static serializeDocument
     const { serializeDocument } = await import("jsdom");
