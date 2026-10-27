@@ -506,7 +506,7 @@ html {
 </style>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Digest: Edge Cases &amp; Special Chars</title>
+<title>Digest: Edge Cases &amp;amp; Special Chars</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&amp;family=Instrument+Sans:wght@400;600&amp;display=swap" rel="stylesheet" />
 <script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
@@ -576,7 +576,7 @@ function sentences(run){
     else{map.push({a:p.a});s+=OBJ;}
   }
   const cuts=[0];
-  const re=/[.!?]+["'’”)\]]*(?=\s+[A-Z0-9"'‘(\[\uFFFC])/g;
+  const re=/[.!?]+["'\u2019\u201D\)\]]*(?=\s+[A-Z0-9"'\u2018\u201C\(\[\uFFFC])/g;
   let m;
   while((m=re.exec(s))){const end=m.index+m[0].length;if(!ABBR.test(s.slice(Math.max(0,end-10),end)))cuts.push(end);}
   cuts.push(s.length);
