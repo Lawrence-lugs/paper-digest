@@ -1,3 +1,6 @@
 [submodule "consistent-scholarly-reader"]
 	path = consistent-scholarly-reader
 	url = git@github.com:Lawrence-lugs/consistent-scholarly-reader.git
+[submodule "scholarly-reader"]
+	path = scholarly-reader
+	url = file:///C:/Users/lafqu/workspace/01_Projects/scholarly-reader
