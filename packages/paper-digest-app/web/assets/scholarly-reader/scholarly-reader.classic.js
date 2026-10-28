@@ -825,6 +825,43 @@ const THEME_PRESETS = {
 
 const THEME_STORAGE_KEY = "sr-theme";
 
+/**
+ * Check if localStorage is available and usable.
+ * Returns false for opaque origins (blob:) and file: protocol.
+ * sessionStorage works for blob: within the same session.
+ */
+function canUseLocalStorage(doc) {
+  try {
+    const win = doc.defaultView || globalThis;
+    const loc = win.location;
+    // Opaque origin (blob:, data:) — localStorage throws or returns null
+    if (loc.protocol === "blob:" || loc.protocol === "file:") return false;
+    // Test actual access
+    const testKey = "__sr_storage_test__";
+    localStorage.setItem(testKey, "1");
+    localStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if sessionStorage is available.
+ * Works for blob: within the same session (page reload keeps it).
+ */
+function canUseSessionStorage(doc) {
+  try {
+    const win = doc.defaultView || globalThis;
+    const testKey = "__sr_storage_test__";
+    win.sessionStorage.setItem(testKey, "1");
+    win.sessionStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function getRoot(doc) {
   return doc.documentElement || doc;
 }
@@ -857,12 +894,18 @@ function applyTheme(root, themeId, customColors) {
 
 function getCurrentTheme(doc) {
   const root = getRoot(doc);
-  const saved = localStorage.getItem(THEME_STORAGE_KEY);
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch {
-      // ignore
+  const useLocal = canUseLocalStorage(doc);
+  const useSession = !useLocal && canUseSessionStorage(doc);
+  const storage = useLocal ? localStorage : (useSession ? doc.defaultView.sessionStorage : null);
+
+  if (storage) {
+    const saved = storage.getItem(THEME_STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // ignore
+      }
     }
   }
   // Default to warm-paper preset
@@ -870,7 +913,14 @@ function getCurrentTheme(doc) {
 }
 
 function saveTheme(doc, theme) {
-  localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+  const useLocal = canUseLocalStorage(doc);
+  const useSession = !useLocal && canUseSessionStorage(doc);
+  const storage = useLocal ? localStorage : (useSession ? doc.defaultView.sessionStorage : null);
+
+  if (storage) {
+    storage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+  }
+  // If no storage available, theme persists only in DOM (data-theme attribute / inline styles)
 }
 
 /**
@@ -1084,13 +1134,18 @@ function createThemeSelector(doc, opts = {}) {
 
   // Panel internal styles (injected once per shadow root / document)
   // Find the correct root for style injection: if parent is in a shadow DOM, use that shadow root
+  // For regular documents, use doc.head; for ShadowRoot, use the shadow root directly.
+  // Event listeners (click outside, Escape) must always attach to the light DOM document
+  // so they fire for clicks/keys anywhere in the page.
   let styleRoot = doc.head;
   let eventRoot = doc;
   if (parent.getRootNode && parent.getRootNode() instanceof ShadowRoot) {
     styleRoot = parent.getRootNode();
-    eventRoot = parent.getRootNode(); // Use shadow root for event listeners too
+    // eventRoot stays as doc (light DOM) for global click/keydown capture
   }
-  if (!styleRoot.getElementById("sr-theme-styles")) {
+  // Use querySelector (works on both Document/ShadowRoot and Element) instead of
+  // getElementById (only on Document/ShadowRoot). doc.head is an HTMLHeadElement.
+  if (!styleRoot.querySelector("#sr-theme-styles")) {
     const style = doc.createElement("style");
     style.id = "sr-theme-styles";
     style.textContent = `
@@ -1136,9 +1191,16 @@ function createThemeSelector(doc, opts = {}) {
 
   // Get current theme for a specific root element (handles shadow host)
   function getCurrentThemeForRoot(root) {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+    const doc = root.ownerDocument || root;
+    const useLocal = canUseLocalStorage(doc);
+    const useSession = !useLocal && canUseSessionStorage(doc);
+    const storage = useLocal ? localStorage : (useSession ? doc.defaultView.sessionStorage : null);
+
+    if (storage) {
+      const saved = storage.getItem(THEME_STORAGE_KEY);
+      if (saved) {
+        try { return JSON.parse(saved); } catch { /* ignore */ }
+      }
     }
     // Check root for data-theme or inline styles
     if (root.dataset.theme && THEME_PRESETS[root.dataset.theme]) {
@@ -1162,6 +1224,11 @@ function createThemeSelector(doc, opts = {}) {
 
   // Apply theme to a specific root element and persist
   function applyAndSaveTheme(root, opts) {
+    const doc = root.ownerDocument || root;
+    const useLocal = canUseLocalStorage(doc);
+    const useSession = !useLocal && canUseSessionStorage(doc);
+    const storage = useLocal ? localStorage : (useSession ? doc.defaultView.sessionStorage : null);
+
     const { preset, custom } = opts;
     let theme;
     if (preset && THEME_PRESETS[preset]) {
@@ -1173,7 +1240,9 @@ function createThemeSelector(doc, opts = {}) {
     } else {
       return false;
     }
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+    if (storage) {
+      storage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+    }
     return true;
   }
 
@@ -1282,9 +1351,16 @@ function initThemeForRoot(rootOrDoc) {
  * @returns {{preset?: string, custom?: Object}}
  */
 function getCurrentThemeForRoot(root) {
-  const saved = localStorage.getItem(THEME_STORAGE_KEY);
-  if (saved) {
-    try { return JSON.parse(saved); } catch { /* ignore */ }
+  const doc = root.ownerDocument || root;
+  const useLocal = canUseLocalStorage(doc);
+  const useSession = !useLocal && canUseSessionStorage(doc);
+  const storage = useLocal ? localStorage : (useSession ? doc.defaultView.sessionStorage : null);
+
+  if (storage) {
+    const saved = storage.getItem(THEME_STORAGE_KEY);
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* ignore */ }
+    }
   }
   if (root.dataset.theme && THEME_PRESETS[root.dataset.theme]) {
     return { preset: root.dataset.theme };

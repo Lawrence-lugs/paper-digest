@@ -18,18 +18,19 @@ module.exports = {
     baseURL,
     reuseExistingServer: true,
     launchTimeout: 30000,
-    stdout: "ignore",
-    stderr: "ignore",
+    stdout: "pipe",
+    stderr: "pipe",
   },
 
   use: {
     baseURL,
     browserName: "chromium",
-    channel: "chrome",
     headless: true,
     args: ["--disable-popup-blocking"],
     navigationTimeout: 30000,
     actionTimeout: 15000,
+    // Wide enough for sr-toc-wide layout (ToC visible side-by-side)
+    viewport: { width: 1200, height: 800 },
     // Keep storage isolated per test (fresh localStorage/IndexedDB each time).
     storageState: undefined,
   },

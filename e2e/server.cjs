@@ -15,10 +15,10 @@ const { readFile, stat } = require("node:fs/promises");
 const { join, resolve, sep } = require("node:path");
 
 const ROOT = resolve(join(__dirname, ".."));
-const WEB = join(ROOT, "web");
+const WEB = join(ROOT, "packages", "paper-digest-app", "web");
 const ASSETS = join(WEB, "assets");
 const E2E_FIXTURES = join(ROOT, "e2e", "fixtures");
-const CSR_FIXTURES = join(ROOT, "test", "fixtures", "csr");
+const CSR_FIXTURES = join(ROOT, "packages", "paper-digest-app", "test", "fixtures", "csr");
 const PORT = 8910;
 const HOST = "127.0.0.1";
 

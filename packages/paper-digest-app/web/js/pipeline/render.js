@@ -29,6 +29,34 @@ import {
   createReadingMark,
 } from "../../assets/scholarly-reader/scholarly-reader.js";
 
+// Load scholarly-reader classic JS for inlining into generated HTML (self-contained)
+let SCHOLARLY_READER_CLASSIC_JS = null;
+async function loadScholarlyReaderClassicJs() {
+  if (!SCHOLARLY_READER_CLASSIC_JS) {
+    // Detect Node.js environment (tests run in Node with jsdom)
+    const isNode = typeof process !== "undefined" && process.versions && process.versions.node;
+    
+    if (isNode) {
+      // Node.js: read from file system - resolve from package root (where this file lives)
+      // This file is at: web/js/pipeline/render.js
+      // Target is at: web/assets/scholarly-reader/scholarly-reader.classic.js
+      const { readFileSync } = await import("node:fs");
+      const { resolve, dirname } = await import("node:path");
+      const { fileURLToPath } = await import("node:url");
+      const __filename = fileURLToPath(import.meta.url);
+      const pkgRoot = resolve(dirname(__filename), "..", ".."); // web/
+      const path = resolve(pkgRoot, "assets", "scholarly-reader", "scholarly-reader.classic.js");
+      SCHOLARLY_READER_CLASSIC_JS = readFileSync(path, "utf8");
+    } else {
+      // Browser: fetch from assets
+      const resp = await fetch(new URL("assets/scholarly-reader/scholarly-reader.classic.js", window.location.href).href);
+      if (!resp.ok) throw new Error(`Failed to load scholarly-reader.classic.js: ${resp.status}`);
+      SCHOLARLY_READER_CLASSIC_JS = await resp.text();
+    }
+  }
+  return SCHOLARLY_READER_CLASSIC_JS;
+}
+
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ESC[c] || c);
@@ -235,18 +263,23 @@ export async function renderDigest(digest, ctx = {}) {
   // Load template
   const tmpl = await loadTemplate();
 
+  // Load and inline scholarly-reader classic JS (replaces {{SCHOLARLY_READER_JS}} placeholder)
+  const srClassicJs = await loadScholarlyReaderClassicJs();
+  const srScriptTag = `<script>${srClassicJs}</script>`;
+  const tmplWithSr = tmpl.replace("{{SCHOLARLY_READER_JS}}", srScriptTag);
+
   // Parse template to DOM (browser-native DOMParser or jsdom in tests)
   let doc;
   let docWindow;
   if (hasNativeParser()) {
     // Browser environment or jsdom
     const parser = getParser();
-    doc = parser.parseFromString(tmpl, "text/html");
+    doc = parser.parseFromString(tmplWithSr, "text/html");
     docWindow = doc.defaultView || window;
   } else {
     // Node.js test environment without jsdom DOMParser
     const { JSDOM } = await import("jsdom");
-    const dom = new JSDOM(tmpl, { contentType: "text/html", url: "http://localhost/" });
+    const dom = new JSDOM(tmplWithSr, { contentType: "text/html", url: "http://localhost/" });
     doc = dom.window.document;
     docWindow = dom.window;
     // Shim globalThis.window for DOMPurify and scholarly-reader in pure Node tests
