@@ -30,7 +30,7 @@ jobs:
       - name: Upload web artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: web/
+          path: packages/paper-digest-app/web
 
       - name: Deploy to GitHub Pages
         id: deployment
