@@ -7,6 +7,14 @@ No server process — runs entirely in the browser. Covers three flows:
 - **Prompt** — ingest a source, copy the master prompt, send it to any chat AI.
 - **Template** — paste an AI digest response back in; figures are resolved from the session store (never from the AI's Markdown), then open/save/copy.
 
+## Monorepo Structure
+
+The projects are in the middle of restructuring into a monorepo.
+Currently, the top-level project is `paper-digest`. However, there are two subprojects inside:
+
+- `consistent-scholarly-reader`
+- `scholarly-reader` - Common dependency of both projects
+
 ## How it works
 
 1. **Ingest.** Enter an arXiv ID/URL or any URL, paste raw HTML, or upload a saved `.html` page. The app fetches the page (arXiv IDs become `https://arxiv.org/html/<id>`), parses it with the [consistent-scholarly-reader](https://github.com/Lawrence-lugs/consistent-scholarly-reader) parsers (arXiv, Nature, IEEE, ACM, Science), and produces a `Source`: title, authors, sections, figures (inline SVG or image URLs), and a text summary (`paperText`). Figures and the base URL live in the app's session store, never in the AI's Markdown — this fixes the old template-flow bug where standalone digests had empty figures.
