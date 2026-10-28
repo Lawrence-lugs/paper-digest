@@ -13,7 +13,7 @@ packages/consistent-scholarly-reader/*.zip
 
 # Paper-digest-app outputs
 packages/paper-digest-app/outputs/
-packages/paper-digest-app/web/assets/scholarly-reader/
+# packages/paper-digest-app/web/assets/scholarly-reader/
 
 # Test temp
 packages/**/test/.tmp/
