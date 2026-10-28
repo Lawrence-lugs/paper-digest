@@ -1,6 +1,0 @@
-[submodule "consistent-scholarly-reader"]
-	path = consistent-scholarly-reader
-	url = git@github.com:Lawrence-lugs/consistent-scholarly-reader.git
-[submodule "scholarly-reader"]
-	path = scholarly-reader
-	url = https://github.com/Lawrence-lugs/scholarly-reader.git
