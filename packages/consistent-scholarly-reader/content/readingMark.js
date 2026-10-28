@@ -28,14 +28,14 @@
     onCitationUnitChange: null,
 
     attach(shadowRoot, rootEl) {
-      const page = shadowRoot.querySelector(".csr-page");
+      const page = shadowRoot.querySelector(".sr-page");
       const scroller = shadowRoot.querySelector(".csr-scroll");
       const activeTarget = rootEl;
       const hintParent = rootEl;
       const keyTarget = document;
 
       if (!page) {
-        console.error("CSR: .csr-page not found in shadow root");
+        console.error("CSR: .sr-page not found in shadow root");
         return;
       }
 

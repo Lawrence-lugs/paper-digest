@@ -182,8 +182,9 @@
     // Create a document for the shadow root
     const doc = shadow.ownerDocument;
 
-    // Inject scholarly-reader CSS + CSR-specific styles into the shadow root (combined)
-    // CSR styles first so they take precedence and tests find them
+    // Inject scholarly-reader CSS + CSR-specific shell styles into the shadow root
+    // Scholarly-reader CSS (CSS) provides all content styling: figures, tables, ToC, reading mark, themes
+    // CSR adds only the overlay shell: root, topbar, scroll, citation sidebar, peek, hint
     const style = doc.createElement("style");
     style.id = "sr-styles";
     style.textContent = `
@@ -208,26 +209,7 @@
 }
 .csr-close:hover{background:var(--sr-paper)}
 .csr-scroll{flex:1 1 auto;overflow-y:auto;padding:2.5rem 1.25rem}
-.csr-page{max-width:72ch;margin:0 auto}
-/* Issue #10: preserved blocks (tables/figures) that overshoot the 72ch column
-   scroll horizontally instead of breaking the layout. img/svg inside figures
-   are left alone (they already scale via width: 100%). */
-.csr-page figure{max-width:100%;overflow-x:auto;background:var(--sr-card);border:1px solid var(--sr-rule);padding:.6rem;margin:1.4rem 0}
-.csr-page table{max-width:100%;overflow-x:auto}
-.csr-page figure img{display:block;width:100%;height:auto;margin:0}
-.csr-page figure object{display:block;width:100%;height:auto;margin:0;pointer-events:none}
-.csr-page figcaption{font-size:.8rem;color:var(--sr-mute);margin-top:.4rem}
-.csr-page table{border-collapse:collapse;width:100%;font-size:.88rem;margin:1rem 0}
-.csr-page th,.csr-page td{border-bottom:1px solid var(--sr-rule);padding:.45rem .5rem;text-align:left;vertical-align:top}
-.csr-page a{color:var(--sr-teal)}
-.csr-page sup a[data-csr-cite-ref],.csr-page a[data-csr-cite-ref]{cursor:help;text-decoration:underline dotted}
-/* Reading mark (sr-* classes from scholarly-reader, plus .rd/.on compat) */
-.sr-on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-.csr-root.sr-active .sr-unit:hover:not(.sr-on){background:rgba(22,37,44,.06)}
-/* CSR-compat classes */
-.rd.on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-.csr-root.rd-active .rd:hover:not(.on){background:rgba(22,37,44,.06)}
-.csr-hint-badge{position:absolute;right:.9rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:var(--sr-mute);background:var(--sr-card);border:1px solid var(--sr-rule);border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
+.sr-page{max-width:72ch;margin:0 auto}
 /* Citation peek tooltip */
 .csr-peek{
   position:fixed;max-width:32ch;z-index:2147483647;
@@ -256,35 +238,14 @@
 .csr-citation-item:focus-visible{outline:2px solid var(--sr-teal);outline-offset:-2px}
 .csr-citation-item.active,.csr-citation-item[aria-current]{color:var(--sr-teal);border-left-color:var(--sr-teal);font-weight:600}
 /* not enough margin: dock as a drawer, like the TOC (and clear of the topbar's close button) */
-.csr-root:not(.csr-toc-wide) .csr-citation-sidebar{
+.csr-root:not(.sr-toc-wide) .csr-citation-sidebar{
   top:3.1rem;bottom:0;max-height:none;width:17rem;padding:1rem;
   background:var(--sr-card);border-left:1px solid var(--sr-rule);box-shadow:-4px 0 14px rgba(22,37,44,.12);
 }
-/* TOC: floats in the left margin, never affects the content column */
-.sr-h2,.sr-h3{scroll-margin-top:1rem}
-.csr-toc{
-  display:none;position:absolute;top:4.25rem;left:1rem;width:14rem;
-  max-height:calc(100% - 5.75rem);overflow-y:auto;
-  font-family:'Instrument Sans',system-ui,sans-serif;font-size:.82rem;line-height:1.35;
-}
-.csr-toc-title{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5B6C73;margin:0 0 .6rem .6rem}
-.csr-toc ul{list-style:none;margin:0;padding:0}
-.csr-toc a{display:block;padding:.28rem .6rem;color:#5B6C73;text-decoration:none;border-left:2px solid #CBD6D3}
-.csr-toc a.sub{padding-left:1.3rem;font-size:.78rem}
-.csr-toc a:hover{color:#16252C;background:rgba(22,37,44,.04)}
-.csr-toc a.active{color:#0E6B73;border-left-color:#0E6B73;font-weight:600}
-.csr-toc-btn{
-  display:none;appearance:none;border:1px solid #CBD6D3;background:#FBFCFB;border-radius:6px;
-  height:1.8rem;padding:0 .6rem;cursor:pointer;font:inherit;color:#16252C;
-}
-/* enough free margin: show TOC in place */
-.csr-root.csr-toc-wide .csr-toc{display:block}
-/* not enough margin: button + drawer */
-.csr-root:not(.csr-toc-wide) .csr-toc-btn{display:inline-block}
-.csr-root:not(.csr-toc-wide).csr-toc-open .csr-toc{
-  display:block;top:3.1rem;left:0;bottom:0;width:17rem;max-height:none;
-  background:#FBFCFB;border-right:1px solid #CBD6D3;padding:1rem;z-index:2;
-  box-shadow:4px 0 14px rgba(22,37,44,.12);
+/* CSR hint badge (positioned in topbar via .csr-hint, not fixed) */
+.csr-hint-badge{
+  font:600 .7rem 'Instrument Sans',system-ui,sans-serif;
+  color:var(--sr-mute);opacity:.9;pointer-events:none;
 }
 ` + CSS;
     shadow.appendChild(style);
@@ -300,10 +261,10 @@
 
     // Adapt the structure for CSR:
     // - root (sr-root) -> wrap in csr-root
-    // - page (sr-page) -> use as csr-page
+    // - page (sr-page) -> keep as sr-page (scholarly-reader CSS styles it)
     // - main (sr-main) -> keep as main
-    // - toc (sr-toc) -> restyle as csr-toc
-    // - tocButton (sr-toc-btn) -> restyle as csr-toc-btn
+    // - toc (sr-toc) -> keep as sr-toc (scholarly-reader CSS styles it)
+    // - tocButton (sr-toc-btn) -> keep as sr-toc-btn (scholarly-reader CSS styles it)
 
     // Wrap sr-root in csr-root
     const csrRoot = doc.createElement("div");
@@ -326,26 +287,24 @@
     const scroll = doc.createElement("div");
     scroll.className = "csr-scroll";
 
-    // The scholarly-reader page has class sr-page; rename to csr-page for CSR styles
-    page.className = "csr-page";
+    // Keep sr-page class (scholarly-reader CSS styles .sr-page)
+    // No rename needed - scholarly-reader CSS handles figure/table/ToC/content styling
     scroll.appendChild(page);
     csrRoot.appendChild(scroll);
 
-    // TOC: scholarly-reader returns sr-toc (nav.sr-toc), adapt to csr-toc
+    // TOC: keep sr-toc class (scholarly-reader CSS styles .sr-toc)
     if (toc) {
-      toc.className = "csr-toc";
       toc.setAttribute("aria-label", "Table of contents");
-      // Update TOC link classes
+      // Update TOC link classes: sr-toc-sub -> sub (for backward compat with SR CSS)
       toc.querySelectorAll("a").forEach((a) => {
         if (a.classList.contains("sr-toc-sub")) a.classList.add("sub");
       });
       csrRoot.appendChild(toc);
 
-      // TOC button
+      // TOC button: keep sr-toc-btn class (scholarly-reader CSS styles .sr-toc-btn)
       if (tocButton) {
-        tocButton.className = "csr-toc-btn";
         tocButton.textContent = "Contents";
-        tocButton.addEventListener("click", () => csrRoot.classList.toggle("csr-toc-open"));
+        tocButton.addEventListener("click", () => csrRoot.classList.toggle("sr-toc-open"));
         topbar.insertBefore(tocButton, closeBtn);
       }
     }
@@ -359,8 +318,8 @@
     // CSR-specific mountLayout (adapted from scholarly-reader's mountLayout)
     const win = shadow.defaultView || window;
     const scroller = scroll; // CSR uses .csr-scroll as scroller
-    const tocNav = csrRoot.querySelector(".csr-toc");
-    const tocBtn = csrRoot.querySelector(".csr-toc-btn");
+    const tocNav = csrRoot.querySelector(".sr-toc");
+    const tocBtn = csrRoot.querySelector(".sr-toc-btn");
 
     if (tocNav) {
       const headings = new Map();
@@ -425,7 +384,7 @@
         const rem = (style && parseFloat(style.fontSize)) || 16;
         const scrollLeft = isWindow ? 0 : scroller.getBoundingClientRect().left;
         const room = page.getBoundingClientRect().left - scrollLeft;
-        csrRoot.classList.toggle("csr-toc-wide", room >= 16.5 * rem);
+        csrRoot.classList.toggle("sr-toc-wide", room >= 16.5 * rem);
       };
       let observer = null;
       if (typeof win.ResizeObserver === "function") {
@@ -450,13 +409,13 @@
         const handler = (e) => {
           e.preventDefault();
           item.target.scrollIntoView({ block: "start", behavior: "smooth" });
-          csrRoot.classList.remove("csr-toc-open");
+          csrRoot.classList.remove("sr-toc-open");
         };
         item.a.addEventListener("click", handler);
         return [item.a, handler];
       });
 
-      const onToggle = () => csrRoot.classList.toggle("csr-toc-open");
+      const onToggle = () => csrRoot.classList.toggle("sr-toc-open");
       if (tocBtn) tocBtn.addEventListener("click", onToggle);
 
       layoutDisposer = {

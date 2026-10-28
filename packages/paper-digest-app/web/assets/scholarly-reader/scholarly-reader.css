@@ -287,16 +287,6 @@ html {
   min-width: 0;
 }
 
-.sr-toc-wide .sr-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
-  gap: 1.5rem;
-}
-
-.sr-toc-wide .sr-page {
-  grid-column: 2;
-}
-
 .sr-main {
   max-width: 72ch;
   margin: 0 auto;
@@ -393,12 +383,16 @@ html {
   overflow-x: auto;
 }
 
-.sr-figure img,
-  .sr-figure svg {
+.sr-page figure img,
+  .sr-page figure object {
   display: block;
   width: 100%;
   height: auto;
   margin: 0;
+}
+
+.sr-page figure object {
+  pointer-events: none;
 }
 
 .sr-figure figcaption {
@@ -409,15 +403,37 @@ html {
 
 .sr-toc {
   position: absolute;
-  top: 4.25rem;
+  top: 2.5rem;
   left: 1rem;
   width: 14rem;
-  max-height: calc(100% - 5.75rem);
+  max-height: calc(100% - 3.5rem);
   overflow-y: auto;
   font-family: var(--font-sans);
   font-size: 0.82rem;
   line-height: 1.35;
   display: none;
+}
+
+.sr-toc-wide .sr-toc {
+  display: block;
+}
+
+.sr-root:not(.sr-toc-wide) .sr-toc-btn {
+  display: inline-block;
+}
+
+.sr-root:not(.sr-toc-wide).sr-toc-open .sr-toc {
+  display: block;
+  top: 3.1rem;
+  left: 0;
+  bottom: 0;
+  width: 17rem;
+  max-height: none;
+  background: var(--sr-card);
+  border-right: 1px solid var(--sr-rule);
+  padding: 1rem;
+  z-index: 2;
+  box-shadow: 4px 0 14px rgba(22, 37, 44, 0.12);
 }
 
 .sr-toc-title {
@@ -473,28 +489,6 @@ html {
   cursor: pointer;
   font: inherit;
   color: var(--sr-ink);
-}
-
-.sr-toc-wide .sr-toc {
-  display: block;
-}
-
-.sr-root:not(.sr-toc-wide) .sr-toc-btn {
-  display: inline-block;
-}
-
-.sr-root:not(.sr-toc-wide).sr-toc-open .sr-toc {
-  display: block;
-  top: 3.1rem;
-  left: 0;
-  bottom: 0;
-  width: 17rem;
-  max-height: none;
-  background: var(--sr-card);
-  border-right: 1px solid var(--sr-rule);
-  padding: 1rem;
-  z-index: 2;
-  box-shadow: 4px 0 14px rgba(22, 37, 44, 0.12);
 }
 
 .sr-badge {
@@ -616,3 +610,9 @@ html {
   --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
+
+/* ToC floats in left margin (like CSR) - never affects content column */
+
+/* Wide mode: show ToC floating in margin */
+
+/* Narrow mode: drawer */

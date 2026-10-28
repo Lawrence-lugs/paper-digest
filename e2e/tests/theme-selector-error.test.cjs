@@ -208,37 +208,24 @@ test.describe("Generated HTML works as blob URL", () => {
     await blobPage.keyboard.press("Escape");
     await blobPage.waitForTimeout(200);
 
-    // --- Step 7: Exercise ToC toggle (sidebar) ---
-    const tocToggle = blobPage.locator(".sr-toc-btn, [data-sr-toc-toggle], button[aria-label*='contents' i], button[aria-label*='toc' i]");
-    const tocToggleExists = await tocToggle.count() > 0;
-    
-    if (!tocToggleExists) {
-      throw new Error("ToC toggle button not found");
-    }
-
-    // Click to open ToC drawer
-    await tocToggle.first().click();
-    await blobPage.waitForTimeout(300);
-
-    // Verify ToC drawer opened (check for open class or visible sidebar)
+    // --- Step 7: Verify ToC is permanently visible (wide mode, like CSR) ---
     const tocNav = blobPage.locator(".sr-toc");
-    const tocOpen = await tocNav.evaluate(el => el.classList.contains("sr-toc-open") || el.classList.contains("open") || getComputedStyle(el).transform !== "none");
-    if (!tocOpen) {
-      // Check if the toggle button shows open state
-      const toggleOpen = await tocToggle.first().evaluate(el => el.getAttribute("aria-expanded") === "true" || el.classList.contains("active"));
-      if (!toggleOpen) {
-        console.log("[Test] ToC drawer state unclear, but no error thrown");
-      }
-    }
-    console.log("[Test] ToC toggle clicked");
+    await expect(tocNav).toBeVisible({ timeout: 5000 });
+    
+    // Verify root has sr-toc-wide class (permanent floating ToC)
+    const rootHasWide = await blobPage.locator(".sr-root").evaluate(el => el.classList.contains("sr-toc-wide"));
+    expect(rootHasWide, "Root should have sr-toc-wide class for permanent floating ToC").toBeTruthy();
+    
+    // Verify ToC toggle button is hidden in wide mode
+    const tocToggle = blobPage.locator(".sr-toc-btn");
+    const toggleVisible = await tocToggle.isVisible();
+    expect(toggleVisible, "ToC toggle button should be hidden in wide mode").toBeFalsy();
+    
+    console.log("[Test] ToC is permanently visible in wide mode (like CSR)");
 
-    // Verify no errors after ToC toggle
-    expect(blobConsoleErrors, "Console errors after ToC toggle").toEqual([]);
-    expect(blobPageErrors, "Page errors after ToC toggle").toEqual([]);
-
-    // Click again to close
-    await tocToggle.first().click();
-    await blobPage.waitForTimeout(300);
+    // Verify no errors
+    expect(blobConsoleErrors, "Console errors after ToC check").toEqual([]);
+    expect(blobPageErrors, "Page errors after ToC check").toEqual([]);
 
     // --- Step 8: Exercise reading marker (R key to toggle, arrows, Escape) ---
     const main = blobPage.locator(".sr-main");

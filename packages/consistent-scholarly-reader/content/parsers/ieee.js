@@ -59,7 +59,7 @@
   // the rest of the article. cloneClean(root) surfaces root's *children* as
   // the content fragment, so the abstract flow is wrapped in a <p> block:
   // without that it would land as bare inline text under <main> and the
-  // reading mark (which only units .csr-page p / li / blockquote / figcaption
+  // reading mark (which only units .sr-page p / li / blockquote / figcaption
   // / td and display math) could not reach it.
   function abstractSection(doc, base) {
     const src = doc.querySelector("div.abstract-text");

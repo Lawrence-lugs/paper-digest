@@ -34,6 +34,7 @@
 const BASE = "{{BASE}}";
 const MAP = {{MAP}};
 document.querySelectorAll('figure[data-n]').forEach((f)=>{
+  f.classList.add('sr-figure');
   if (f.querySelector('img, svg')) return;
   const n=f.dataset.n,img=new Image();img.loading='lazy';img.alt='Figure '+n;
   img.onerror=()=>{const a=document.createElement('a');a.href=BASE.replace(/\/$/,'')+'#'+f.dataset.a;a.textContent='Open Fig. '+n+' on arXiv';a.className='sr-toc-link';a.style.color='var(--sr-teal)';img.replaceWith(a);};
@@ -50,15 +51,16 @@ addEventListener('load', () => {
     const root = document.querySelector('.sr-root');
     if (!root) return;
 
-    // Wire up ToC: scroll-spy, drawer toggle, smooth scroll
+    // Wire up ToC: scroll-spy, permanent floating ToC (forceWide like CSR), smooth scroll
     if (window.ScholarlyReader && window.ScholarlyReader.mountLayout) {
-      window.ScholarlyReader.mountLayout(root);
+      window.ScholarlyReader.mountLayout(root, { forceWide: true });
     }
 
     // Wire up reading marker: R toggles, arrows/j/k navigate, click on unit, Esc exits
     const main = root.querySelector('.sr-main');
     if (main && window.ScholarlyReader && window.ScholarlyReader.createReadingMark) {
-      window.ScholarlyReader.createReadingMark({ container: main });
+      const readingMark = window.ScholarlyReader.createReadingMark({ container: main });
+      readingMark.attach();
     }
 
     // Initialize theme selector (floating button + dropdown)

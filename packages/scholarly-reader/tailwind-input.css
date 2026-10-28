@@ -127,17 +127,6 @@
 }
 
 @layer components {
-  .sr-toc-wide .sr-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
-    gap: 1.5rem;
-  }
-  .sr-toc-wide .sr-page {
-    grid-column: 2;
-  }
-}
-
-@layer components {
   .sr-main {
     max-width: 72ch;
     margin: 0 auto;
@@ -264,12 +253,18 @@
 }
 
 @layer components {
-  .sr-figure img,
-  .sr-figure svg {
+  .sr-page figure img,
+  .sr-page figure object {
     display: block;
     width: 100%;
     height: auto;
     margin: 0;
+  }
+}
+
+@layer components {
+  .sr-page figure object {
+    pointer-events: none;
   }
 }
 
@@ -281,18 +276,49 @@
   }
 }
 
+/* ToC floats in left margin (like CSR) - never affects content column */
 @layer components {
   .sr-toc {
     position: absolute;
-    top: 4.25rem;
+    top: 2.5rem;
     left: 1rem;
     width: 14rem;
-    max-height: calc(100% - 5.75rem);
+    max-height: calc(100% - 3.5rem);
     overflow-y: auto;
     font-family: var(--font-sans);
     font-size: 0.82rem;
     line-height: 1.35;
     display: none;
+  }
+}
+
+/* Wide mode: show ToC floating in margin */
+@layer components {
+  .sr-toc-wide .sr-toc {
+    display: block;
+  }
+}
+
+/* Narrow mode: drawer */
+@layer components {
+  .sr-root:not(.sr-toc-wide) .sr-toc-btn {
+    display: inline-block;
+  }
+}
+
+@layer components {
+  .sr-root:not(.sr-toc-wide).sr-toc-open .sr-toc {
+    display: block;
+    top: 3.1rem;
+    left: 0;
+    bottom: 0;
+    width: 17rem;
+    max-height: none;
+    background: var(--sr-card);
+    border-right: 1px solid var(--sr-rule);
+    padding: 1rem;
+    z-index: 2;
+    box-shadow: 4px 0 14px rgba(22, 37, 44, 0.12);
   }
 }
 
@@ -360,34 +386,6 @@
     cursor: pointer;
     font: inherit;
     color: var(--sr-ink);
-  }
-}
-
-@layer components {
-  .sr-toc-wide .sr-toc {
-    display: block;
-  }
-}
-
-@layer components {
-  .sr-root:not(.sr-toc-wide) .sr-toc-btn {
-    display: inline-block;
-  }
-}
-
-@layer components {
-  .sr-root:not(.sr-toc-wide).sr-toc-open .sr-toc {
-    display: block;
-    top: 3.1rem;
-    left: 0;
-    bottom: 0;
-    width: 17rem;
-    max-height: none;
-    background: var(--sr-card);
-    border-right: 1px solid var(--sr-rule);
-    padding: 1rem;
-    z-index: 2;
-    box-shadow: 4px 0 14px rgba(22, 37, 44, 0.12);
   }
 }
 

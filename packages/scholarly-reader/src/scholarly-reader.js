@@ -660,11 +660,13 @@ export function buildDocument(model = {}, opts = {}) {
 
 // Wires the table of contents: scroll-spy, the drawer for narrow widths and
 // the Contents toggle. `scroller` is window (default) or the element that
-// scrolls. Returns { dispose() }.
+// scrolls. If `forceWide` is true, the ToC is always shown as a permanent
+// floating panel (like CSR) regardless of viewport width. Returns { dispose() }.
 export function mountLayout(root, opts = {}) {
   const doc = root.ownerDocument;
   const win = opts.window || doc.defaultView || globalThis;
   const scroller = opts.scroller || win;
+  const forceWide = !!opts.forceWide;
   const page = root.querySelector(".sr-page");
   const toc = root.querySelector(".sr-toc");
   const button = root.querySelector(".sr-toc-btn");
@@ -728,7 +730,12 @@ export function mountLayout(root, opts = {}) {
 
   // The ToC sits in the left column when the margin beside the centred column
   // fits it (14rem panel, 1rem offset, 1.5rem gap). Otherwise it is a drawer.
+  // If forceWide is true, always use wide mode (permanent floating ToC like CSR).
   const measure = () => {
+    if (forceWide) {
+      root.classList.add("sr-toc-wide");
+      return;
+    }
     const style = win.getComputedStyle ? win.getComputedStyle(doc.documentElement) : null;
     const rem = (style && parseFloat(style.fontSize)) || 16;
     const scrollLeft = isWindow ? 0 : scroller.getBoundingClientRect().left;
@@ -736,7 +743,7 @@ export function mountLayout(root, opts = {}) {
     root.classList.toggle("sr-toc-wide", room >= 16.5 * rem);
   };
   let observer = null;
-  if (typeof win.ResizeObserver === "function") {
+  if (typeof win.ResizeObserver === "function" && !forceWide) {
     observer = new win.ResizeObserver(measure);
     observer.observe(root);
   } else {
