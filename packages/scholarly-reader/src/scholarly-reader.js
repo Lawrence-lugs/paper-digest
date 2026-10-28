@@ -952,15 +952,27 @@ export function initTheme(doc) {
 /**
  * Create and attach the theme selector UI (floating button + dropdown panel).
  * @param {Document} doc
- * @param {Object} opts - { parent?: HTMLElement, position?: 'top-right'|'bottom-right'|'top-left'|'bottom-left' }
+ * @param {Object} opts - { parent?: HTMLElement, position?: 'top-right'|'bottom-right'|'top-left'|'bottom-left', themeRoot?: HTMLElement }
  * @returns {{ dispose(): void }}
  */
 export function createThemeSelector(doc, opts = {}) {
   const parent = opts.parent || doc.body;
   const position = opts.position || "bottom-right";
 
-  const root = getRoot(doc);
-  const isDark = root.dataset.theme && THEME_PRESETS[root.dataset.theme]?.isDark;
+  // Determine the theme root: the element that receives data-theme attribute.
+  // Must be an element INSIDE the shadow DOM (or document) where CSS [data-theme] selectors live.
+  // If parent is in a shadow DOM, use parent itself (the shadow tree's root element),
+  // otherwise use document.documentElement.
+  let themeRoot = opts.themeRoot;
+  if (!themeRoot) {
+    if (parent.getRootNode && parent.getRootNode() instanceof ShadowRoot) {
+      themeRoot = parent; // element inside shadow DOM (e.g., csrRoot)
+    } else {
+      themeRoot = getRoot(doc);
+    }
+  }
+
+  const isDark = themeRoot.dataset.theme && THEME_PRESETS[themeRoot.dataset.theme]?.isDark;
 
   // Button
   const btn = doc.createElement("button");
@@ -986,7 +998,7 @@ export function createThemeSelector(doc, opts = {}) {
   // Build panel content
   let html = '<div class="sr-theme-presets" role="group" aria-label="Preset themes">';
   for (const [id, preset] of Object.entries(THEME_PRESETS)) {
-    const active = root.dataset.theme === id ? ' aria-selected="true"' : "";
+    const active = themeRoot.dataset.theme === id ? ' aria-selected="true"' : "";
     html += `
       <button type="button" class="sr-theme-preset" data-theme="${id}" role="option"${active} style="--sr-preset-paper: ${preset.paper}; --sr-preset-ink: ${preset.ink};">
         <span class="sr-theme-swatch" aria-hidden="true"></span>
@@ -1068,8 +1080,15 @@ export function createThemeSelector(doc, opts = {}) {
     color: var(--sr-ink);
   `;
 
-  // Panel internal styles (injected once)
-  if (!doc.getElementById("sr-theme-styles")) {
+  // Panel internal styles (injected once per shadow root / document)
+  // Find the correct root for style injection: if parent is in a shadow DOM, use that shadow root
+  let styleRoot = doc.head;
+  let eventRoot = doc;
+  if (parent.getRootNode && parent.getRootNode() instanceof ShadowRoot) {
+    styleRoot = parent.getRootNode();
+    eventRoot = parent.getRootNode(); // Use shadow root for event listeners too
+  }
+  if (!styleRoot.getElementById("sr-theme-styles")) {
     const style = doc.createElement("style");
     style.id = "sr-theme-styles";
     style.textContent = `
@@ -1089,12 +1108,12 @@ export function createThemeSelector(doc, opts = {}) {
       .sr-theme-apply-custom:hover, .sr-theme-reset:hover { background: var(--sr-mute); color: var(--sr-paper); }
       .sr-theme-btn:hover { border-color: var(--sr-teal); }
     `;
-    doc.head.appendChild(style);
+    styleRoot.appendChild(style);
   }
 
   // Sync color inputs with current theme
   function syncInputs() {
-    const current = getTheme(doc);
+    const current = getCurrentThemeForRoot(themeRoot);
     const paperInput = panel.querySelector('[data-prop="paper"]');
     const inkInput = panel.querySelector('[data-prop="ink"]');
     if (current.custom) {
@@ -1111,6 +1130,49 @@ export function createThemeSelector(doc, opts = {}) {
       if (preset.rule) panel.querySelector('[data-prop="rule"]').value = preset.rule;
       if (preset.card) panel.querySelector('[data-prop="card"]').value = preset.card;
     }
+  }
+
+  // Get current theme for a specific root element (handles shadow host)
+  function getCurrentThemeForRoot(root) {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* ignore */ }
+    }
+    // Check root for data-theme or inline styles
+    if (root.dataset.theme && THEME_PRESETS[root.dataset.theme]) {
+      return { preset: root.dataset.theme };
+    }
+    const paper = root.style.getPropertyValue("--sr-paper").trim();
+    const ink = root.style.getPropertyValue("--sr-ink").trim();
+    if (paper || ink) {
+      return {
+        custom: {
+          paper: paper || undefined,
+          ink: ink || undefined,
+          mute: root.style.getPropertyValue("--sr-mute").trim() || undefined,
+          rule: root.style.getPropertyValue("--sr-rule").trim() || undefined,
+          card: root.style.getPropertyValue("--sr-card").trim() || undefined,
+        },
+      };
+    }
+    return { preset: "warm-paper" };
+  }
+
+  // Apply theme to a specific root element and persist
+  function applyAndSaveTheme(root, opts) {
+    const { preset, custom } = opts;
+    let theme;
+    if (preset && THEME_PRESETS[preset]) {
+      applyTheme(root, preset);
+      theme = { preset };
+    } else if (custom) {
+      applyTheme(root, null, custom);
+      theme = { custom };
+    } else {
+      return false;
+    }
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+    return true;
   }
 
   // Event handlers
@@ -1137,7 +1199,7 @@ export function createThemeSelector(doc, opts = {}) {
     const btnEl = e.target.closest(".sr-theme-preset");
     if (!btnEl) return;
     const themeId = btnEl.dataset.theme;
-    setTheme(doc, { preset: themeId });
+    applyAndSaveTheme(themeRoot, { preset: themeId });
     // Update UI
     panel.querySelectorAll(".sr-theme-preset").forEach(b => b.removeAttribute("aria-selected"));
     btnEl.setAttribute("aria-selected", "true");
@@ -1150,13 +1212,13 @@ export function createThemeSelector(doc, opts = {}) {
       const val = input.value;
       if (val) custom[input.dataset.prop] = val;
     }
-    setTheme(doc, { custom });
+    applyAndSaveTheme(themeRoot, { custom });
     closePanel();
   }
 
   function onReset() {
     localStorage.removeItem(THEME_STORAGE_KEY);
-    applyTheme(root, "warm-paper");
+    applyTheme(themeRoot, "warm-paper");
     closePanel();
   }
 
@@ -1177,8 +1239,8 @@ export function createThemeSelector(doc, opts = {}) {
   panel.addEventListener("click", onPresetClick);
   panel.querySelector(".sr-theme-apply-custom").addEventListener("click", onApplyCustom);
   panel.querySelector(".sr-theme-reset").addEventListener("click", onReset);
-  doc.addEventListener("click", onClickOutside);
-  doc.addEventListener("keydown", onKeydown);
+  eventRoot.addEventListener("click", onClickOutside);
+  eventRoot.addEventListener("keydown", onKeydown);
 
   parent.appendChild(btn);
   parent.appendChild(panel);
@@ -1189,8 +1251,8 @@ export function createThemeSelector(doc, opts = {}) {
       panel.removeEventListener("click", onPresetClick);
       panel.querySelector(".sr-theme-apply-custom").removeEventListener("click", onApplyCustom);
       panel.querySelector(".sr-theme-reset").removeEventListener("click", onReset);
-      doc.removeEventListener("click", onClickOutside);
-      doc.removeEventListener("keydown", onKeydown);
+      eventRoot.removeEventListener("click", onClickOutside);
+      eventRoot.removeEventListener("keydown", onKeydown);
       btn.remove();
       panel.remove();
     },
@@ -1198,13 +1260,67 @@ export function createThemeSelector(doc, opts = {}) {
 }
 
 /**
+ * Initialize theme from localStorage for a specific root element.
+ * Call this early, before building the document.
+ * @param {HTMLElement|Document} rootOrDoc - Element to apply theme to, or Document (uses documentElement)
+ */
+export function initThemeForRoot(rootOrDoc) {
+  const root = rootOrDoc.nodeType === 9 ? getRoot(rootOrDoc) : rootOrDoc; // Document -> documentElement
+  const saved = getCurrentThemeForRoot(root);
+  if (saved.preset && THEME_PRESETS[saved.preset]) {
+    applyTheme(root, saved.preset);
+  } else if (saved.custom) {
+    applyTheme(root, null, saved.custom);
+  }
+}
+
+/**
+ * Get current theme configuration for a specific root element.
+ * @param {HTMLElement} root
+ * @returns {{preset?: string, custom?: Object}}
+ */
+function getCurrentThemeForRoot(root) {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch { /* ignore */ }
+  }
+  if (root.dataset.theme && THEME_PRESETS[root.dataset.theme]) {
+    return { preset: root.dataset.theme };
+  }
+  const paper = root.style.getPropertyValue("--sr-paper").trim();
+  const ink = root.style.getPropertyValue("--sr-ink").trim();
+  if (paper || ink) {
+    return {
+      custom: {
+        paper: paper || undefined,
+        ink: ink || undefined,
+        mute: root.style.getPropertyValue("--sr-mute").trim() || undefined,
+        rule: root.style.getPropertyValue("--sr-rule").trim() || undefined,
+        card: root.style.getPropertyValue("--sr-card").trim() || undefined,
+      },
+    };
+  }
+  return { preset: "warm-paper" };
+}
+
+/**
  * Convenience: initialize theme from localStorage AND attach the theme selector UI.
  * Call this after the document structure is in place (e.g., after buildDocument).
  * @param {Document} doc
- * @param {Object} opts - { position?: 'top-right'|'bottom-right'|'top-left'|'bottom-left', parent?: HTMLElement }
+ * @param {Object} opts - { position?: 'top-right'|'bottom-right'|'top-left'|'bottom-left', parent?: HTMLElement, themeRoot?: HTMLElement }
  * @returns {{ dispose(): void }} - call dispose() to clean up
  */
 export function attachThemeSelector(doc, opts = {}) {
-  initTheme(doc);
-  return createThemeSelector(doc, opts);
+  // Determine themeRoot (same logic as createThemeSelector)
+  const parent = opts.parent || doc.body;
+  let themeRoot = opts.themeRoot;
+  if (!themeRoot) {
+    if (parent.getRootNode && parent.getRootNode() instanceof ShadowRoot) {
+      themeRoot = parent; // element inside shadow DOM (e.g., csrRoot)
+    } else {
+      themeRoot = getRoot(doc);
+    }
+  }
+  initThemeForRoot(themeRoot);
+  return createThemeSelector(doc, { ...opts, themeRoot });
 }

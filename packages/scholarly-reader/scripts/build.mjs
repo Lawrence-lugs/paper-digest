@@ -602,7 +602,9 @@ function main() {
     "getTheme",
     "getThemePresets",
     "initTheme",
+    "initThemeForRoot",
     "createThemeSelector",
+    "attachThemeSelector",
   ];
   const exportAssignments = exportNames.map((name) => `  ScholarlyReader.${name} = ${name};`).join("\n");
   classicJs = `(function (global) {

@@ -190,36 +190,36 @@
 :host{all:initial}
 .csr-root{
   position:fixed;inset:0;z-index:2147483647;
-  background:#F2F5F3;color:#16252C;
+  background:var(--sr-paper);color:var(--sr-ink);
   font-family:'Literata',Georgia,serif;line-height:1.65;
   display:flex;flex-direction:column;
 }
 .csr-root *{box-sizing:border-box}
 .csr-topbar{
   flex:0 0 auto;display:flex;align-items:center;gap:1rem;
-  padding:.6rem 1rem;background:#FBFCFB;border-bottom:1px solid #CBD6D3;
-  font-family:'Instrument Sans',system-ui,sans-serif;font-size:.85rem;color:#5B6C73;
+  padding:.6rem 1rem;background:var(--sr-card);border-bottom:1px solid var(--sr-rule);
+  font-family:'Instrument Sans',system-ui,sans-serif;font-size:.85rem;color:var(--sr-mute);
 }
-.csr-brand{font-weight:600;color:#16252C}
+.csr-brand{font-weight:600;color:var(--sr-ink)}
 .csr-hint{flex:1 1 auto}
 .csr-close{
-  appearance:none;border:1px solid #CBD6D3;background:#FBFCFB;border-radius:6px;
-  width:1.8rem;height:1.8rem;cursor:pointer;font-size:1rem;color:#16252C;line-height:1;
+  appearance:none;border:1px solid var(--sr-rule);background:var(--sr-card);border-radius:6px;
+  width:1.8rem;height:1.8rem;cursor:pointer;font-size:1rem;color:var(--sr-ink);line-height:1;
 }
-.csr-close:hover{background:#F2F5F3}
+.csr-close:hover{background:var(--sr-paper)}
 .csr-scroll{flex:1 1 auto;overflow-y:auto;padding:2.5rem 1.25rem}
 .csr-page{max-width:72ch;margin:0 auto}
 /* Issue #10: preserved blocks (tables/figures) that overshoot the 72ch column
    scroll horizontally instead of breaking the layout. img/svg inside figures
    are left alone (they already scale via width: 100%). */
-.csr-page figure{max-width:100%;overflow-x:auto;background:#FBFCFB;border:1px solid #CBD6D3;padding:.6rem;margin:1.4rem 0}
+.csr-page figure{max-width:100%;overflow-x:auto;background:var(--sr-card);border:1px solid var(--sr-rule);padding:.6rem;margin:1.4rem 0}
 .csr-page table{max-width:100%;overflow-x:auto}
 .csr-page figure img{display:block;width:100%;height:auto;margin:0}
 .csr-page figure object{display:block;width:100%;height:auto;margin:0;pointer-events:none}
-.csr-page figcaption{font-size:.8rem;color:#5B6C73;margin-top:.4rem}
+.csr-page figcaption{font-size:.8rem;color:var(--sr-mute);margin-top:.4rem}
 .csr-page table{border-collapse:collapse;width:100%;font-size:.88rem;margin:1rem 0}
-.csr-page th,.csr-page td{border-bottom:1px solid #CBD6D3;padding:.45rem .5rem;text-align:left;vertical-align:top}
-.csr-page a{color:#0E6B73}
+.csr-page th,.csr-page td{border-bottom:1px solid var(--sr-rule);padding:.45rem .5rem;text-align:left;vertical-align:top}
+.csr-page a{color:var(--sr-teal)}
 .csr-page sup a[data-csr-cite-ref],.csr-page a[data-csr-cite-ref]{cursor:help;text-decoration:underline dotted}
 /* Reading mark (sr-* classes from scholarly-reader, plus .rd/.on compat) */
 .sr-on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
@@ -227,12 +227,12 @@
 /* CSR-compat classes */
 .rd.on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .csr-root.rd-active .rd:hover:not(.on){background:rgba(22,37,44,.06)}
-.csr-hint-badge{position:absolute;right:.9rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:#5B6C73;background:#FBFCFB;border:1px solid #CBD6D3;border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
+.csr-hint-badge{position:absolute;right:.9rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:var(--sr-mute);background:var(--sr-card);border:1px solid var(--sr-rule);border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
 /* Citation peek tooltip */
 .csr-peek{
   position:fixed;max-width:32ch;z-index:2147483647;
-  font-family:'Instrument Sans',system-ui,sans-serif;font-size:.78rem;line-height:1.4;color:#16252C;
-  background:#FBFCFB;border:1px solid #CBD6D3;border-radius:6px;padding:.5rem .65rem;
+  font-family:'Instrument Sans',system-ui,sans-serif;font-size:.78rem;line-height:1.4;color:var(--sr-ink);
+  background:var(--sr-card);border:1px solid var(--sr-rule);border-radius:6px;padding:.5rem .65rem;
   box-shadow:0 4px 14px rgba(22,37,44,.18);pointer-events:none;
 }
 /* Citation sidebar (issue #9): floats in the right margin, mirroring the TOC */
@@ -240,25 +240,25 @@
   position:fixed;top:4.25rem;right:1rem;width:14rem;
   max-height:calc(100% - 5.75rem);overflow-y:auto;
   display:block;background:none;border:0;z-index:2147483648;
-  font-family:'Instrument Sans',system-ui,sans-serif;font-size:.82rem;line-height:1.35;color:#16252C;
+  font-family:'Instrument Sans',system-ui,sans-serif;font-size:.82rem;line-height:1.35;color:var(--sr-ink);
 }
 .csr-citation-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
 .csr-citation-list::before{
   content:"Citations";margin:0 0 .6rem .6rem;
-  font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5B6C73;
+  font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--sr-mute);
 }
 .csr-citation-list:empty::before{display:none}
 .csr-citation-item{
-  display:block;width:100%;appearance:none;border:0;border-left:2px solid #CBD6D3;border-radius:0;
-  background:none;padding:.28rem .6rem;font:inherit;color:#5B6C73;text-align:left;cursor:pointer;
+  display:block;width:100%;appearance:none;border:0;border-left:2px solid var(--sr-rule);border-radius:0;
+  background:none;padding:.28rem .6rem;font:inherit;color:var(--sr-mute);text-align:left;cursor:pointer;
 }
-.csr-citation-item:hover{color:#16252C;background:rgba(22,37,44,.04)}
-.csr-citation-item:focus-visible{outline:2px solid #0E6B73;outline-offset:-2px}
-.csr-citation-item.active,.csr-citation-item[aria-current]{color:#0E6B73;border-left-color:#0E6B73;font-weight:600}
+.csr-citation-item:hover{color:var(--sr-ink);background:rgba(22,37,44,.04)}
+.csr-citation-item:focus-visible{outline:2px solid var(--sr-teal);outline-offset:-2px}
+.csr-citation-item.active,.csr-citation-item[aria-current]{color:var(--sr-teal);border-left-color:var(--sr-teal);font-weight:600}
 /* not enough margin: dock as a drawer, like the TOC (and clear of the topbar's close button) */
 .csr-root:not(.csr-toc-wide) .csr-citation-sidebar{
   top:3.1rem;bottom:0;max-height:none;width:17rem;padding:1rem;
-  background:#FBFCFB;border-left:1px solid #CBD6D3;box-shadow:-4px 0 14px rgba(22,37,44,.12);
+  background:var(--sr-card);border-left:1px solid var(--sr-rule);box-shadow:-4px 0 14px rgba(22,37,44,.12);
 }
 /* TOC: floats in the left margin, never affects the content column */
 .sr-h2,.sr-h3{scroll-margin-top:1rem}
@@ -490,9 +490,10 @@
     CSR.citationPeek.attach(shadow, article.bibliography);
 
     // Initialize theme selector in the shadow DOM (bottom-left to avoid sr-hint at bottom-right)
+    // Pass csrRoot as parent since shadow DOM doesn't have a traditional body element
     if (window.ScholarlyReader && window.ScholarlyReader.attachThemeSelector) {
       const doc = shadow.ownerDocument;
-      CSR.themeDisposer = window.ScholarlyReader.attachThemeSelector(doc, { position: 'bottom-left' });
+      CSR.themeDisposer = window.ScholarlyReader.attachThemeSelector(doc, { position: 'bottom-left', parent: csrRoot });
     }
 
     // Issue #9: citation sidebar — wire into the reading mark so the panel
