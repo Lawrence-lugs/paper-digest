@@ -1,0 +1,55 @@
+PS c/U/l/w/0/consistent-scholarly-reader > gh issue list                            
+
+Showing 8 of 8 open issues in Lawrence-lugs/consistent-scholarly-reader
+
+ID  TITLE                                                                    LABELS  UPDATED             
+#8  replicate tables and code as-is                                                  about 13 minutes ago
+#7  consistent location on click                                                     about 47 minutes ago
+#6  secondary css classes are not inherited                                          about 45 minutes ago
+#5  table of contents                                                                about 6 hours ago
+#4  equations are small                                                              about 1 hour ago
+#3  firefox android extension                                                        about 6 hours ago
+#2  policy31 on https://arxiv.org/html/2602.22425 shows code badly forma...          about 6 hours ago
+#1  dagger callout/popup on arxiv turns into text                                    about 6 hours ago
+PS c/U/l/w/0/consistent-scholarly-reader > gh issue view 8             
+replicate tables and code as-is Lawrence-lugs/consistent-scholarly-reader#8
+Open • Lawrence-lugs (Lawrence Quizon) opened about 14 minutes ago • 1 comment
+
+
+  tables and code tend to have incorrect parsing                                                       
+  might as well just preserve the entire thing                                                         
+
+
+Lawrence-lugs (Owner) • 13m • Newest comment
+
+  #2 is related                                                                                        
+
+
+View this issue on GitHub: https://github.com/Lawrence-lugs/consistent-scholarly-reader/issues/8
+PS c/U/l/w/0/consistent-scholarly-reader > gh issue view 4
+equations are small Lawrence-lugs/consistent-scholarly-reader#4
+Open • Lawrence-lugs (Lawrence Quizon) opened about 6 hours ago • 2 comments
+
+
+  No description provided
+
+
+———————— Not showing 1 comment ————————
+
+
+Lawrence-lugs (Owner) • 1h • Newest comment
+
+  equations should at least be the size of equations in the arxiv reader                               
+
+
+Use --comments to view the full conversation
+View this issue on GitHub: https://github.com/Lawrence-lugs/consistent-scholarly-reader/issues/4
+PS c/U/l/w/0/consistent-scholarly-reader > gh issue view 2
+policy31 on https://arxiv.org/html/2602.22425 shows code badly formatted Lawrence-lugs/consistent-scholarly-reader#2
+Open • Lawrence-lugs (Lawrence Quizon) opened about 6 hours ago • 0 comments
+
+
+  No description provided
+
+
+View this issue on GitHub: https://github.com/Lawrence-lugs/consistent-scholarly-reader/issues/2

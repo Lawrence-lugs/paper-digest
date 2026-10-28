@@ -1,6 +1,24 @@
+# Monorepo root
 .agents
-reference/
 node_modules/
-outputs/
-tmp.txt
-test/.tmp/
+*.log
+
+# Package build outputs
+packages/*/dist/
+packages/*/lib/
+packages/*/node_modules/
+
+# Extension build
+packages/consistent-scholarly-reader/*.zip
+
+# Paper-digest-app outputs
+packages/paper-digest-app/outputs/
+packages/paper-digest-app/web/assets/scholarly-reader/
+
+# Test temp
+packages/**/test/.tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp

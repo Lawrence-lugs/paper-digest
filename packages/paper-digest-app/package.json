@@ -1,0 +1,39 @@
+{
+  "name": "paper-digest-app",
+  "version": "0.2.0",
+  "description": "Paper digest generator: static client-side web app (digest + prompt + template flows).",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lafqu/paper-digest.git"
+  },
+  "keywords": ["arxiv", "digest", "paper"],
+  "author": "paper-digest",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "scholarly-reader": "file:../scholarly-reader",
+    "marked": "^18.1.1"
+  },
+  "devDependencies": {
+    "dompurify": "^3.2.4",
+    "jsdom": "^26.0.0",
+    "linkedom": "^0.18.13"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/**/*.test.js",
+    "test:ingest": "node --test test/ingest/**/*.test.js",
+    "test:pipeline": "node --test test/pipeline/**/*.test.js",
+    "test:app": "node --test test/app/**/*.test.js",
+    "lint": "node --check web/js/**/*.js",
+    "sync:vendor": "node scripts/vendor-libs.mjs"
+  },
+  "files": [
+    "web/",
+    "scripts/",
+    "docs/"
+  ]
+}

@@ -1,39 +1,24 @@
 {
-  "name": "paper-digest",
+  "name": "paper-digest-monorepo",
   "version": "0.2.0",
-  "description": "Paper digest generator: static client-side web app (digest + prompt + template flows).",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lafqu/paper-digest.git"
-  },
-  "keywords": ["arxiv", "digest", "paper"],
-  "author": "paper-digest",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "marked": "^18.1.1"
-  },
-  "devDependencies": {
-    "dompurify": "^3.2.4",
-    "jsdom": "^26.0.0",
-    "linkedom": "^0.18.13",
-    "playwright": "^1.53.0"
-  },
+  "description": "Paper digest monorepo: scholarly-reader library, paper-digest-app web app, consistent-scholarly-reader extension",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "test": "node --test test/ingest/ test/pipeline/ test/app/",
-    "test:ingest": "node --test test/ingest/",
-    "test:pipeline": "node --test test/pipeline/",
-    "test:app": "node --test test/app/",
-    "lint": "node --check web/js/**/*.js",
-    "sync:csr": "node scripts/sync-csr.mjs",
+    "build": "npm run build --workspaces --if-present",
+    "build:sr": "npm run build -w scholarly-reader",
+    "build:app": "npm run build -w paper-digest-app",
+    "build:csr": "npm run build -w consistent-scholarly-reader",
+    "dev": "npm run dev -w paper-digest-app",
+    "test": "npm run test --workspaces --if-present",
     "sync:vendor": "node scripts/vendor-libs.mjs"
   },
-  "files": [
-    "web/",
-    "scripts/",
-    "docs/"
-  ]
+  "devDependencies": {
+    "playwright": "^1.53.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }

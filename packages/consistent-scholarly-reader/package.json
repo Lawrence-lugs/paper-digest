@@ -1,0 +1,26 @@
+{
+  "name": "consistent-scholarly-reader",
+  "version": "0.1.0",
+  "description": "Chrome extension: distraction-free reading mode for academic HTML papers with moveable reading mark and citation hover peek.",
+  "type": "module",
+  "scripts": {
+    "prepare": "npm run copy:sr",
+    "copy:sr": "node scripts/copy-scholarly-reader.mjs",
+    "build": "npm run copy:sr && node scripts/zip-extension.mjs",
+    "test": "node --test test/**/*.test.js"
+  },
+  "dependencies": {
+    "scholarly-reader": "file:../scholarly-reader"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1"
+  },
+  "keywords": [
+    "chrome-extension",
+    "scholarly",
+    "reader",
+    "paper",
+    "arxiv"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digest: AA-Omniscience: Evaluating Cross-Domain Knowledge Reliability in Large Language Models</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<style>
+:root{--paper:#F2F5F3;--ink:#16252C;--mute:#5B6C73;--rule:#CBD6D3;--teal:#0E6B73;--gain:#2B7A4B;--risk:#A83A2C;--warn:#9A6A12;--card:#FBFCFB}
+body{background:var(--paper);color:var(--ink);font-family:Literata,Georgia,serif;line-height:1.65}
+.ui{font-family:'Instrument Sans',system-ui,sans-serif}
+h2.s{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;font-size:1.35rem;border-left:4px solid var(--teal);padding-left:.7rem;margin:2.6rem 0 .8rem}
+p,li{max-width:72ch}
+ul.b{list-style:disc;padding-left:1.2rem;margin:.4rem 0}
+.conf{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.75rem;font-weight:600;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:.05rem .5rem;margin-left:.5rem;white-space:nowrap;vertical-align:middle}
+.chip{font-family:'Instrument Sans',system-ui,sans-serif;font-size:.72rem;font-weight:600;border-radius:4px;padding:.05rem .4rem;margin-right:.4rem;color:#fff}
+.neg{background:var(--risk)}.pos{background:var(--gain)}.neu{background:var(--warn)}
+.item{border-bottom:1px solid var(--rule);padding:.7rem 0;max-width:72ch}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--rule);padding:.45rem .5rem;text-align:left;vertical-align:top}
+th{font-family:'Instrument Sans',system-ui,sans-serif;font-weight:600;color:var(--mute)}
+.wrap{overflow-x:auto}
+blockquote{border-left:3px solid var(--rule);padding-left:1rem;color:var(--mute)}
+code,.cite{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--mute)}
+figure{background:var(--card);border:1px solid var(--rule);padding:.6rem;width:100%;max-width:72ch}
+figure img{display:block;width:100%;max-width:100%;height:auto;margin:0}
+figcaption{font-size:.8rem;color:var(--mute);margin-top:.4rem}
+main p,main li,main .item,main blockquote{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+main .cite,main .conf{text-align:left;hyphens:none}
+/* Tailwind Preflight zeroes margins and is injected after this sheet; `main` raises specificity */
+main p{margin:.75rem 0}
+main blockquote{margin:1.25rem 0}
+main figure{margin:1.5rem 0}
+/* Preflight forces svg{display:block}: keep inline math inline; scroll only display math */
+mjx-container[jax="SVG"]{display:inline-block!important;overflow:visible}
+mjx-container[jax="SVG"] svg{display:inline-block!important}
+mjx-container[jax="SVG"][display="true"]{display:flex!important;justify-content:safe center;overflow-x:auto;overflow-y:hidden;max-width:100%;margin:1rem 0}
+/* Reading marker: darkened sentence selector, moved with arrow keys (see script at end of body) */
+.rd.on{background:rgba(22,37,44,.15);box-shadow:0 0 0 2px rgba(22,37,44,.15);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+body.rd-active .rd:hover:not(.on){background:rgba(22,37,44,.06)}
+#rd-hint{position:fixed;right:.8rem;bottom:.7rem;font:600 .7rem 'Instrument Sans',system-ui,sans-serif;color:var(--mute);background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.2rem .55rem;opacity:.9;pointer-events:none}
+@media print{.rd.on{background:none;box-shadow:none}#rd-hint{display:none}}
+</style>
+</head>
+<body class="antialiased">
+<div class="mx-auto max-w-6xl px-5 py-10 lg:flex lg:gap-12">
+<nav class="ui hidden lg:block w-44 shrink-0 text-sm sticky top-8 self-start" style="color:var(--mute)">
+<a class="block py-1" href="#mot">Motivation</a><a class="block py-1" href="#core">Core idea</a><a class="block py-1" href="#diff">Distinguishing factor</a><a class="block py-1" href="#eval">Evaluation</a><a class="block py-1" href="#icymi">In case you missed it</a><a class="block py-1" href="#judge">Cautious judgement</a><a class="block py-1" href="#src">Sources and limits</a>
+</nav>
+<main class="min-w-0 flex-1">
+<header>
+<p class="ui text-sm" style="color:var(--mute)">arXiv preprint (cs.CL) &middot; arXiv:2511.13029v1 &middot; 17 Nov 2025 &middot; full HTML text incl. appendices; figure images not inspected</p>
+<h1 class="ui text-3xl font-semibold leading-tight mt-1">AA-Omniscience: Evaluating Cross-Domain Knowledge Reliability in Large Language Models</h1>
+<p class="ui text-sm mt-1" style="color:var(--mute)">Declan Jackson, William Keating, George Cameron, Micah Hill-Smith &middot; Artificial Analysis</p>
+<p class="mt-4"><b>Verdict.</b> A benchmark paper whose useful contribution is operational: it scores short-form factual recall with an abstention-aware index (OI) over 6,000 source-grounded, GPT-5-generated questions in 42 topics. OI is essentially the penalty-weighted average score from earlier short-form factuality work, fixed at penalty 1, so the headline (Claude 4.1 Opus at 4.8, only three of 36 models above 0) rests on that penalty choice, on an LLM generator and grader whose agreement with humans is not quantified, and on a prompt that tells models to abstain. Treat it as a diagnostic of selective answering, not as a reliability ranking. <span class="conf">overall confidence 70%</span></p>
+</header>
+<h2 class="s" id="mot">Motivation<span class="conf">80%</span></h2>
+<ul class="b">
+<li>Capability benchmarks (coding, MMLU-style understanding, tool use) score correctness, not hallucination or knowing when not to answer, so they do not help choose a model for knowledge-heavy work.</li>
+<li>Accuracy-only scoring rewards guessing. The authors lean on Kalai et al. (2025) to argue this reinforces overconfidence during post-training.</li>
+<li>Embedded knowledge still matters with tools: a model needs context and acronyms to search well, and a calibrated model can route to tools only when needed (one chat example, Fig. 2).</li>
+<li>Aggregated factuality benchmarks hide per-domain variation, so model choice by use case needs domain-level results.</li>
+</ul>
+<p><b>My read.</b> The first two points are credible and well argued. The third is asserted with one anecdote and no experiment. The domain choice is justified by the six domains covering 44% of 2024 U.S. wages, which supports the importance of the topics but says little about how representative the questions are.</p>
+<h2 class="s" id="core">Core idea<span class="conf">85%</span></h2>
+<p><b>Idea 1: the Omniscience Index.</b> Let \(c,p,i,a\) be the counts of correct, partially correct, incorrect and abstained answers, and \(N=c+p+i+a\). The paper defines</p>
+\[ \mathrm{OI}=100\cdot\frac{c-i}{c+p+i+a},\qquad \mathrm{Accuracy}=\frac{c}{c+p+i+a},\qquad \mathrm{Hallucination\ rate}=\frac{i}{p+i+a}. \]
+<p>Two consequences the paper does not spell out. First, OI is accuracy minus the share of questions answered wrongly:</p>
+\[ \mathrm{OI}=100\left(\mathrm{Accuracy}-\frac{i}{N}\right). \]
+<p>Second, it is one point of a family of penalty-weighted scores</p>
+\[ S_\lambda=\frac{c-\lambda\, i}{N}, \]
+<p>with \(\lambda=1\) (the paper calls this penalty \(p\), which collides with its partial-answer count \(p\)). At \(\lambda=1\), answering pays off only above 50% confidence, partial answers and abstentions both score 0, and a model that abstains on everything scores exactly 0.</p>
+<p><b>Idea 2: a source-grounded question agent.</b> A GPT-5-based agent derives questions from authoritative, up-to-date documents, then filters them (similarity, difficulty, ambiguity, source reliance) and revises them (Table 1 of the paper) toward single, short, exact answers. Difficulty is checked against frontier models from many labs. Evaluation gives models no tools or context, with a system prompt saying it is better to say you do not know. A grader, Gemini 2.5 Flash Preview (09-2025) with reasoning, labels each answer correct, partially correct, incorrect or not attempted.</p>
+<p>There is no framework figure; the paper is a benchmark and metric paper.</p>
+<h2 class="s" id="diff">Distinguishing factor<span class="conf">70%</span></h2>
+<ul class="b">
+<li><b>Short-form factuality (SimpleQA, Wei et al. 2024a).</b> Same format: one short gold answer, an LLM grader, correct / incorrect / not attempted. That work already discusses an average score with a penalty for wrong answers and correct-given-attempted and F-score metrics. AA-Omniscience fixes the penalty at 1, rescales to [-100, 100], and extends coverage to 42 topics in six domains with per-domain reporting.</li>
+<li><b>Human-annotated factuality sets (FreshQA, FActScore, Natural Questions).</b> Replaced by an agent that generates, filters and revises questions, with unspecified manual review. The claimed gain is scalability and continual updating.</li>
+<li><b>Long-form factuality (Wei et al. 2024b).</b> Builds on its automated question generation, but feeds source documents into the generation prompt instead of few-shot GPT-4 prompts.</li>
+<li><b>Hallucination benchmarks (HalluLens).</b> Per the authors, they measure fidelity to input or training data, while this measures recall of facts from authoritative sources.</li>
+<li><b>Single-domain benchmarks (LawBench, GPQA).</b> This one reports across domains.</li>
+<li><b>Authors' earlier version.</b> None in the text. Results are a snapshot of a leaderboard the authors say is continuously updated.</li>
+</ul>
+<p><b>My read.</b> The closest ancestor is SimpleQA. The novelty is breadth, the generation pipeline, and a default parameter choice. The paper never compares OI with earlier metrics on the same models, so it cannot show what OI reveals that they miss.</p>
+<h2 class="s" id="eval">Evaluation, conclusions, rigor<span class="conf">65%</span></h2>
+<div class="wrap"><table><thead><tr><th>Section</th><th>Setup</th><th>Reported result</th><th>My read</th></tr></thead><tbody><tr><td>2.1&ndash;2.2 Questions</td><td>6,000 questions, 42 topics, 6 domains. GPT-5 agent generates, filters, revises. Each question is tested against frontier models to keep difficulty high.</td><td>Fewer than 2% of questions are first answerable in 2025. Difficulty is such that only 3 of 36 models score above 0.</td><td>Difficulty is partly circular: filtering against frontier-model failures lowers frontier scores by construction. The filter models are not named, so favoritism for or against them cannot be assessed.</td></tr><tr><td>2.3 Grading</td><td>Gemini 2.5 Flash Preview (09-2025), chosen over gpt-oss-120b, Qwen3-235B-A22B-Thinking and GPT-5 for better alignment with human grading.</td><td>Alignment claimed, no numbers.</td><td>No agreement rate, kappa, sample size or confusion matrix. A Gemini-family model is both grader and one of the graded models.</td></tr><tr><td>2.3 Stability</td><td>Single pass over all questions; 10 repetitions on a sample of models.</td><td>Standard deviation below 0.005, units not stated.</td><td>One question is worth 100/6,000 = 0.017 OI points. If 0.005 is on the OI scale it is below one question flip, so it is probably on a 0&ndash;1 scale (about 0.5 OI points). Either way it covers run noise only, not question-sampling noise; my rough estimate is about &plusmn;1 OI point (one standard error) at N = 6,000.</td></tr><tr><td>3.1 Overall</td><td>36 models, no tools, abstention-encouraging prompt, one pass.</td><td>Claude 4.1 Opus OI 4.8 (accuracy 36%). Grok 4 and GPT-5 (high): accuracy 39%, hallucination rate 64% and 81%. Only three models above 0.</td><td>Consistent with the metric. My arithmetic from these rounded numbers: Opus has about 31% incorrect and 49% hallucination rate; Grok 4 is near 0 (&plusmn;1); GPT-5 (high) is about &minus;10. The top spread is small next to the noise estimate above.</td></tr><tr><td>3.1 Quadrants</td><td>Four relative reliability types (Fig. 5).</td><td>Opus, GPT-5.1, Grok 4 in &ldquo;higher knowledge, higher reliability&rdquo;. Claude 4.5 Haiku and Llama 3.1 405B in &ldquo;lower knowledge, higher reliability&rdquo;.</td><td>The authors say the labels are relative. Still, Grok 4 sits in &ldquo;higher reliability&rdquo; with a stated 64% hallucination rate, and Haiku 4.5 (16% accuracy, 26% rate) works out to about &minus;6, below an abstain-all policy. &ldquo;Reliable&rdquo; here means less bad than peers.</td></tr><tr><td>3.2 vs Intelligence Index</td><td>Scatter of OI against the authors&rsquo; own Intelligence Index (Fig. 6).</td><td>Intelligence does not predict OI (Minimax M2, gpt-oss-120b high: high index, poor OI; Llama 3.1 405B the reverse).</td><td>Named examples from a scatterplot, no correlation statistic. Small-active-parameter models would be expected to know less, so size is a plausible confounder.</td></tr><tr><td>3.3 Domains</td><td>Per-domain OI, normalized per domain (Fig. 8).</td><td>Opus leads Law, Software Engineering, Humanities and Social Sciences; GPT-5.1 Business; Grok 4 Health and Science/Engineering/Math.</td><td>About 1,000 questions per domain if split evenly (Fig. 3 not inspected), so roughly &plusmn;2&ndash;3 OI points per domain by my estimate. No intervals, and per-domain normalization hides absolute gaps. The abstract&rsquo;s claim that three labs lead rests on these margins.</td></tr><tr><td>3.4 Size</td><td>Open-weights models only (Figs. 9&ndash;10).</td><td>Accuracy rises with parameters; OI does not track size; Nemotron Nano 9B V2 and Llama Nemotron Super 49B v1.5 overperform.</td><td>Plausible, but a small sample with no fitted trend or interval.</td></tr><tr><td>3.5 Cost</td><td>Cost of target-model tokens including reasoning; grader excluded (Fig. 11).</td><td>OI rises with cost; Haiku 4.5 beats GPT-5 (high) and Kimi K2 Thinking at lower cost.</td><td>A snapshot that depends on current prices and reasoning-token usage.</td></tr><tr><td>App. B Public set</td><td>10% of questions released, sampled to match the domain and category mix.</td><td>Public and full-set OI closely aligned (Fig. 12).</td><td>Alignment shown by figure only. At about 600 questions the standard error is roughly &plusmn;3 OI points; the authors themselves say domain-level public results are unreliable.</td></tr></tbody></table></div>
+<figure data-n="1" data-a="S0.F1"><figcaption>Fig. 1. Omniscience Index results across models.</figcaption></figure>
+<figure data-n="5" data-a="S3.F5"><figcaption>Fig. 5. Accuracy against Omniscience Index; the four quadrants are the paper&rsquo;s reliability types.</figcaption></figure>
+<figure data-n="8" data-a="S3.F8"><figcaption>Fig. 8. Omniscience Index by domain, normalized per domain.</figcaption></figure>
+<p><b>Paper&rsquo;s conclusion.</b> Claude 4.1 Opus has the highest OI (4.8), only three models score above zero, which the authors read as persistent factuality and calibration weaknesses; leaders differ by domain, so models should be chosen by use case.</p>
+<p><b>Supported?</b> Partly. That most models answer wrongly more than rightly on these questions is supported, though inflated by adversarial filtering. The first-place claim holds only to within a few points. &ldquo;Calibration&rdquo; is overstated, since no confidence is elicited or scored (see ICYMI). Domain leadership lacks intervals. &ldquo;Choose by domain&rdquo; is sensible advice but not established by these margins.</p>
+<h2 class="s" id="icymi">In case you missed it<span class="conf">70%</span></h2>
+<div class="item"><span class="chip neg">&minus;</span><b>The headline explanation is an identity.</b> Because \(\mathrm{OI}=100(\mathrm{Accuracy}-i/N)\), the statement that high hallucination is the dominant factor driving low scores follows from the metric, not from the data.</div>
+<div class="item"><span class="chip neg">&minus;</span><b>Calibration is claimed but not measured.</b> No confidence is elicited and no calibration statistic (such as expected calibration error) is reported. OI scores binary answer-or-abstain behavior under a prompt that asks for abstention, so it mixes knowledge, calibration and instruction-following. There is no run without the abstention instruction.</div>
+<div class="item"><span class="chip neg">&minus;</span><b>The penalty is a free parameter and the prompt does not state it.</b> The \(\lambda=1\) choice has no sensitivity analysis, and the answerer prompt only says it is better to say you do not know. As I recall, Kalai et al. recommend stating explicit confidence thresholds in the instructions; I did not re-check that here. The authors themselves float a &minus;0.5 penalty. My rough arithmetic from the rounded figures: at \(\lambda=0.5\), Opus is about 20.4, Grok 4 about 19.5, GPT-5 (high) about 14.3, so the top two are nearly tied.</div>
+<div class="item"><span class="chip neg">&minus;</span><b>Precision is graded asymmetrically.</b> Appendix A.2 grades &ldquo;1.5&rdquo; against gold &ldquo;1.5.0&rdquo; as INCORRECT (Example 3), while &ldquo;28.1 million&rdquo; against gold &ldquo;28&rdquo; is only PARTIAL (Example 5). Under the penalty, too little detail costs a point and too much detail is free, which may disproportionately hit version- and number-heavy topics such as software and science.</div>
+<div class="item"><span class="chip neg">&minus;</span><b>Generator and filter circularity, acknowledged but untested.</b> GPT-5 writes, filters and revises the questions, and GPT-5 variants are among the ranked models. Questions are also screened against frontier models that the paper does not name. The authors list the first as a limitation but report no check of it.</div>
+<div class="item"><span class="chip neg">&minus;</span><b>Partial answers are neither rewarded nor penalized.</b> They score 0 in OI, the same as abstaining, yet they sit in the hallucination-rate denominator. A model that gives coarse-but-right answers is treated like one that declines.</div>
+<div class="item"><span class="chip pos">+</span><b>Honest handling of the abstain-everything degenerate case.</b> The authors note that never answering scores 0, which would rank 4th of 36 (so 33 models are at or below it), report the lowest observed attempt rate (42%, next lowest 65%), and propose a gentler penalty.</div>
+<div class="item"><span class="chip neu">&middot;</span><b>Only 10% of questions are public.</b> About 600 questions are released, stratified to the full distribution, to limit contamination. That protects the benchmark but means third parties cannot reproduce or audit the full-set numbers.</div>
+<div class="item"><span class="chip neu">&middot;</span><b>Questions carry a &ldquo;first answerable date.&rdquo;</b> The pipeline records when the needed information first became public and favors recent facts. Fewer than 2% of questions date from 2025, so the authors consider the penalty for earlier-cutoff models minimal.</div>
+<h2 class="s" id="judge">Cautious judgement<span class="conf">65%</span></h2>
+<div class="wrap"><table><thead><tr><th>Question</th><th>Answer</th><th>Conf.</th></tr></thead><tbody><tr><td>Fair comparison to external baselines?</td><td>Partly. Inside the benchmark the comparison is even: one prompt, no tools, one grader, one pass. But there is no external baseline: OI is not compared with SimpleQA-style metrics on the same models, the only comparator is the authors&rsquo; own Intelligence Index, and the filter models and human-grading agreement are not disclosed.</td><td>60%</td></tr><tr><td>Invents its own FoM?</td><td>Yes, nominally. OI is a named new index, but it is the known penalty-weighted average score at penalty 1, rescaled to [-100, 100]. Accuracy and hallucination rate are simple ratios, and the Intelligence Index comparator is also in-house.</td><td>85%</td></tr><tr><td>Rewrite of an existing idea?</td><td>Mostly a recombination. Metric from SimpleQA-style scoring, motivation from Kalai et al. (2025), pipeline as an automated, source-grounded version of human-curated sets. New: 42-topic, six-domain coverage with per-domain reporting, generator-at-scale, and the model comparison.</td><td>75%</td></tr><tr><td>Reliable enough to reuse?</td><td>Reuse the metric and prompts as a diagnostic of selective answering. Do not rely on rank order among the top few models or on domain winners without intervals. The full set is private, so audit is limited. If you reuse it: bootstrap intervals over questions, sweep the penalty, and hand-check the grader on a sample.</td><td>65%</td></tr></tbody></table></div>
+<h2 class="s" id="src">Sources and limits<span class="conf">90%</span></h2>
+<ul class="b">
+<li><b>Read:</b> the full arXiv HTML text of v1, including Appendix A (prompts) and Appendix B (public set).</li>
+<li><b>Not read:</b> the PDF; the figure images themselves (I saw only captions and the numbers quoted in the text, so per-model values in Figs. 1, 5&ndash;11 are unseen); the released question set; the leaderboard site; any cited paper.</li>
+<li><b>My arithmetic</b> (incorrect shares, implied OI, penalty sweep, standard errors) is back-computed from rounded percentages in the text and from an assumed per-question score variance near 0.7. Treat it as approximate.</li>
+<li><b>Figure links</b> come from the fetched arXiv HTML and were not tested for loading here.</li>
+<li><b>Disclosure:</b> Claude is made by Anthropic and Claude models top this ranking. I tried to judge method rather than rank.</li>
+</ul>
+<p class="cite">"AA-Omniscience: Evaluating Cross-Domain Knowledge Reliability in Large Language Models" Jackson 2025</p>
+<p class="cite">"Measuring short-form factuality in large language models" Wei 2024</p>
+<p class="cite">"Why language models hallucinate" Kalai 2025</p>
+<p class="cite">"HalluLens: LLM hallucination benchmark" Bang 2025</p>
+<p class="cite">"FreshLLMs: refreshing large language models with search engine augmentation" Vu 2023</p>
+<p class="cite">"Long-form factuality in large language models" Wei 2024</p>
+</main>
+</div>
+<script>
+const BASE='https://arxiv.org/html/2511.13029v1/';
+const MAP={1:'resources/Artificial_Analysis_Omniscience_Index.png',5:'resources/Omniscience_Accuracy_vs_Omniscience_Index.png',8:'resources/Artificial_Analysis_Omniscience_Index_Across_Domains.png'};
+document.querySelectorAll('figure[data-n]').forEach(f=>{
+  const n=f.dataset.n,img=new Image();img.loading='lazy';img.alt='Figure '+n;
+  img.onerror=()=>{const a=document.createElement('a');a.href='https://arxiv.org/html/2511.13029#'+f.dataset.a;a.textContent='Open Fig. '+n+' on arXiv';a.className='ui text-sm underline';a.style.color='var(--teal)';img.replaceWith(a);};
+  img.src=BASE+MAP[n];f.prepend(img);
+});
+</script>
+<script>
+/* Reading marker. R or a click on a sentence starts it; Up/Down (or k/j) move it; Esc or R stops it.
+   Arrow keys scroll the page normally unless the marker is active. Runs after MathJax has typeset. */
+(function(){
+const BLK='main p:not(.cite),main li:not(.cite),main .item,main blockquote,main figcaption,main td';
+const ALL=BLK+',main mjx-container[display="true"]';
+const ABBR=/(?:\b(?:e\.g|i\.e|et al|etc|vs|cf|Figs?|Eqs?|Secs?|Tab|Refs?|Algs?|approx|resp|No)|\b[A-Z])\.$/;
+const OBJ='\uFFFC';
+let units=[],idx=-1,on=false,ready=false,hintEl;
+
+function tokens(block){
+  const items=[];let run=[];
+  const flush=()=>{if(run.length)items.push({run});run=[];};
+  const walk=n=>{
+    for(let c=n.firstChild;c;c=c.nextSibling){
+      if(c.nodeType===3){run.push({t:c});}
+      else if(c.nodeType===1){
+        const tag=c.tagName;
+        if(tag==='MJX-CONTAINER'){
+          if(c.getAttribute('display')==='true'){flush();items.push({disp:c});}
+          else run.push({a:c});
+        }else if(tag==='SCRIPT'||tag==='STYLE'||tag==='MJX-ASSISTIVE-MML'||tag==='IMG'){}
+        else walk(c);
+      }
+    }
+  };
+  walk(block);flush();return items;
+}
+
+function sentences(run){
+  let s='';const map=[];
+  for(const p of run){
+    if(p.t){const v=p.t.nodeValue;for(let i=0;i<v.length;i++)map.push({n:p.t,o:i,L:v.length});s+=v;}
+    else{map.push({a:p.a});s+=OBJ;}
+  }
+  const cuts=[0];
+  const re=/[.!?]+["'’”)\]]*(?=\s+[A-Z0-9"'“‘(\[\uFFFC])/g;
+  let m;
+  while((m=re.exec(s))){const end=m.index+m[0].length;if(!ABBR.test(s.slice(Math.max(0,end-10),end)))cuts.push(end);}
+  cuts.push(s.length);
+  const out=[];
+  for(let i=0;i<cuts.length-1;i++){
+    let a=cuts[i],b=cuts[i+1];
+    while(a<b&&/\s/.test(s[a]))a++;
+    while(b>a&&/\s/.test(s[b-1]))b--;
+    if(b>a)out.push([a,b]);
+  }
+  return {out,map};
+}
+
+function rangeFor(block,map,a,b){
+  const r=document.createRange(),f=map[a],l=map[b-1];
+  if(f.a)r.setStartBefore(f.a);
+  else if(f.o===0){let n=f.n;while(n.parentNode!==block&&n===n.parentNode.firstChild)n=n.parentNode;r.setStartBefore(n);}
+  else r.setStart(f.n,f.o);
+  if(l.a)r.setEndAfter(l.a);
+  else if(l.o===l.L-1){let n=l.n;while(n.parentNode!==block&&n===n.parentNode.lastChild)n=n.parentNode;r.setEndAfter(n);}
+  else r.setEnd(l.n,l.o+1);
+  return r;
+}
+
+function build(block){
+  const out=[];
+  for(const it of tokens(block)){
+    if(it.disp){it.disp.classList.add('rd');out.push(it.disp);continue;}
+    const {out:ss,map}=sentences(it.run),spans=[];
+    for(let i=ss.length-1;i>=0;i--){   /* last sentence first, so earlier offsets stay valid */
+      const r=rangeFor(block,map,ss[i][0],ss[i][1]);
+      const sp=document.createElement('span');sp.className='rd';
+      sp.appendChild(r.extractContents());r.insertNode(sp);spans.push(sp);
+    }
+    out.push(...spans.reverse());
+  }
+  return out;
+}
+
+function hint(){
+  if(!hintEl){hintEl=document.createElement('div');hintEl.id='rd-hint';document.body.appendChild(hintEl);}
+  hintEl.textContent=on?'\u2191 \u2193 move \u00b7 Esc exit':'R: reading marker';
+}
+function inView(i){const r=units[i].getBoundingClientRect();return r.bottom>0&&r.top<innerHeight;}
+function firstVisible(){for(let i=0;i<units.length;i++)if(units[i].getBoundingClientRect().top>=48)return i;return units.length-1;}
+function ensure(u,fast){
+  const r=u.getBoundingClientRect(),h=innerHeight;
+  if(r.top<h*.18||r.bottom>h*.78)scrollBy({top:r.top-h*.38,behavior:fast?'auto':'smooth'});
+}
+function set(i,scroll,fast){
+  if(units[idx])units[idx].classList.remove('on');
+  idx=Math.max(0,Math.min(units.length-1,i));
+  units[idx].classList.add('on');
+  if(scroll)ensure(units[idx],fast);
+}
+function activate(i){
+  on=true;document.body.classList.add('rd-active');
+  set(i!==undefined?i:(idx>=0&&inView(idx)?idx:firstVisible()),i===undefined);hint();
+}
+function deactivate(){
+  on=false;document.body.classList.remove('rd-active');
+  if(units[idx])units[idx].classList.remove('on');hint();
+}
+
+document.addEventListener('keydown',e=>{
+  if(!units.length||e.ctrlKey||e.metaKey||e.altKey)return;
+  const t=e.target;if(t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable))return;
+  if(e.key==='r'||e.key==='R'){e.preventDefault();on?deactivate():activate();return;}
+  if(!on)return;
+  if(e.key==='ArrowDown'||e.key==='j'){e.preventDefault();set(idx+1,true,e.repeat);}
+  else if(e.key==='ArrowUp'||e.key==='k'){e.preventDefault();set(idx-1,true,e.repeat);}
+  else if(e.key==='Escape')deactivate();
+});
+document.addEventListener('click',e=>{
+  const sel=getSelection();if(sel&&!sel.isCollapsed)return;
+  if(!units.length||e.target.closest('a,button,nav'))return;
+  const u=e.target.closest('.rd');if(!u)return;
+  const i=units.indexOf(u);if(i<0)return;
+  if(on){set(i,false);}else activate(i);
+});
+
+function init(){
+  if(ready)return;ready=true;
+  for(const el of Array.from(document.querySelectorAll(ALL))){
+    if(el.tagName==='MJX-CONTAINER'){if(!el.parentElement.closest(BLK)){el.classList.add('rd');units.push(el);}continue;}
+    if(el.querySelector(BLK))continue;
+    units.push(...build(el));
+  }
+  hint();
+}
+addEventListener('load',()=>{
+  const p=window.MathJax&&window.MathJax.startup&&window.MathJax.startup.promise;
+  Promise.resolve(p).then(init,init);
+});
+})();
+</script>
+</body>
+</html>
