@@ -53,6 +53,9 @@ function main() {
     --sr-risk: #A83A2C;
     --sr-warn: #9A6A12;
     --sr-card: #FBFCFB;
+    /* Font families (matching tailwind.config.js fontFamily) */
+    --font-serif: "Literata", Georgia, serif;
+    --font-sans: "Instrument Sans", system-ui, sans-serif;
   }
 
   /* --- Preset themes --- */
