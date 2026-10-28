@@ -27,7 +27,7 @@ import {
   mountLayout,
   ensureFonts,
   createReadingMark,
-} from "../../assets/scholarly-reader/scholarly-reader.js";
+} from "web/assets/scholarly-reader/scholarly-reader.js";
 
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 function esc(s) {
