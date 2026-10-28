@@ -1196,3 +1196,15 @@ export function createThemeSelector(doc, opts = {}) {
     },
   };
 }
+
+/**
+ * Convenience: initialize theme from localStorage AND attach the theme selector UI.
+ * Call this after the document structure is in place (e.g., after buildDocument).
+ * @param {Document} doc
+ * @param {Object} opts - { position?: 'top-right'|'bottom-right'|'top-left'|'bottom-left', parent?: HTMLElement }
+ * @returns {{ dispose(): void }} - call dispose() to clean up
+ */
+export function attachThemeSelector(doc, opts = {}) {
+  initTheme(doc);
+  return createThemeSelector(doc, opts);
+}

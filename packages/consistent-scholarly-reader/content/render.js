@@ -489,6 +489,12 @@
     CSR.readingMark.attach(shadow, csrRoot);
     CSR.citationPeek.attach(shadow, article.bibliography);
 
+    // Initialize theme selector in the shadow DOM (bottom-left to avoid sr-hint at bottom-right)
+    if (window.ScholarlyReader && window.ScholarlyReader.attachThemeSelector) {
+      const doc = shadow.ownerDocument;
+      CSR.themeDisposer = window.ScholarlyReader.attachThemeSelector(doc, { position: 'bottom-left' });
+    }
+
     // Issue #9: citation sidebar — wire into the reading mark so the panel
     // updates as the mark moves. citationSidebar.js is registered in the
     // manifest, so CSR.citationSidebar exists in the real extension; guard
@@ -525,6 +531,10 @@
     if (layoutDisposer) {
       layoutDisposer.dispose();
       layoutDisposer = null;
+    }
+    if (CSR.themeDisposer) {
+      CSR.themeDisposer.dispose();
+      CSR.themeDisposer = null;
     }
     if (markSectionId) {
       // Jump back to the section containing the active reading mark, mapped by

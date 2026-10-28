@@ -183,6 +183,10 @@ function init(){
 addEventListener('load',()=>{
   const p=window.MathJax&&window.MathJax.startup&&window.MathJax.startup.promise;
   Promise.resolve(p).then(init,init);
+  // Initialize theme selector (scholarly-reader)
+  if (window.ScholarlyReader && window.ScholarlyReader.attachThemeSelector) {
+    window.ScholarlyReader.attachThemeSelector(document, { position: 'bottom-right' });
+  }
 });
 })();
 </script>
