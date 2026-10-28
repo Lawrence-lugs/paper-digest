@@ -256,11 +256,19 @@ export async function renderDigest(digest, ctx = {}) {
   // Save the script tags from the template body (they contain BASE/MAP and client-side logic)
   const templateScripts = Array.from(doc.body.querySelectorAll("script")).map(s => s.cloneNode(true));
 
-  // Inject scholarly-reader CSS into the document head
-  const styleEl = doc.createElement("style");
-  styleEl.id = "sr-styles";
-  styleEl.textContent = CSS;
-  doc.head.insertBefore(styleEl, doc.head.firstChild);
+  // Replace template's inline <style> with authoritative SR CSS (keeps template standalone-friendly,
+  // avoids duplication in generated output)
+  const templateStyle = doc.head.querySelector("style");
+  if (templateStyle) {
+    templateStyle.id = "sr-styles";
+    templateStyle.textContent = CSS;
+  } else {
+    // Fallback: inject if template has no style block
+    const styleEl = doc.createElement("style");
+    styleEl.id = "sr-styles";
+    styleEl.textContent = CSS;
+    doc.head.insertBefore(styleEl, doc.head.firstChild);
+  }
 
   // Ensure fonts are loaded
   ensureFonts(doc);
