@@ -18,7 +18,7 @@
 import { marked } from "../../vendor/lib/marked.esm.js";
 import createDOMPurify from "../../vendor/lib/dompurify.es.mjs";
 
-// Import scholarly-reader exports (npm package)
+// Import scholarly-reader exports (local copy in assets/)
 import {
   CSS,
   protectMath,
@@ -27,7 +27,7 @@ import {
   mountLayout,
   ensureFonts,
   createReadingMark,
-} from "scholarly-reader";
+} from "../../assets/scholarly-reader/scholarly-reader.js";
 
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 function esc(s) {

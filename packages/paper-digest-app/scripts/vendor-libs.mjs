@@ -19,9 +19,12 @@
 
 import { mkdir, copyFile, readFile, writeFile } from "node:fs/promises";
 import { resolve, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ROOT = resolve(process.cwd());
-const NODE_MODULES = join(ROOT, "node_modules");
+const __dirname = resolve(fileURLToPath(import.meta.url), "..");
+const ROOT = resolve(__dirname, "..");
+// In a monorepo with workspaces, node_modules is at the repo root
+const NODE_MODULES = join(ROOT, "..", "..", "node_modules");
 const DEST_DIR = join(ROOT, "web", "vendor", "lib");
 
 const LIBS = [
